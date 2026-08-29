@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en" data-theme="lemonade">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Climate Cascade Response - Agentic Architecture</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daisyui@5.5.19/daisyui.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daisyui@5.5.19/themes.css">
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.2.4/dist/index.global.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    :where(.grid, .flex) > * { min-width: 0; }
+    :where(p, h1, h2, h3, li, td, th, .badge, code) { overflow-wrap: anywhere; }
+    :where(img, svg, canvas, iframe) { max-width: 100%; height: auto; }
+    body {
+      background-image:
+        radial-gradient(circle at 10% 5%, color-mix(in srgb, var(--color-primary) 15%, transparent), transparent 26%),
+        radial-gradient(circle at 90% 12%, color-mix(in srgb, var(--color-accent) 13%, transparent), transparent 24%);
+    }
+    .mermaid { min-width: 0; overflow-x: auto; }
+  </style>
+  <script type="module">
+    import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.15.0/dist/mermaid.esm.min.mjs";
+    mermaid.initialize({ startOnLoad: true, theme: "base", securityLevel: "strict" });
+  </script>
+</head>
+<body class="min-h-screen text-base-content">
+  <main class="mx-auto max-w-7xl p-4 sm:p-6 lg:p-10">
+    <section class="hero rounded-box border border-base-300 bg-base-100/95 shadow-xl">
+      <div class="hero-content max-w-5xl py-12 text-center">
+        <div>
+          <div class="mb-4 flex flex-wrap justify-center gap-2">
+            <span class="badge badge-primary">ADR-0001</span>
+            <span class="badge badge-outline">Flood MVP</span>
+            <span class="badge badge-success badge-outline">Local-first</span>
+          </div>
+          <h1 class="text-4xl font-black tracking-tight sm:text-6xl">Code owns control</h1>
+          <p class="mx-auto mt-5 max-w-3xl text-xl opacity-80">Agents own bounded judgment. Python owns state, data access, geospatial analysis, arithmetic, retries, approvals, and exports.</p>
+          <div role="alert" class="alert alert-warning mt-7 text-left">
+            <span>Only two model roles exist in the final design: a response supervisor drafts actions, and an independent evidence and safety supervisor challenges them.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="mt-10">
+      <p class="text-sm font-semibold uppercase tracking-widest text-primary">Final topology</p>
+      <h2 class="text-3xl font-bold">One durable workflow, two bounded agents</h2>
+      <div class="card card-border mt-5 bg-base-100 shadow">
+        <div class="card-body">
+          <div class="mermaid">
+flowchart TD
+  U["Emergency analyst"] --> UI["React dashboard"]
+  UI -->|"HTTP and SSE"| API["FastAPI control API"]
+  API --> DB["SQLite and event stream"]
+  DB --> W["Durable Python worker"]
+  W --> O["Deterministic state machine"]
+  O --> RS["Response supervisor"]
+  O --> VS["Evidence and safety supervisor"]
+  O --> T["Typed tool registry"]
+  T --> S["Source adapters"]
+  T --> G["Geospatial and access engines"]
+  T --> L["Life-safety calculator"]
+  S --> A["Content-addressed artifacts"]
+  G --> A
+  O --> H["Human review checkpoint"]
+  H --> X["Reviewed exports and trajectory"]
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="mt-10 grid gap-5 lg:grid-cols-3">
+      <div class="card border-2 border-primary bg-base-100 shadow">
+        <div class="card-body">
+          <p class="text-sm font-semibold uppercase tracking-widest text-primary">Agent 1</p>
+          <h2 class="card-title text-2xl">Response supervisor</h2>
+          <p>Reads verified evidence and compact impact results, queries allowlisted read-only tools, and drafts typed actions.</p>
+          <div class="mt-2 flex flex-wrap gap-2">
+            <span class="badge badge-outline">No network</span>
+            <span class="badge badge-outline">No database</span>
+            <span class="badge badge-outline">No approval</span>
+          </div>
+        </div>
+      </div>
+      <div class="card border-2 border-warning bg-base-100 shadow">
+        <div class="card-body">
+          <p class="text-sm font-semibold uppercase tracking-widest text-warning">Agent 2</p>
+          <h2 class="card-title text-2xl">Evidence and safety supervisor</h2>
+          <p>Independently checks claims, locations, population, estimates, ownership, dependencies, and prohibited instructions.</p>
+          <div class="mt-2 flex flex-wrap gap-2">
+            <span class="badge badge-outline">Pass</span>
+            <span class="badge badge-outline">Revise</span>
+            <span class="badge badge-outline">Reject</span>
+          </div>
+        </div>
+      </div>
+      <div class="card border-2 border-success bg-base-100 shadow">
+        <div class="card-body">
+          <p class="text-sm font-semibold uppercase tracking-widest text-success">Authority</p>
+          <h2 class="card-title text-2xl">Qualified human</h2>
+          <p>Approves, edits, requests evidence, or rejects. No model or tool can move an action to approved.</p>
+          <div class="mt-2 flex flex-wrap gap-2">
+            <span class="badge badge-success badge-outline">Rationale required</span>
+            <span class="badge badge-success badge-outline">Versioned decision</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="mt-12">
+      <p class="text-sm font-semibold uppercase tracking-widest text-primary">Measured progression</p>
+      <h2 class="text-3xl font-bold">Each stage adds one provable capability</h2>
+      <div class="mt-5 grid gap-5 lg:grid-cols-2">
+        <div class="card card-border bg-base-100 shadow">
+          <div class="card-body">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <h3 class="card-title">Baseline</h3>
+              <span class="badge">One model call</span>
+            </div>
+            <div class="mermaid">
+flowchart TD
+  C["Frozen case"] --> D["Flat dossier"]
+  D --> M["Single model call"]
+  M --> V["Schema validation"]
+  V --> E["Evaluation"]
+            </div>
+            <p class="text-sm opacity-70">No tools, memory, retries, verifier, or feedback.</p>
+          </div>
+        </div>
+
+        <div class="card card-border bg-base-100 shadow">
+          <div class="card-body">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <h3 class="card-title">Iteration 1</h3>
+              <span class="badge badge-info">Verified intake</span>
+            </div>
+            <div class="mermaid">
+flowchart TD
+  C["Case"] --> F["Fetch and snapshot"]
+  F --> R["Response supervisor"]
+  R --> Q["Claim agreement"]
+  Q -->|"verified"| D["Evidence dossier"]
+  Q -->|"conflict"| B["Block"]
+            </div>
+            <p class="text-sm opacity-70">Target: evidence precision and correct abstention.</p>
+          </div>
+        </div>
+
+        <div class="card card-border bg-base-100 shadow">
+          <div class="card-body">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <h3 class="card-title">Iteration 2</h3>
+              <span class="badge badge-info">Deterministic impact</span>
+            </div>
+            <div class="mermaid">
+flowchart TD
+  D["Evidence dossier"] --> P["Population overlay"]
+  D --> A["Asset intersection"]
+  D --> R["Access graph"]
+  P --> I["Impact summary"]
+  A --> I
+  R --> I
+  I --> S["Response supervisor"]
+            </div>
+            <p class="text-sm opacity-70">Target: population error, asset F1, and deduplication.</p>
+          </div>
+        </div>
+
+        <div class="card card-border bg-base-100 shadow">
+          <div class="card-body">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <h3 class="card-title">Iteration 3</h3>
+              <span class="badge badge-warning">Independent challenge</span>
+            </div>
+            <div class="mermaid">
+flowchart TD
+  I["Impact package"] --> R["Response supervisor"]
+  R --> A["Action draft"]
+  A --> V["Evidence supervisor"]
+  V -->|"pass"| Q["Review queue"]
+  V -->|"revise"| R
+  V -->|"reject"| X["Recorded rejection"]
+            </div>
+            <p class="text-sm opacity-70">Target: LSAC@5 with zero unsupported final actions.</p>
+          </div>
+        </div>
+
+        <div class="card card-border bg-base-100 shadow lg:col-span-2">
+          <div class="card-body">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <h3 class="card-title">Iteration 4</h3>
+              <span class="badge badge-success">Human accountable</span>
+            </div>
+            <div class="mermaid">
+flowchart LR
+  Q["Verified actions"] --> E["Range or abstention"]
+  E --> H["Human review"]
+  H -->|"approve"| A["Approved record"]
+  H -->|"edit"| C["Recalculate"]
+  H -->|"request evidence"| V["Reverify"]
+  H -->|"reject"| X["Rejected record"]
+            </div>
+            <p class="text-sm opacity-70">Target: range coverage, abstention correctness, and lower review time.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="mt-12 grid gap-5 lg:grid-cols-2">
+      <div class="card card-border bg-base-100 shadow">
+        <div class="card-body">
+          <p class="text-sm font-semibold uppercase tracking-widest text-primary">Contracts</p>
+          <h2 class="card-title text-2xl">Everything crosses a typed boundary</h2>
+          <div class="grid gap-3 sm:grid-cols-2">
+            <div class="rounded-box bg-base-200 p-3"><strong>Pydantic:</strong> API, agents, tools, events, exports</div>
+            <div class="rounded-box bg-base-200 p-3"><strong>Versioning:</strong> schemas, prompts, policies, tools, configs</div>
+            <div class="rounded-box bg-base-200 p-3"><strong>Idempotency:</strong> run, stage, tool, version, input hash</div>
+            <div class="rounded-box bg-base-200 p-3"><strong>Evidence:</strong> immutable IDs and content hashes</div>
+          </div>
+        </div>
+      </div>
+      <div class="card card-border bg-base-100 shadow">
+        <div class="card-body">
+          <p class="text-sm font-semibold uppercase tracking-widest text-primary">Memory</p>
+          <h2 class="card-title text-2xl">Explicit, scoped, reproducible</h2>
+          <ul class="list-disc space-y-2 pl-5">
+            <li>SQLite run, action, review, tool, and trajectory memory</li>
+            <li>Immutable evidence snapshots in a content-addressed store</li>
+            <li>Versioned policy and prompt files</li>
+            <li>No vector database until a measured retrieval failure justifies it</li>
+            <li>No automatic conversion of reviewer feedback into policy</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="mt-12">
+      <p class="text-sm font-semibold uppercase tracking-widest text-primary">Infrastructure</p>
+      <h2 class="text-3xl font-bold">Small enough to reproduce, durable enough to resume</h2>
+      <div class="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div class="stat rounded-box border border-base-300 bg-base-100 shadow"><div class="stat-title">API</div><div class="stat-value text-2xl">FastAPI</div><div class="stat-desc">HTTP, SSE, Pydantic</div></div>
+        <div class="stat rounded-box border border-base-300 bg-base-100 shadow"><div class="stat-title">Workflow</div><div class="stat-value text-2xl">Python worker</div><div class="stat-desc">Lease and state machine</div></div>
+        <div class="stat rounded-box border border-base-300 bg-base-100 shadow"><div class="stat-title">Database</div><div class="stat-value text-2xl">SQLite WAL</div><div class="stat-desc">SQLAlchemy and Alembic</div></div>
+        <div class="stat rounded-box border border-base-300 bg-base-100 shadow"><div class="stat-title">Artifacts</div><div class="stat-value text-2xl">SHA-256</div><div class="stat-desc">Pinned local files</div></div>
+      </div>
+    </section>
+
+    <section class="mt-12 grid gap-5 lg:grid-cols-2">
+      <div class="card border border-error/40 bg-error/5 shadow">
+        <div class="card-body">
+          <p class="text-sm font-semibold uppercase tracking-widest text-error">Rejected complexity</p>
+          <h2 class="card-title text-2xl">Not in the MVP</h2>
+          <div class="flex flex-wrap gap-2">
+            <span class="badge badge-error badge-outline">Group-chat agents</span>
+            <span class="badge badge-error badge-outline">Agent-controlled workflow</span>
+            <span class="badge badge-error badge-outline">Arbitrary HTTP or shell</span>
+            <span class="badge badge-error badge-outline">PostGIS</span>
+            <span class="badge badge-error badge-outline">Redis and Celery</span>
+            <span class="badge badge-error badge-outline">Vector database</span>
+            <span class="badge badge-error badge-outline">Automatic policy learning</span>
+          </div>
+        </div>
+      </div>
+      <div class="card border border-success/40 bg-success/5 shadow">
+        <div class="card-body">
+          <p class="text-sm font-semibold uppercase tracking-widest text-success">Downstream boundary</p>
+          <h2 class="card-title text-2xl">Reviewed exports, not execution</h2>
+          <p>The MVP produces Markdown, PDF, JSON, CSV, GeoJSON, and JSONL. It does not connect to dispatch, public alerts, hospitals, messaging, infrastructure control, or incident-command systems.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
+

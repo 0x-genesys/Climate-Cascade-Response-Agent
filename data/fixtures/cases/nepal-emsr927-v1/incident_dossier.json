@@ -1,0 +1,92 @@
+{
+  "schema_version": "1",
+  "case_id": "nepal-emsr927-v1",
+  "title": "Flood in Nepal - EMSR927 baseline dossier",
+  "event": {
+    "schema_version": "1",
+    "event_id": "nepal-emsr927",
+    "display_name": "Flood in Nepal",
+    "hazard_type": "flood_debris_flow",
+    "occurred_at": "2026-08-25T22:00:00Z",
+    "location_summary": "Rasuwa District and downstream Trishuli River corridor, Nepal.",
+    "activation_code": "emsr927"
+  },
+  "sources": [
+    {
+      "schema_version": "1",
+      "source_id": "cems-activation",
+      "publisher": "Copernicus Emergency Management Service",
+      "source_url": "https://mapping.emergency.copernicus.eu/backend/dashboard-api/public-activations/?code=EMSR927",
+      "retrieved_at": "2026-08-29T15:47:06Z",
+      "materialization": "curated_summary",
+      "upstream_sha256": "55a29837d2b95539a7e3f409643f63da7315bc271ac83e223e2560b510e5c1ef",
+      "license_note": "CEMS data are publicly accessible; the fixture retains a cited curated summary for the baseline only."
+    },
+    {
+      "schema_version": "1",
+      "source_id": "usgs-event",
+      "publisher": "U.S. Geological Survey",
+      "source_url": "https://www.usgs.gov/programs/landslide-hazards/science/2026-nepal-debris-avalanche-and-flash-flood",
+      "retrieved_at": "2026-08-29T15:47:06Z",
+      "materialization": "curated_summary",
+      "upstream_sha256": null,
+      "license_note": "USGS event information is preliminary or provisional and subject to revision."
+    },
+    {
+      "schema_version": "1",
+      "source_id": "charter-activation",
+      "publisher": "International Charter: Space and Major Disasters",
+      "source_url": "https://disasterscharter.org/activations/flood-in-nepal-activation-1052-",
+      "retrieved_at": "2026-08-29T15:47:06Z",
+      "materialization": "curated_summary",
+      "upstream_sha256": null,
+      "license_note": "The Charter activation is cited for event context and uncertainty, not used as an operational command source."
+    }
+  ],
+  "claims": [
+    {
+      "schema_version": "1",
+      "claim_id": "event-identity",
+      "statement": "CEMS activation EMSR927 identifies a flash flood in Nepal affecting Rasuwa District and the downstream corridor.",
+      "status": "supported",
+      "source_ids": ["cems-activation"]
+    },
+    {
+      "schema_version": "1",
+      "claim_id": "impact-summary",
+      "statement": "The retrieved CEMS summary reports 5,300 affected people, 3,207 identified affected buildings, 46 affected road kilometres, and 26 affected bridge or elevated-highway features across completed AOIs.",
+      "status": "supported",
+      "source_ids": ["cems-activation"]
+    },
+    {
+      "schema_version": "1",
+      "claim_id": "trigger-uncertainty",
+      "statement": "USGS describes a likely glacial-collapse trigger and marks its findings preliminary, while the International Charter says the precise cause of the sudden surge remains under investigation.",
+      "status": "preliminary",
+      "source_ids": ["usgs-event", "charter-activation"]
+    },
+    {
+      "schema_version": "1",
+      "claim_id": "pending-coverage",
+      "statement": "Bharatpur was pending delivery in the retrieved CEMS activation response and must remain an explicit data gap.",
+      "status": "supported",
+      "source_ids": ["cems-activation"]
+    }
+  ],
+  "impact_summary": {
+    "schema_version": "1",
+    "analysis_status": "curated_source_summary",
+    "affected_population": 5300,
+    "affected_buildings": 3207,
+    "affected_roads_km": 46.0,
+    "affected_bridge_features": 26,
+    "source_ids": ["cems-activation"],
+    "note": "These are source-reported impact estimates from the frozen baseline dossier, not independently verified casualty figures."
+  },
+  "data_gaps": [
+    "Bharatpur AOI was pending delivery at the fixture retrieval time.",
+    "This fixture does not include a raw upstream CEMS response or geospatial product archive.",
+    "The initiating mechanism remains preliminary and must not be stated as certain."
+  ],
+  "safety_note": "The fixture is decision-support input only. It cannot authorize public warnings, evacuation orders, dispatches, or infrastructure control."
+}

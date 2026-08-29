@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en" data-theme="lemonade">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Climate Cascade Response - Product Plan</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daisyui@5.5.19/daisyui.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daisyui@5.5.19/themes.css">
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.2.4/dist/index.global.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    :where(.grid, .flex) > * { min-width: 0; }
+    :where(p, h1, h2, h3, li, td, th, .badge) { overflow-wrap: anywhere; }
+    :where(img, svg, canvas, iframe) { max-width: 100%; height: auto; }
+    body { background-image: radial-gradient(circle at 12% 8%, color-mix(in srgb, var(--color-primary) 14%, transparent), transparent 28%), radial-gradient(circle at 88% 18%, color-mix(in srgb, var(--color-accent) 14%, transparent), transparent 24%); }
+  </style>
+  <script type="module">
+    import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.15.0/dist/mermaid.esm.min.mjs";
+    mermaid.initialize({ startOnLoad: true, theme: "base", securityLevel: "strict" });
+  </script>
+</head>
+<body class="min-h-screen text-base-content">
+  <main class="mx-auto max-w-7xl p-4 sm:p-6 lg:p-10">
+    <section class="hero rounded-box border border-base-300 bg-base-100/90 shadow-xl">
+      <div class="hero-content max-w-5xl py-12 text-center">
+        <div>
+          <div class="mb-4 flex flex-wrap justify-center gap-2">
+            <span class="badge badge-primary badge-outline">Post-disaster</span>
+            <span class="badge badge-warning badge-outline">Human approval required</span>
+            <span class="badge badge-success badge-outline">Evidence first</span>
+          </div>
+          <h1 class="text-4xl font-black tracking-tight sm:text-6xl">Climate Cascade Response</h1>
+          <p class="mx-auto mt-5 max-w-3xl text-lg opacity-80">Turn a verified disaster map into a ranked queue of owned, time-bound, human-reviewed actions with population impact, evidence, uncertainty, and modelled life-safety benefit.</p>
+          <div role="alert" class="alert alert-warning mt-7 text-left">
+            <span>The product supports decisions after a disaster is verified. It never predicts collapse, orders evacuation, dispatches responders, or claims that exposed population equals lives saved.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="mt-8">
+      <p class="text-sm font-semibold uppercase tracking-widest text-primary">Scope judges can verify</p>
+      <h2 class="text-3xl font-bold">One complete MVP, one credible platform roadmap</h2>
+      <div class="mt-5 grid gap-5 lg:grid-cols-2">
+        <div class="card border-2 border-primary bg-base-100 shadow-lg">
+          <div class="card-body">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <h3 class="card-title text-2xl">Hackathon MVP</h3>
+              <span class="badge badge-primary">Committed hackathon scope</span>
+            </div>
+            <p class="text-lg font-semibold">Flood and debris-flow response</p>
+            <ul class="mt-2 list-disc space-y-2 pl-5">
+              <li>CEMS event ingestion and pinned fixtures</li>
+              <li>Population, infrastructure, and access impact</li>
+              <li>Ranked actions with estimates or abstention</li>
+              <li>Human review, progress feed, exports, and audit</li>
+              <li>Ten closed benchmark cases plus difficult Nepal case</li>
+            </ul>
+          </div>
+        </div>
+        <div class="card border border-base-300 bg-base-100 shadow">
+          <div class="card-body">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <h3 class="card-title text-2xl">Beyond the MVP</h3>
+              <span class="badge badge-outline">Designed, not validated</span>
+            </div>
+            <p class="text-lg font-semibold">One typed adapter per additional hazard</p>
+            <div class="mt-2 flex flex-wrap gap-2">
+              <span class="badge badge-outline">Earthquake</span>
+              <span class="badge badge-outline">Tsunami</span>
+              <span class="badge badge-outline">Tornado</span>
+              <span class="badge badge-outline">Volcanic eruption</span>
+            </div>
+            <p class="mt-3">The lifecycle, action review, dashboard, and audit stay common. Sources, severity models, secondary hazards, action policies, estimators, and evaluation remain hazard-specific.</p>
+            <div role="alert" class="alert alert-info mt-3 text-sm">Flood results will never be presented as evidence of multi-hazard performance.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="mt-8">
+      <div class="mb-4 flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p class="text-sm font-semibold uppercase tracking-widest text-primary">Pilot snapshot</p>
+          <h2 class="text-3xl font-bold">Nepal EMSR927</h2>
+        </div>
+        <span class="badge badge-warning">Open activation - provisional</span>
+      </div>
+      <div class="stats stats-vertical w-full border border-base-300 bg-base-100 shadow md:stats-horizontal">
+        <div class="stat"><div class="stat-title">Affected population</div><div class="stat-value text-primary">5,300</div><div class="stat-desc">CEMS estimate</div></div>
+        <div class="stat"><div class="stat-title">Affected buildings</div><div class="stat-value">3,207</div><div class="stat-desc">Identified features</div></div>
+        <div class="stat"><div class="stat-title">Affected roads</div><div class="stat-value">46 km</div><div class="stat-desc">Activation summary</div></div>
+        <div class="stat"><div class="stat-title">Bridge features</div><div class="stat-value">26</div><div class="stat-desc">Three completed AOIs</div></div>
+      </div>
+    </section>
+
+    <section class="mt-10 grid gap-6 lg:grid-cols-[1.25fr_0.75fr]">
+      <div class="card card-border bg-base-100 shadow">
+        <div class="card-body">
+          <p class="text-sm font-semibold uppercase tracking-widest text-primary">Architecture</p>
+          <h2 class="card-title text-2xl">Visible, resumable agent lifecycle</h2>
+          <div class="mermaid mt-3 overflow-x-auto">
+flowchart TD
+  A["Receive activation"] --> B["Verify authoritative sources"]
+  B -->|conflict or missing| X["Block and explain"]
+  B -->|verified| C["Snapshot data and licenses"]
+  C --> D["Deterministic impact analysis"]
+  D --> E["Draft typed actions"]
+  E --> F["Verify evidence and estimates"]
+  F -->|failed| E
+  F --> G["Human review"]
+  G -->|request evidence or edit| E
+  G -->|approve| H["Export action brief and audit"]
+          </div>
+        </div>
+      </div>
+
+      <div class="card card-border bg-base-100 shadow">
+        <div class="card-body">
+          <p class="text-sm font-semibold uppercase tracking-widest text-primary">Core product</p>
+          <h2 class="card-title text-2xl">Action, not another map</h2>
+          <ul class="mt-3 space-y-3">
+            <li class="rounded-box bg-base-200 p-3"><strong>Where:</strong> linked map geometry and affected population</li>
+            <li class="rounded-box bg-base-200 p-3"><strong>What:</strong> one concrete verb-first response step</li>
+            <li class="rounded-box bg-base-200 p-3"><strong>Who:</strong> accountable human owner</li>
+            <li class="rounded-box bg-base-200 p-3"><strong>Why:</strong> cited evidence and calculation</li>
+            <li class="rounded-box bg-base-200 p-3"><strong>Impact:</strong> modelled range or not estimable</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="mt-10">
+      <p class="text-sm font-semibold uppercase tracking-widest text-primary">Dashboard concept</p>
+      <h2 class="text-3xl font-bold">A run that explains itself</h2>
+      <div class="mt-5 grid gap-5 lg:grid-cols-3">
+        <div class="card card-border bg-base-100 shadow">
+          <div class="card-body">
+            <h3 class="card-title">Impact map</h3>
+            <div class="aspect-video rounded-box bg-base-200 p-5">
+              <div class="h-full rounded-box border-2 border-dashed border-primary/40 bg-gradient-to-br from-base-100 to-primary/10 p-4">
+                <div class="badge badge-error">Flood extent</div>
+                <div class="mt-4 badge badge-warning">Bridge outage</div>
+                <div class="mt-4 ml-10 badge badge-info">Population cluster</div>
+              </div>
+            </div>
+            <p class="text-sm opacity-70">Map selections synchronize with actions and evidence. Important information also remains available in tables.</p>
+          </div>
+        </div>
+        <div class="card card-border bg-base-100 shadow">
+          <div class="card-body">
+            <h3 class="card-title">Live run feed</h3>
+            <ul class="steps steps-vertical text-sm">
+              <li class="step step-success">Sources verified</li>
+              <li class="step step-success">Data snapshotted</li>
+              <li class="step step-primary">Analyzing access</li>
+              <li class="step">Drafting actions</li>
+              <li class="step">Human review</li>
+            </ul>
+            <div class="alert alert-warning mt-3 text-sm">Bharatpur AOI is pending. Analysis will not infer zero impact.</div>
+          </div>
+        </div>
+        <div class="card card-border bg-base-100 shadow">
+          <div class="card-body">
+            <div class="flex items-center justify-between gap-3">
+              <h3 class="card-title">Action review</h3>
+              <span class="badge badge-error">Immediate</span>
+            </div>
+            <p class="font-semibold">Verify access to bridge-isolated settlements</p>
+            <dl class="grid grid-cols-2 gap-2 text-sm">
+              <dt class="opacity-60">Owner</dt><dd>Incident commander</dd>
+              <dt class="opacity-60">Population</dt><dd>Evidence-linked</dd>
+              <dt class="opacity-60">Lives saved</dt><dd>Not estimable</dd>
+              <dt class="opacity-60">Confidence</dt><dd>Medium</dd>
+            </dl>
+            <div class="card-actions mt-3 grid grid-cols-2">
+              <button class="btn btn-success btn-sm">Approve</button>
+              <button class="btn btn-outline btn-sm">Request evidence</button>
+              <button class="btn btn-outline btn-sm">Edit</button>
+              <button class="btn btn-error btn-outline btn-sm">Reject</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="mt-10">
+      <p class="text-sm font-semibold uppercase tracking-widest text-primary">Measured progression</p>
+      <h2 class="text-3xl font-bold">Baseline first, one hypothesis at a time</h2>
+      <div class="mt-5 overflow-x-auto rounded-box border border-base-300 bg-base-100 shadow">
+        <table class="table table-zebra">
+          <thead><tr><th>Stage</th><th>Change</th><th>Metric expected to move</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>Baseline</td><td>One direct prompt from the same flattened dossier</td><td>Establish LSAC@5 and safety starting point</td><td><span class="badge">Planned</span></td></tr>
+            <tr><td>Iteration 1</td><td>Source verification, snapshots, uncertainty, licenses</td><td>Evidence precision</td><td><span class="badge">Planned</span></td></tr>
+            <tr><td>Iteration 2</td><td>Population, assets, spatial deduplication, access graph</td><td>Population error and asset F1</td><td><span class="badge">Planned</span></td></tr>
+            <tr><td>Iteration 3</td><td>Typed action planning and independent verification</td><td>LSAC@5 and unsupported actions</td><td><span class="badge">Planned</span></td></tr>
+            <tr><td>Iteration 4</td><td>Impact ranges and human feedback loop</td><td>Range coverage, abstention, review time</td><td><span class="badge">Planned</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="mt-10 grid gap-6 lg:grid-cols-2">
+      <div class="card card-border bg-base-100 shadow">
+        <div class="card-body">
+          <p class="text-sm font-semibold uppercase tracking-widest text-primary">Evaluation</p>
+          <h2 class="card-title text-2xl">Life-Safety Action Coverage at 5</h2>
+          <p>Severity-weighted coverage of required critical actions among the first five proposals.</p>
+          <div class="divider">Safety gates</div>
+          <ul class="space-y-2">
+            <li><span class="badge badge-success mr-2">0%</span> unsafe autonomous actions</li>
+            <li><span class="badge badge-success mr-2">0%</span> unsupported approved actions</li>
+            <li><span class="badge badge-success mr-2">0</span> approved actions missing evidence</li>
+          </ul>
+        </div>
+      </div>
+      <div class="card card-border bg-base-100 shadow">
+        <div class="card-body">
+          <p class="text-sm font-semibold uppercase tracking-widest text-primary">Data</p>
+          <h2 class="card-title text-2xl">Public, pinned, reproducible</h2>
+          <div class="flex flex-wrap gap-2">
+            <span class="badge badge-outline">Copernicus EMS</span>
+            <span class="badge badge-outline">USGS</span>
+            <span class="badge badge-outline">WorldPop</span>
+            <span class="badge badge-outline">OpenStreetMap</span>
+            <span class="badge badge-outline">HydroRIVERS</span>
+            <span class="badge badge-outline">GHSL</span>
+          </div>
+          <p class="mt-4">Live sources support discovery. Small dated fixtures, checksums, attribution, and exact download paths support judging.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="mt-10 rounded-box bg-neutral p-8 text-neutral-content shadow-xl">
+      <p class="text-sm font-semibold uppercase tracking-widest opacity-70">Candidate insight</p>
+      <blockquote class="mt-3 text-2xl font-bold sm:text-3xl">Disaster maps describe damage. Lives are protected when verified evidence becomes an owned, time-bound action with assumptions and uncertainty visible.</blockquote>
+      <p class="mt-4 opacity-70">This remains a hypothesis until the baseline and iterations produce evidence.</p>
+    </section>
+  </main>
+</body>
+</html>

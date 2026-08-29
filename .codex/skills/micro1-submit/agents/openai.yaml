@@ -1,0 +1,3 @@
+interface:
+  display_name: "Micro1 Submit"
+  short_description: "Package the Micro1 submission with changelog, repro guide, video, and traces"

@@ -1,0 +1,29 @@
+{
+  "schema_version": "1",
+  "fixture_id": "nepal-emsr927-v1",
+  "fixture_version": 1,
+  "frozen_at": "2026-08-29T15:47:06Z",
+  "run_mode": "baseline",
+  "hazard_type": "flood_debris_flow",
+  "data_classification": "public_cited_plus_synthetic_constraints",
+  "dossier_path": "incident_dossier.json",
+  "scenario_path": "operational_scenario.json",
+  "gold_actions_path": "gold_actions.json",
+  "artifacts": [
+    {
+      "schema_version": "1",
+      "relative_path": "incident_dossier.json",
+      "sha256": "136e3abb9b51a90275a85e5ab907e6a25177596bcb90ad9d7d0f9c3ed558c5b9"
+    },
+    {
+      "schema_version": "1",
+      "relative_path": "operational_scenario.json",
+      "sha256": "4718c886bc9418cc73d60e7c3b16ab7d95a42967fd08878a74e78c3e0e04cbf4"
+    },
+    {
+      "schema_version": "1",
+      "relative_path": "gold_actions.json",
+      "sha256": "337a10605b631835cfac8e02468775a1ecbe6eb2ed40ae758eb046e712e849ac"
+    }
+  ]
+}

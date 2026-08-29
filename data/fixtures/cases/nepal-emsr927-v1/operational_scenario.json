@@ -1,0 +1,29 @@
+{
+  "schema_version": "1",
+  "scenario_id": "nepal-emsr927-operations-v1",
+  "case_id": "nepal-emsr927-v1",
+  "is_synthetic_overlay": true,
+  "constraints": [
+    {
+      "schema_version": "1",
+      "constraint_id": "field-access-verification",
+      "description": "Any field-access recommendation must remain human-reviewed until route condition evidence is available.",
+      "origin": "synthetic",
+      "source_ids": []
+    },
+    {
+      "schema_version": "1",
+      "constraint_id": "single-verification-team",
+      "description": "The evaluation scenario assumes one human field-verification team can be prioritized at a time.",
+      "origin": "synthetic",
+      "source_ids": []
+    },
+    {
+      "schema_version": "1",
+      "constraint_id": "pending-aoi-unknown",
+      "description": "Pending Bharatpur coverage is unknown and cannot be interpreted as no impact.",
+      "origin": "source",
+      "source_ids": ["cems-activation"]
+    }
+  ]
+}
