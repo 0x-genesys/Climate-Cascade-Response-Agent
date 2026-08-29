@@ -25,9 +25,9 @@ An emergency operations analyst needs to turn fragmented, evolving evidence into
 
 ## Baseline story
 
-The baseline copies the available incident summary into a general-purpose model and asks for recommendations. It can write plausible prose, but it cannot verify changing sources, calculate geospatial exposure, detect route isolation, deduplicate affected populations, or prove why an action belongs in the top five.
+The baseline copies the available incident summary into one general-purpose structured-model request and asks for reviewable draft recommendations. It has no retrieval, tools, memory, retries, verifier, geospatial calculations, life-safety estimator, or human-feedback loop. The run artifact preserves the full prompt and exact model response; a deterministic evaluator then checks evidence references and policy patterns, while a human records the semantic gold-action coverage required for LSAC@5.
 
-Baseline results have not yet been measured. Replace this paragraph with observed strengths and failures after the baseline run.
+The baseline implementation has passed its focused contract and end-to-end tests. It does not yet have a credentialed live-model result or a numeric LSAC@5 value, so no claim about baseline quality is currently made.
 
 ## Product story
 
@@ -103,6 +103,7 @@ This is a candidate, not the final hot take. Replace or revise it when a measure
 | The agent can estimate potential lives saved responsibly | Model and calibration not implemented | Unproven |
 | The shared workflow can support additional hazard adapters | Architecture contract in `docs/product.md`; no additional adapter implemented | Designed, not validated |
 | The baseline input boundary is reproducible and tamper-evident | `docs/execution/2026-08-29-domain-schemas-and-frozen-case.md`; checksum and cross-reference tests | Verified foundation; no baseline model result yet |
+| The single-call baseline records failures, exact output, and evaluation state without retrying or fabricating a score | `docs/execution/2026-08-29-single-call-baseline.md`; baseline focused tests | Verified implementation; live model quality remains unmeasured |
 
 ## Iteration update protocol
 

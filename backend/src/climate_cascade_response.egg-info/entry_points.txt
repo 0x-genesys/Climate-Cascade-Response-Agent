@@ -1,0 +1,2 @@
+[console_scripts]
+climate-cascade-baseline = climate_cascade.cli:main

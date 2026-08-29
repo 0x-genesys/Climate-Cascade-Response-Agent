@@ -323,6 +323,26 @@ class ActionCandidate(StrictModel):
         return self
 
 
+class BaselineActionResponse(StrictModel):
+    """The one-call baseline response, intentionally limited to draft actions."""
+
+    schema_version: Literal[SCHEMA_VERSION] = SCHEMA_VERSION
+    case_id: Identifier
+    actions: list[ActionCandidate] = Field(min_length=1, max_length=5)
+    limitations: list[NonEmptyText] = Field(min_length=1)
+
+    @model_validator(mode="after")
+    def actions_are_unique_unestimated_drafts(self) -> "BaselineActionResponse":
+        action_ids = [action.action_id for action in self.actions]
+        if len(action_ids) != len(set(action_ids)):
+            raise ValueError("baseline actions must use unique action_id values")
+        if any(action.status is not ActionStatus.DRAFT for action in self.actions):
+            raise ValueError("baseline actions must remain drafts")
+        if any(action.estimate is not None for action in self.actions):
+            raise ValueError("baseline cannot produce life-safety estimates")
+        return self
+
+
 class ReviewDecision(StrictModel):
     schema_version: Literal[SCHEMA_VERSION] = SCHEMA_VERSION
     action_id: Identifier
