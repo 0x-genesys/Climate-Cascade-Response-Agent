@@ -45,6 +45,12 @@ Maintain evidence while building:
 - append meaningful iteration notes to the improvement changelog as the work evolves
 - keep representative agent trajectories instead of trying to reconstruct them later
 
+## README discipline
+
+Keep the root `README.md` aligned with the Micro1 submission guidance. It must introduce the intended user and bottleneck, explain the value and scope boundary, give clean-environment setup plus exact baseline, solution, and evaluation commands, identify required data and expected outputs, and state where secrets are supplied without committing them.
+
+Update it whenever reproducibility inputs change. Link the improvement changelog, evaluation evidence, execution ledger, and trajectories. Do not present missing benchmark values, cost, runtime, or improvement as zero or as a completed result.
+
 ## Required implementation loop
 
 For every meaningful build step:

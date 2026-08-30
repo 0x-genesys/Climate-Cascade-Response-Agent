@@ -12,6 +12,9 @@ dependencies = [
   "pydantic>=2.13,<3",
 ]
 
+[project.scripts]
+climate-cascade-baseline = "climate_cascade.cli:main"
+
 [dependency-groups]
 dev = [
   "pytest>=9,<10",

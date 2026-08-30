@@ -31,6 +31,16 @@ Both systems receive the same case identifier, source summaries, operational sce
 - no deterministic geospatial tools
 - no memory, retries, verifier, or human-feedback loop
 
+### Implemented baseline evaluation boundary
+
+The baseline is implemented as one OpenAI-compatible structured completion. It preserves the exact system prompt, rendered frozen-case prompt, raw model response, model identifier, token counts when supplied, and one of four outcomes: `completed`, `provider_not_configured`, `provider_error`, `model_schema`, or `output_policy`.
+
+The evaluator is deterministic except for one explicit human task: a reviewer records one coverage decision for every frozen gold action. This is required before computing LSAC@5. The project does not use a second model to decide whether an action semantically covers a gold action.
+
+Baseline reports always state which values are measured, not evaluated, or not applicable. A missing model credential, incomplete adjudication, unknown model cost, or absent closed-event fixture must remain `not_evaluated`, never `0`.
+
+See [the baseline run and adjudication guide](baseline.md) for the exact commands and artifact contracts.
+
 ### Agent solution
 
 - source verification and pinned evidence
