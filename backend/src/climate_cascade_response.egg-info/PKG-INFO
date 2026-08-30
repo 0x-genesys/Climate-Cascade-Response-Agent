@@ -402,6 +402,8 @@ The baseline has:
 
 This is intentionally simple but realistic. It represents an analyst copying available information into a general-purpose assistant.
 
+Implementation status: the single-call structured baseline and its deterministic evaluator are implemented. A credentialed live-model run and human coverage adjudication are still required before reporting a numeric baseline LSAC@5 result. See [baseline evaluation](evaluation/baseline.md).
+
 ### Iteration 1: verified event intake
 
 Add source adapters, an authoritative-source policy, claim agreement checks, timestamps, hashes, licenses, and abstention on unresolved facts.

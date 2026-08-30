@@ -1,7 +1,7 @@
 # Solution Improvement Changelog
 
 Status: Started before implementation  
-Last updated: 2026-08-29
+Last updated: 2026-08-30
 
 This is the evidence-backed history of how the Climate Cascade Response Agent improves over its baseline. Append one entry for every meaningful experiment, including experiments that are later removed.
 
@@ -15,6 +15,7 @@ Do not backfill successful-looking results. Record the hypothesis before impleme
 | Foundation: domain schemas and frozen case, completed | Added versioned Pydantic models for event, evidence, impact, scenario, gold-action, review, estimate, progress, and manifest contracts. Added checksum-verified Nepal `EMSR927` baseline fixture with cited curated facts, explicit data gaps, and synthetic constraints. | `docs/execution/2026-08-29-domain-schemas-and-frozen-case.md`; final `uv run pytest` reported `10 passed in 0.07s`; `uv lock --check` passed. Initial domain-test collection failed because `ActionUrgency` was not exported, then passed after the public export was fixed. | Keep. The fixture boundary is reproducible and fails closed on tampering or broken references. Baseline model execution and LSAC@5 remain unmeasured. |
 | Baseline, planned | One direct prompt receives the same flattened event dossier and required action schema as the final system. It has no tools, retries, memory, verifier, or geospatial calculations. | Not run. | Implement and freeze this before adding the advanced workflow. |
 | Baseline, implemented | One OpenAI-compatible structured completion receives the frozen dossier and scenario. It writes draft actions only, has no tools, retries, memory, verifier, human-feedback loop, or life-safety estimator. A deterministic evaluator checks response structure, evidence IDs, policy patterns, and LSAC@5 from explicit human adjudication. | Focused tests: `9 passed`. Local CLI run without `OPENAI_API_KEY` produced a `provider_not_configured` run artifact and `run_failed` evaluation artifact, as designed. No model output or numeric LSAC@5 exists yet. | Keep. The baseline is reproducible and fails closed. Run a credentialed Nepal case, store human adjudication, then materialize closed CEMS benchmark cases before comparing an improved workflow. |
+| Documentation maintenance | Added the Micro1 submission entry-point README, a maintained Markdown version of the supplied hackathon brief, and explicit project-skill requirements to keep README evidence and commands current. Removed the local no-mistakes gate instructions at the user's request. | `README.md`; `docs/micro1-hackathon-brief.md`; `docs/execution/2026-08-30-readme-and-skill-maintenance.md`. No product metric changed. | Keep. The README must remain aligned with reproducible commands, current evidence, and truthful benchmark status. |
 | Iteration 1, planned | Add authoritative source adapters, evidence snapshots, claim agreement, freshness, licensing, and abstention. | Not run. | Test whether evidence precision improves without reducing critical-action coverage. |
 | Iteration 2, planned | Add deterministic population, asset, and road-connectivity calculations. | Not run. | Test population error, asset F1, and duplicate-population rate. |
 | Iteration 3, planned | Add typed action templates, ranking, ownership, dependencies, and an evidence verifier. | Not run. | Test LSAC@5 and unsupported-action rate. |

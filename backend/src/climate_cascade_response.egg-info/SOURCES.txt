@@ -1,3 +1,4 @@
+README.md
 pyproject.toml
 backend/src/climate_cascade/__init__.py
 backend/src/climate_cascade/cli.py
@@ -5,6 +6,7 @@ backend/src/climate_cascade/baseline/__init__.py
 backend/src/climate_cascade/baseline/gateway.py
 backend/src/climate_cascade/baseline/prompting.py
 backend/src/climate_cascade/baseline/runner.py
+backend/src/climate_cascade/baseline/schema.py
 backend/src/climate_cascade/domain/__init__.py
 backend/src/climate_cascade/domain/fixtures.py
 backend/src/climate_cascade/domain/models.py

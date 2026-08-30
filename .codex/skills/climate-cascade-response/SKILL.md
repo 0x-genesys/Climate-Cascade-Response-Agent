@@ -156,6 +156,9 @@ Tie-break order:
 ## Documentation discipline
 
 - Keep `docs/product.md` current when product scope, architecture, inputs, outputs, or safety boundaries change.
+- Keep the root `README.md` current as the Micro1 entry point. It must state the intended user and bottleneck, MVP scope and safety boundary, exact setup plus baseline and evaluation commands, expected artifacts, required public or synthetic data, and where a user supplies secrets without committing them.
+- Keep README claims evidence-bound. Link the evaluation plan, improvement changelog, story, execution ledger, and trajectories; mark unmeasured results as unmeasured rather than using placeholders or zeroes.
+- Update the README whenever dependencies, model configuration, fixture paths, CLI commands, benchmark status, runtime, cost, or reproduction expectations change.
 - Keep the MVP-versus-beyond-MVP distinction visible in the product plan, evaluation plan, story, dashboard copy, demo, and submission video.
 - Append experiments to `docs/solution_improvement/README.md`; never erase inconvenient results.
 - Keep metric definitions and benchmark changes in `docs/evaluation/README.md`.
