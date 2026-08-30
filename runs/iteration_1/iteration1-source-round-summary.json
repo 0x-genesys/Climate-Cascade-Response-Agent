@@ -1,0 +1,46 @@
+[
+  {
+    "activation": "EMSR927",
+    "aoi_products": 5,
+    "closed": false,
+    "data_gaps": 2,
+    "findings": [
+      "cems-source-reachable",
+      "cems-activation-open",
+      "cems-products-pending"
+    ],
+    "name": "nepal-emsr927-live-source",
+    "raw_snapshot_present": true,
+    "run_id": "run-00ebe4d6-baa6-4948-b6de-0e36ef400c28",
+    "state": "blocked",
+    "verification_status": "preliminary"
+  },
+  {
+    "activation": "EMSR756",
+    "aoi_products": 35,
+    "closed": true,
+    "data_gaps": 0,
+    "findings": [
+      "cems-source-reachable"
+    ],
+    "name": "poland-emsr756-live-source",
+    "raw_snapshot_present": true,
+    "run_id": "run-36e48282-c326-4c91-a58a-85d06aaf60ad",
+    "state": "blocked",
+    "verification_status": "supported"
+  },
+  {
+    "activation": "EMSR851",
+    "aoi_products": 29,
+    "closed": true,
+    "data_gaps": 0,
+    "findings": [
+      "cems-source-reachable"
+    ],
+    "name": "sri-lanka-emsr851-live-source",
+    "raw_snapshot_present": true,
+    "run_id": "run-ffc92869-e231-44bb-832b-e9e9358ae5e5",
+    "state": "blocked",
+    "verification_status": "supported"
+  }
+]

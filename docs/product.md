@@ -394,13 +394,13 @@ The baseline has:
 
 This is intentionally simple but realistic. It represents an analyst copying available information into a general-purpose assistant.
 
-Implementation status: the single-call structured baseline, deterministic evaluator, SQLite persistence, content-addressed artifact store, FastAPI run control plane, ordered SSE progress stream, leased worker workflow, and local `uv run climate-cascade-local` setup/startup path are implemented. The recorded Nepal baseline result is LSAC@5 `3/17` (`17.65%`) after human adjudication. The agent workflow remains intentionally blocked until Iteration 1 source verification is implemented, so this is not a final-agent result. See [baseline evaluation](evaluation/baseline.md), [workflow execution record](execution/2026-08-30-04-durable-workflow-api-and-worker.md), and [local runtime record](execution/2026-08-30-05-local-runtime-sqlite-setup.md).
+Implementation status: the single-call structured baseline, deterministic evaluator, SQLite persistence, content-addressed artifact store, FastAPI run control plane, ordered SSE progress stream, leased worker workflow, local `uv run climate-cascade-local` setup/startup path, CEMS source adapter, versioned source-evidence package, and source-intake dashboard are implemented. The recorded Nepal baseline result is LSAC@5 `3/17` (`17.65%`) after human adjudication. Iteration 1 completes source verification and deliberately blocks before impact analysis, action drafting, life-safety estimation, or human action review. It is not a final-agent result or an LSAC improvement. See [baseline evaluation](evaluation/baseline.md), [Iteration 1 execution record](execution/2026-08-30-06-iteration-1-source-intake-dashboard.md), and [source-intake artifacts](../runs/iteration_1/).
 
 ### Iteration 1: verified event intake
 
-Add source adapters, an authoritative-source policy, claim agreement checks, timestamps, hashes, licenses, and abstention on unresolved facts.
+Implemented for CEMS Rapid Mapping activations: a typed adapter retrieves and canonicalizes the public activation response, records a SHA-256 snapshot, publisher, URL, retrieval time, and license note, then produces typed claims, findings, AOI product status, and data gaps. The workflow stops after source intake until Iteration 2 deterministic impact analysis exists. The local dashboard exposes run progress through the persisted SSE feed and renders the stored evidence package for a pinned fixture or live activation.
 
-Hypothesis: source verification will improve evidence precision and reduce unsupported event claims.
+Observed source-intake result: live `EMSR927` was correctly marked `preliminary` because the activation is open and two products were waiting for data. Historical flood activations `EMSR756` and `EMSR851` were marked `supported` with no source-level data gaps. This validates the source-verification contract and abstention surface, not evidence precision or action coverage. See [Iteration 1 evidence](../runs/iteration_1/).
 
 ### Iteration 2: deterministic impact engine
 

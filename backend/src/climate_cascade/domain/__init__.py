@@ -6,6 +6,8 @@ from .models import (
     ActionStatus,
     ActionUrgency,
     BaselineActionResponse,
+    CemsActivationSummary,
+    CemsAoiProductStatus,
     EvidenceClaim,
     EvidenceStatus,
     EventInput,
@@ -28,7 +30,12 @@ from .models import (
     RunMode,
     RunState,
     SourceReference,
+    SourceSnapshot,
+    SourceSnapshotKind,
+    SourceVerificationFinding,
+    SourceVerificationSeverity,
     StrictModel,
+    VerifiedEvidencePackage,
 )
 
 __all__ = [
@@ -36,6 +43,8 @@ __all__ = [
     "ActionStatus",
     "ActionUrgency",
     "BaselineActionResponse",
+    "CemsActivationSummary",
+    "CemsAoiProductStatus",
     "EvidenceClaim",
     "EvidenceStatus",
     "EventInput",
@@ -59,6 +68,11 @@ __all__ = [
     "RunMode",
     "RunState",
     "SourceReference",
+    "SourceSnapshot",
+    "SourceSnapshotKind",
+    "SourceVerificationFinding",
+    "SourceVerificationSeverity",
     "StrictModel",
+    "VerifiedEvidencePackage",
     "load_frozen_case",
 ]

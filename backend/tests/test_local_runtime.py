@@ -103,3 +103,29 @@ def test_local_serve_starts_api_and_worker_with_shared_sqlite_runtime(tmp_path: 
     assert captured["worker_repository_root"] == REPOSITORY_ROOT
     assert captured["worker_run_migrations"] is False
     assert str(captured["worker_id"]).startswith("local-")
+
+
+def test_local_serve_treats_keyboard_interrupt_as_clean_shutdown(tmp_path: Path, monkeypatch) -> None:
+    database_url = sqlite_url(tmp_path / "runtime" / "climate-cascade.db")
+
+    def interrupted_uvicorn_run(app, *, host: str, port: int) -> None:
+        raise KeyboardInterrupt
+
+    monkeypatch.setattr(local.uvicorn, "run", interrupted_uvicorn_run)
+
+    exit_code = local_main(
+        [
+            "serve",
+            "--database-url",
+            database_url,
+            "--artifact-root",
+            str(tmp_path / "runtime" / "artifacts"),
+            "--case-root",
+            str(CASE_ROOT),
+            "--repository-root",
+            str(REPOSITORY_ROOT),
+            "--no-worker",
+        ]
+    )
+
+    assert exit_code == 0

@@ -1,0 +1,28 @@
+id: 1
+event: run_event
+data: {"sequence":1,"event_type":"run_created","stage":"received","status":"queued","message":"Run was accepted and queued for a worker lease.","evidence_ids":[],"retry_count":0,"created_at":"2026-08-30T17:08:42.263925+00:00"}
+
+id: 2
+event: run_event
+data: {"sequence":2,"event_type":"lease_acquired","stage":"received","status":"leased","message":"Run leased by worker local-Karans-MacBook-Pro-6.local-77894 until 2026-08-30T17:10:42.551415+00:00.","evidence_ids":[],"retry_count":0,"created_at":"2026-08-30T17:08:42.554856+00:00"}
+
+id: 3
+event: run_event
+data: {"sequence":3,"event_type":"state_transition","stage":"source_check","status":"completed","message":"Agent run accepted; authoritative source intake is starting.","evidence_ids":[],"retry_count":0,"created_at":"2026-08-30T17:08:42.559066+00:00"}
+
+id: 4
+event: run_event
+data: {"sequence":4,"event_type":"source_verified","stage":"verified","status":"completed","message":"Source verification produced a supported evidence package with 1 snapshot(s), 3 claim(s), and 0 data gap(s).","evidence_ids":["cems-event-identity","cems-impact-stats","cems-aoi-product-status"],"retry_count":0,"created_at":"2026-08-30T17:08:44.031868+00:00"}
+
+id: 5
+event: run_event
+data: {"sequence":5,"event_type":"source_snapshot_pinned","stage":"data_snapshot","status":"completed","message":"Verified source evidence package pinned as artifact 26c37cd25c634f1974eec50980119508ee0bbd6ecea8abeda73fa5b38d3c39fc.","evidence_ids":[],"retry_count":0,"created_at":"2026-08-30T17:08:44.034632+00:00"}
+
+id: 6
+event: run_event
+data: {"sequence":6,"event_type":"impact_analysis_pending","stage":"blocked","status":"completed","message":"Iteration 1 source intake is complete; deterministic impact analysis is pending ADR step 7.","evidence_ids":[],"retry_count":0,"created_at":"2026-08-30T17:08:44.036304+00:00"}
+
+id: 7
+event: run_event
+data: {"sequence":7,"event_type":"lease_released","stage":"blocked","status":"released","message":"Worker local-Karans-MacBook-Pro-6.local-77894 released the run lease.","evidence_ids":[],"retry_count":0,"created_at":"2026-08-30T17:08:44.037945+00:00"}
+

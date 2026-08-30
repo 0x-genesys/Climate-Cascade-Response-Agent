@@ -7,13 +7,15 @@ from fastapi.testclient import TestClient
 
 from climate_cascade.api import build_services, create_app
 from climate_cascade.baseline.gateway import ModelCompletion
-from climate_cascade.domain import RunMode, RunState
+from climate_cascade.domain import RunMode, RunState, load_frozen_case
 from climate_cascade.persistence import LocalArtifactStore, RunRepository, create_sqlite_engine, migrate_database, sqlite_url
+from climate_cascade.sources import build_fixture_evidence_package
 from climate_cascade.workflow import WorkflowEngine
 
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 CASE_ROOT = REPOSITORY_ROOT / "data" / "fixtures" / "cases"
+DASHBOARD_ROOT = REPOSITORY_ROOT / "dashboard"
 
 
 class StaticGateway:
@@ -182,3 +184,90 @@ def test_api_baseline_run_exposes_worker_artifacts(tmp_path: Path) -> None:
     assert status.json()["state"] == "awaiting_human_review"
     assert artifacts.json()["baseline_run"]["status"] == "completed"
     assert artifacts.json()["baseline_evaluation"]["status"] == "not_evaluable"
+
+
+def test_worker_runs_agent_source_intake_to_impact_block(tmp_path: Path) -> None:
+    database_url = sqlite_url(tmp_path / "workflow.db")
+    migrate_database(database_url, repository_root=REPOSITORY_ROOT)
+    repository = RunRepository(create_sqlite_engine(database_url))
+    run, _ = repository.create_run(
+        case_id="nepal-emsr927-v1",
+        mode=RunMode.AGENT,
+        fixture_mode=True,
+        config={},
+        idempotency_key="agent-source-test-key",
+    )
+    engine = WorkflowEngine(
+        repository=repository,
+        artifact_store=LocalArtifactStore(tmp_path / "artifacts"),
+        case_root=CASE_ROOT,
+        gateway_factory=lambda _config: None,
+    )
+
+    result = engine.process_next(worker_id="agent-source-worker")
+
+    assert result is not None
+    assert result.state is RunState.BLOCKED
+    evidence_artifact = repository.get_artifact(run.run_id, "source_evidence_package")
+    assert evidence_artifact is not None
+    evidence = json.loads(evidence_artifact.storage_path.read_text(encoding="utf-8"))
+    assert evidence["verification_status"] == "preliminary"
+    assert evidence["activation_code"] == "EMSR927"
+    event_types = [event.event_type for event in repository.list_events(run.run_id)]
+    assert "source_verified" in event_types
+    assert "source_snapshot_pinned" in event_types
+    assert "impact_analysis_pending" in event_types
+
+
+def test_api_agent_run_allows_live_activation_and_exposes_evidence(tmp_path: Path) -> None:
+    database_url = sqlite_url(tmp_path / "workflow.db")
+    artifact_root = tmp_path / "artifacts"
+    services = build_services(
+        database_url=database_url,
+        artifact_root=artifact_root,
+        case_root=CASE_ROOT,
+        repository_root=REPOSITORY_ROOT,
+    )
+    client = TestClient(create_app(services=services))
+    created = client.post(
+        "/v1/agent/runs",
+        headers={"Idempotency-Key": "api-agent-live-key"},
+        json={"case_id": "emsr756", "mode": "agent", "fixture_mode": False, "activation": "EMSR756"},
+    )
+    assert created.status_code == 202
+    run_id = created.json()["run_id"]
+    case = load_frozen_case(CASE_ROOT / "nepal-emsr927-v1")
+    engine = WorkflowEngine(
+        repository=services.repository,
+        artifact_store=LocalArtifactStore(artifact_root),
+        case_root=CASE_ROOT,
+        gateway_factory=lambda _config: None,
+        evidence_package_factory=lambda _run: build_fixture_evidence_package(case),
+    )
+
+    engine.process_next(worker_id="api-agent-source-worker")
+
+    status = client.get(f"/v1/runs/{run_id}")
+    evidence = client.get(f"/v1/runs/{run_id}/evidence")
+    assert status.json()["state"] == "blocked"
+    assert evidence.status_code == 200
+    assert evidence.json()["source_evidence_package"]["activation_code"] == "EMSR927"
+
+
+def test_api_serves_dashboard_static_files(tmp_path: Path) -> None:
+    services = build_services(
+        database_url=sqlite_url(tmp_path / "workflow.db"),
+        artifact_root=tmp_path / "artifacts",
+        case_root=CASE_ROOT,
+        repository_root=REPOSITORY_ROOT,
+        dashboard_root=DASHBOARD_ROOT,
+    )
+    client = TestClient(create_app(services=services))
+
+    index = client.get("/")
+    script = client.get("/dashboard/app.js")
+
+    assert index.status_code == 200
+    assert "Climate Cascade Response" in index.text
+    assert script.status_code == 200
+    assert "/v1/runs/${runId}/evidence" in script.text

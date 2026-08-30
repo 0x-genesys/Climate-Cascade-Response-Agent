@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, StringConstraints
+from pydantic import BaseModel, ConfigDict, Field, StringConstraints, model_validator
 from typing_extensions import Annotated
 
 from climate_cascade.domain import Identifier, RunMode, RunState
@@ -27,6 +27,12 @@ class CreateRunRequest(ApiModel):
     operational_constraints: list[str] = Field(default_factory=list)
     model: str | None = None
     api_key_env: str = "OPENAI_API_KEY"
+
+    @model_validator(mode="after")
+    def live_agent_runs_require_activation(self) -> "CreateRunRequest":
+        if self.mode is RunMode.AGENT and not self.fixture_mode and not self.activation:
+            raise ValueError("live agent runs require an activation code")
+        return self
 
 
 class CreateBaselineRunRequest(ApiModel):

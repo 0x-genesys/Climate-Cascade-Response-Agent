@@ -1,0 +1,14 @@
+{
+  "case_id": "emsr927",
+  "completed_at": "2026-08-30T17:08:42.044570Z",
+  "created_at": "2026-08-30T17:08:40.950119Z",
+  "fixture_mode": false,
+  "lease_expires_at": null,
+  "lease_owner": null,
+  "mode": "agent",
+  "run_id": "run-00ebe4d6-baa6-4948-b6de-0e36ef400c28",
+  "stage_attempt": 4,
+  "started_at": "2026-08-30T17:08:41.064636Z",
+  "state": "blocked",
+  "updated_at": "2026-08-30T17:08:42.045482Z"
+}

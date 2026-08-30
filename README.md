@@ -10,9 +10,9 @@ The pilot case is Nepal `EMSR927`. It is a deliberately difficult, evolving even
 
 ## Current status
 
-ADR steps 2 through 5 are implemented. The baseline makes one structured model call over the checksum-verified Nepal fixture, records the exact response, and produces an evaluation artifact. A SQLite-backed FastAPI control plane queues runs, exposes ordered SSE progress, and a separate leased worker persists baseline artifacts before pausing for human review. The baseline still has no tools, retrieval, memory, retries, verifier, human-feedback loop, geospatial calculation, or life-safety estimator.
+ADR steps 2 through 6 are implemented. The baseline makes one structured model call over the checksum-verified Nepal fixture, records the exact response, and produces an evaluation artifact. A SQLite-backed FastAPI control plane queues runs, exposes ordered SSE progress, and a separate leased worker persists artifacts. Iteration 1 adds a typed CEMS source adapter, immutable evidence package, and dashboard for source status and run progress. It stops before impact analysis, action drafting, life-safety estimation, and human action review.
 
-One credentialed Nepal baseline is recorded: `gpt-5-mini-2025-08-07` produced five draft actions, and human adjudication measured LSAC@5 at `3/17` (`17.65%`). The run had zero deterministic unsafe-action findings and zero missing evidence references. This is one difficult, open-event case, not a closed-event aggregate or evidence of improvement. Model cost is not recorded. The implementation and result are documented in [the baseline evaluation guide](docs/evaluation/baseline.md) and [execution ledger](docs/execution/2026-08-30-03-nepal-baseline-evaluation.md).
+One credentialed Nepal baseline is recorded: `gpt-5-mini-2025-08-07` produced five draft actions, and human adjudication measured LSAC@5 at `3/17` (`17.65%`). The run had zero deterministic unsafe-action findings and zero missing evidence references. This is one difficult, open-event case, not a closed-event aggregate or evidence of improvement. Model cost is not recorded. The implementation and result are documented in [the baseline evaluation guide](docs/evaluation/baseline.md) and [execution ledger](docs/execution/2026-08-30-03-nepal-baseline-evaluation.md). Iteration 1 source intake is verified separately in [its run artifacts](runs/iteration_1/) but has no action-quality metric yet.
 
 ## Quick start
 
@@ -85,7 +85,7 @@ The fastest local path starts the API and a worker in one process against the sa
 uv run climate-cascade-local serve
 ```
 
-Open `http://127.0.0.1:8000/v1/health` and expect `{"status":"ready"}`.
+Open `http://127.0.0.1:8000/` for the source-intake dashboard, or `http://127.0.0.1:8000/v1/health` and expect `{"status":"ready"}`.
 
 For process-isolation testing, start the API and worker in separate terminals:
 
@@ -110,7 +110,34 @@ curl -X POST http://127.0.0.1:8000/v1/baseline/runs \
   -d '{"case_id":"nepal-emsr927-v1","model":"gpt-5-mini"}'
 ```
 
-Use `GET /v1/runs/{run_id}`, `GET /v1/runs/{run_id}/events`, and `GET /v1/runs/{run_id}/baseline` to inspect durable status, reconnectable SSE progress, and saved baseline artifacts. Agent-mode runs are deliberately blocked until Iteration 1 source verification is implemented.
+Use `GET /v1/runs/{run_id}`, `GET /v1/runs/{run_id}/events`, and `GET /v1/runs/{run_id}/baseline` to inspect durable status, reconnectable SSE progress, and saved baseline artifacts.
+
+## Run Iteration 1 source intake
+
+Start the local control plane as above, open `http://127.0.0.1:8000/`, then either use **Fetch CEMS Source** or create a live run directly. This path does not call an LLM and does not require `OPENAI_API_KEY`.
+
+```bash
+curl -X POST http://127.0.0.1:8000/v1/agent/runs \
+  -H 'Content-Type: application/json' \
+  -H 'Idempotency-Key: live-emsr927-001' \
+  -d '{"case_id":"emsr927","mode":"agent","fixture_mode":false,"activation":"EMSR927"}'
+```
+
+Copy `run_id` from the `202` response, then inspect the persisted progress and source-evidence package:
+
+```bash
+curl http://127.0.0.1:8000/v1/runs/RUN_ID
+curl http://127.0.0.1:8000/v1/runs/RUN_ID/events?follow=false
+curl http://127.0.0.1:8000/v1/runs/RUN_ID/evidence
+```
+
+Expected behavior: Nepal `EMSR927` is currently `preliminary` because CEMS marks the activation open and records pending AOI products. A `blocked` run at `impact_analysis_pending` is correct for this iteration, not a worker failure. Run `EMSR756` or `EMSR851` to inspect completed historical flood activations.
+
+## Evaluation path
+
+There are two intentionally separate paths. The baseline action-quality path is complete: run the one-call baseline, create the human adjudication file, then run `climate-cascade-evaluate-baseline` to calculate LSAC@5 and deterministic safety checks. That evaluator is deterministic and does not call an LLM.
+
+Iteration 1 evaluates source handling instead: the worker retrieves CEMS through the configured adapter, persists a typed evidence package, and the dashboard or `/evidence` endpoint exposes its status, source snapshot hash, AOI completeness, findings, and data gaps. It does not yet produce actions, so it cannot be scored with LSAC@5. Iteration 2 adds deterministic impact evidence; Iteration 3 will add action proposals and rerun the frozen human-adjudicated LSAC@5 comparison against the recorded baseline.
 
 ## Evidence and submission record
 
@@ -136,6 +163,7 @@ The final submission will also include representative trajectories for every age
 | Human semantic review | [Coverage adjudication](runs/baseline/nepal-emsr927-v1.adjudication.json) | Only Bharatpur's pending-data-gap action is covered; Timure, Bidur, and Syapru Besi remain missed. |
 | Deterministic score and safety checks | [Evaluation report](runs/baseline/nepal-emsr927-v1.evaluation.json) and [evaluation guide](docs/evaluation/baseline.md) | LSAC@5 is `3/17` (`17.65%`); zero unsafe autonomous-action findings and zero missing evidence references. |
 | Durable run control plane | [Workflow execution record](docs/execution/2026-08-30-04-durable-workflow-api-and-worker.md), [local runtime record](docs/execution/2026-08-30-05-local-runtime-sqlite-setup.md), [API package](backend/src/climate_cascade/api/), and [workflow package](backend/src/climate_cascade/workflow/) | `uv run` setup, SQLite migrations, idempotent run creation, ordered reconnectable SSE, immutable artifacts, worker leases, and baseline pause at human review. |
+| Iteration 1 source verification and dashboard | [Iteration 1 execution record](docs/execution/2026-08-30-06-iteration-1-source-intake-dashboard.md), [live source artifacts](runs/iteration_1/), [source adapters](backend/src/climate_cascade/sources/), and [dashboard](dashboard/) | CEMS source snapshots, freshness/data-gap findings, persisted evidence endpoint, and live worker progress. This is not yet an LSAC action-quality result. |
 | Reproducible execution history | [Execution ledger](docs/execution/README.md) and [final baseline record](docs/execution/2026-08-30-03-nepal-baseline-evaluation.md) | Records are sequenced in filenames and retain failed attempts alongside the successful result. |
 | Measured baseline limitations and next hypothesis | [Improvement changelog](docs/solution_improvement/README.md) | The next iteration must improve AOI-specific life-safety coverage without losing safety or evidence performance. |
 | Judge-facing narrative and claim limits | [Project story](docs/story/README.md) | No claim of final-agent improvement, lives saved, or multi-hazard validation is made before evidence exists. |
@@ -151,6 +179,7 @@ Potential lives saved is not implemented in the baseline. Later work may produce
 
 ```text
 backend/                  Python domain contracts, baseline, evaluation, API, persistence, and workflow worker
+dashboard/                Local source-intake and worker-progress dashboard served by FastAPI
 data/fixtures/            Checksum-verified frozen disaster cases
 docs/                     Product, Micro1 brief, architecture, evaluation, execution, story, and changelog
 var/artifacts/            Local content-addressed artifacts, excluded from version control

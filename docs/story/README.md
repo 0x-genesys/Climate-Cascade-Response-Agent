@@ -1,6 +1,6 @@
 # Project Story
 
-Status: Narrative scaffold, updated with baseline evidence
+Status: Narrative scaffold, updated with baseline and Iteration 1 source-intake evidence
 Last updated: 2026-08-30
 
 ## Working title
@@ -67,7 +67,7 @@ Load the pinned `EMSR927` Nepal fixture. Show USGS, CEMS, and International Char
 
 ### Beat 2: The agent works in public
 
-Show the run feed moving through source verification, data snapshot, deterministic impact analysis, response-supervisor drafting, and independent evidence verification. Surface one warning about the incomplete Bharatpur AOI.
+Show the live dashboard run feed moving through source verification and the source snapshot. Surface the stored warning that `EMSR927` is open and that Bidur and Bharatpur contain pending products. The run then visibly stops at `impact_analysis_pending`; deterministic impact analysis, action drafting, and evidence-supervisor review remain later iterations.
 
 ### Beat 3: Damage becomes an action
 
@@ -104,6 +104,7 @@ This is a candidate, not the final hot take. Replace or revise it when a measure
 | The shared workflow can support additional hazard adapters | Architecture contract in `docs/product.md`; no additional adapter implemented | Designed, not validated |
 | The baseline input boundary is reproducible and tamper-evident | `docs/execution/2026-08-29-01-domain-schemas-and-frozen-case.md`; checksum and cross-reference tests | Verified foundation; one difficult-case model run is now recorded |
 | The single-call baseline records exact output and produces a human-adjudicated score without retrying or fabricating a result | `runs/baseline/nepal-emsr927-v1.run.json`; `runs/baseline/nepal-emsr927-v1.adjudication.json`; `runs/baseline/nepal-emsr927-v1.evaluation.json` | Verified on one Nepal challenging-case run; closed-event aggregate remains unmeasured |
+| The Iteration 1 workflow preserves CEMS freshness and incomplete-AOI warnings in a stored evidence package | `runs/iteration_1/iteration1-source-round-summary.json`; `docs/execution/2026-08-30-06-iteration-1-source-intake-dashboard.md` | Verified on live Nepal, Poland, and Sri Lanka source intake; it is not action-quality or LSAC evidence |
 
 ## Iteration update protocol
 

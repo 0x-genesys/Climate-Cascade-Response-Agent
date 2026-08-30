@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Climate Cascade Response</title>
+    <link rel="stylesheet" href="/dashboard/styles.css">
+  </head>
+  <body>
+    <main class="shell">
+      <section class="topbar">
+        <div>
+          <p class="eyebrow">Flood and debris-flow MVP</p>
+          <h1>Climate Cascade Response</h1>
+        </div>
+        <div class="status-pill" id="connectionStatus">API not checked</div>
+      </section>
+
+      <section class="workspace">
+        <aside class="control-panel" aria-label="Run controls">
+          <div class="panel-section">
+            <h2>Start Source Intake</h2>
+            <label for="caseSelect">Pinned fixture</label>
+            <select id="caseSelect"></select>
+            <button id="startFixtureRun" type="button">Load Nepal Fixture</button>
+          </div>
+
+          <div class="panel-section">
+            <label for="activationCode">Live CEMS activation</label>
+            <input id="activationCode" value="EMSR927" autocomplete="off">
+            <button id="startLiveRun" type="button">Fetch CEMS Source</button>
+          </div>
+
+          <div class="panel-section">
+            <h2>Inspect Run</h2>
+            <label for="runIdInput">Run ID</label>
+            <input id="runIdInput" placeholder="run-..." autocomplete="off">
+            <button id="inspectRun" type="button">Inspect</button>
+          </div>
+
+          <div class="panel-section note">
+            <strong>Current stop point</strong>
+            <p>Iteration 1 verifies and snapshots sources. Impact analysis, action ranking, and life-safety ranges remain pending later ADR steps.</p>
+          </div>
+        </aside>
+
+        <section class="run-panel" aria-label="Run status and evidence">
+          <div class="run-summary">
+            <div>
+              <p class="eyebrow">Active run</p>
+              <h2 id="runTitle">No run selected</h2>
+            </div>
+            <div class="state-box">
+              <span id="runState">idle</span>
+              <small id="runMode">-</small>
+            </div>
+          </div>
+
+          <div class="grid">
+            <section class="surface progress-surface">
+              <div class="section-heading">
+                <h3>Worker Progress</h3>
+                <button id="refreshRun" type="button">Refresh</button>
+              </div>
+              <ol id="eventList" class="event-list"></ol>
+            </section>
+
+            <section class="surface evidence-surface">
+              <div class="section-heading">
+                <h3>Source Evidence</h3>
+                <span id="evidenceStatus">No package</span>
+              </div>
+              <div id="evidencePanel" class="empty-state">Start or inspect a run to see source snapshots, findings, AOI products, and data gaps.</div>
+            </section>
+          </div>
+        </section>
+      </section>
+    </main>
+    <script src="/dashboard/app.js"></script>
+  </body>
+</html>

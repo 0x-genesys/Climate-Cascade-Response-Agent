@@ -18,7 +18,7 @@ The hackathon MVP supports floods and debris flows. Earthquakes, tsunamis, torna
 
 Build a local-first system with:
 
-- a React and TypeScript dashboard
+- a static HTML, CSS, and JavaScript dashboard served by FastAPI for the MVP
 - a Python FastAPI control API
 - a separate Python worker running an explicit finite-state workflow
 - SQLite in WAL mode for durable workflow, audit, and review state
@@ -99,20 +99,19 @@ Baseline constraints:
 
 ### Iteration 1: verified event intake
 
-Add the response supervisor, authoritative-source adapters, source policy, claim comparison, and immutable snapshots. The supervisor can reason about source agreement, but code performs downloads, hashes, validation, and state changes.
+Implement authoritative-source adapters, a source policy, typed source findings, and immutable snapshots. Code performs downloads, canonicalization, hashing, validation, state changes, and status determination. The response supervisor remains deferred until impact analysis and action drafting exist.
 
 ```mermaid
 flowchart TD
   C["Frozen case or activation code"] --> O["Workflow orchestrator"]
   O --> F["Fetch source documents"]
   F --> S["Snapshot, hash, and license check"]
-  S --> R["Response supervisor"]
-  R --> Q["Compare claims and freshness"]
-  Q -->|"verified"| D["Versioned evidence dossier"]
-  Q -->|"conflict or missing"| B["Blocked with explanation"]
-  D --> P["Action draft using verified facts only"]
-  P --> E["Evaluation harness"]
-  B --> E
+  S --> V["Deterministic source verifier"]
+  V -->|"supported or preliminary"| D["Versioned evidence dossier"]
+  V -->|"conflict or missing"| B["Blocked with explanation"]
+  D --> X["Stop before Iteration 2 impact analysis"]
+  B --> E["Source-intake evaluation"]
+  X --> E
 ```
 
 Expected measured effect:
@@ -902,7 +901,8 @@ Live-source refresh is optional and produces a new snapshot version. It never si
 | 3. SQLite migrations, repositories, artifact store, and run-event stream | Implemented | Alembic migration; SQLite WAL repository; immutable SHA-256 artifact store; monotonic persisted run events; `backend/tests/test_workflow_api.py` |
 | 4. FastAPI run creation, status, SSE, and baseline endpoints | Implemented | `/v1/runs`, `/v1/baseline/runs`, run status, reconnectable SSE, and baseline artifact endpoints; `backend/tests/test_workflow_api.py`; local startup command covered by `backend/tests/test_local_runtime.py` |
 | 5. Worker lease and explicit workflow engine | Implemented | SQLite `BEGIN IMMEDIATE` lease claims, expiry reclaim, persisted state transitions, baseline pause at human review, separate worker CLI, and combined local API-plus-worker command; [workflow record](../execution/2026-08-30-04-durable-workflow-api-and-worker.md), [local runtime record](../execution/2026-08-30-05-local-runtime-sqlite-setup.md) |
-| 6-12. Source adapters, agents, tools, dashboard, benchmark, and reproduction hardening | Planned | Must follow the test and execution-evidence protocol |
+| 6. Source adapters and Iteration 1 evidence contracts | Implemented | Typed CEMS adapter, SHA-256 source snapshots, AOI status/data-gap findings, persisted evidence package, agent source-intake transitions, `/v1/runs/{run_id}/evidence`, and static dashboard source/progress views. [Execution record](../execution/2026-08-30-06-iteration-1-source-intake-dashboard.md); `runs/iteration_1/`; `backend/tests/test_source_adapters.py` |
+| 7-12. Impact tools, response/evidence supervisors, review, remaining dashboard views, benchmark, and reproduction hardening | Planned | Must follow the test and execution-evidence protocol. The source/progress dashboard is implemented; map, action review, comparison, and export views await their underlying contracts. |
 
 ## Implementation order
 
