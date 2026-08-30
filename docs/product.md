@@ -394,7 +394,7 @@ The baseline has:
 
 This is intentionally simple but realistic. It represents an analyst copying available information into a general-purpose assistant.
 
-Implementation status: the single-call structured baseline and its deterministic evaluator are implemented. A credentialed live-model run and human coverage adjudication are still required before reporting a numeric baseline LSAC@5 result. See [baseline evaluation](evaluation/baseline.md).
+Implementation status: the single-call structured baseline, deterministic evaluator, SQLite persistence, content-addressed artifact store, FastAPI run control plane, ordered SSE progress stream, leased worker workflow, and local `uv run climate-cascade-local` setup/startup path are implemented. The recorded Nepal baseline result is LSAC@5 `3/17` (`17.65%`) after human adjudication. The agent workflow remains intentionally blocked until Iteration 1 source verification is implemented, so this is not a final-agent result. See [baseline evaluation](evaluation/baseline.md), [workflow execution record](execution/2026-08-30-04-durable-workflow-api-and-worker.md), and [local runtime record](execution/2026-08-30-05-local-runtime-sqlite-setup.md).
 
 ### Iteration 1: verified event intake
 
