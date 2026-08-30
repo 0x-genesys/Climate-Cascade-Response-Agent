@@ -897,8 +897,8 @@ Live-source refresh is optional and produces a new snapshot version. It never si
 
 | Step | Status | Evidence |
 | --- | --- | --- |
-| 1. Define domain schemas and frozen case format | Complete | [Execution record](../execution/2026-08-29-domain-schemas-and-frozen-case.md), final `uv run pytest` with `10 passed` |
-| 2. Implement the direct-prompt baseline and evaluation output | Implemented; live benchmark pending | [Baseline evaluation guide](../evaluation/baseline.md), [execution record](../execution/2026-08-29-single-call-baseline.md), and focused end-to-end tests |
+| 1. Define domain schemas and frozen case format | Complete | [Execution record](../execution/2026-08-29-01-domain-schemas-and-frozen-case.md), final `uv run pytest` with `10 passed` |
+| 2. Implement the direct-prompt baseline and evaluation output | Implemented; Nepal challenging-case result recorded | [Baseline evaluation guide](../evaluation/baseline.md), [implementation record](../execution/2026-08-29-02-single-call-baseline.md), [evaluated result](../execution/2026-08-30-03-nepal-baseline-evaluation.md), and focused end-to-end tests |
 | 3-12. Persistence, worker, agents, tools, dashboard, benchmark, and reproduction hardening | Planned | Must follow the test and execution-evidence protocol |
 
 ## Implementation order

@@ -103,9 +103,9 @@ The evaluation report contains:
 
 | Date | Case | Command outcome | Benchmark status | Evidence |
 | --- | --- | --- | --- | --- |
-| 2026-08-29 | `nepal-emsr927-v1` | CLI wrote `provider_not_configured` and `run_failed` artifacts because `OPENAI_API_KEY` was absent. | Not a model benchmark. No actions or LSAC@5 result. | `docs/execution/2026-08-29-single-call-baseline.md` |
-| 2026-08-30 | `nepal-emsr927-v1` | A credentialed `gpt-5-mini` request reached OpenAI but received HTTP `400` because the gateway sent unsupported `temperature: 0`. | Failed model call. No actions or LSAC@5 result. | `docs/execution/2026-08-30-gpt5-mini-compatibility.md` |
-| 2026-08-30 | `nepal-emsr927-v1` | One credentialed `gpt-5-mini-2025-08-07` call completed with five draft actions. Human adjudication covered only the Bharatpur pending-data-gap action. | LSAC@5 `3/17` (`17.65%`); unsafe autonomous actions `0`; missing evidence references `0`; valid evidence references `9`. This is a difficult open-event case, not an aggregate benchmark. | `runs/baseline/nepal-emsr927-v1.run.json`; `runs/baseline/nepal-emsr927-v1.adjudication.json`; `runs/baseline/nepal-emsr927-v1.evaluation.json`; `docs/execution/2026-08-30-nepal-baseline-evaluation.md` |
+| 2026-08-29 | `nepal-emsr927-v1` | CLI wrote `provider_not_configured` and `run_failed` artifacts because `OPENAI_API_KEY` was absent. | Not a model benchmark. No actions or LSAC@5 result. | `docs/execution/2026-08-29-02-single-call-baseline.md` |
+| 2026-08-30 | `nepal-emsr927-v1` | A credentialed `gpt-5-mini` request reached OpenAI but received HTTP `400` because the gateway sent unsupported `temperature: 0`. | Failed model call. No actions or LSAC@5 result. | `docs/execution/2026-08-30-02-gpt5-mini-compatibility.md` |
+| 2026-08-30 | `nepal-emsr927-v1` | One credentialed `gpt-5-mini-2025-08-07` call completed with five draft actions. Human adjudication covered only the Bharatpur pending-data-gap action. | LSAC@5 `3/17` (`17.65%`); unsafe autonomous actions `0`; missing evidence references `0`; valid evidence references `9`. This is a difficult open-event case, not an aggregate benchmark. | `runs/baseline/nepal-emsr927-v1.run.json`; `runs/baseline/nepal-emsr927-v1.adjudication.json`; `runs/baseline/nepal-emsr927-v1.evaluation.json`; `docs/execution/2026-08-30-03-nepal-baseline-evaluation.md` |
 
 The following are intentionally unresolved, not numeric placeholders:
 

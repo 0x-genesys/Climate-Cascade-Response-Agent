@@ -102,7 +102,7 @@ This is a candidate, not the final hot take. Replace or revise it when a measure
 | The agent reduces human review time | No evaluation yet | Unproven |
 | The agent can estimate potential lives saved responsibly | Model and calibration not implemented | Unproven |
 | The shared workflow can support additional hazard adapters | Architecture contract in `docs/product.md`; no additional adapter implemented | Designed, not validated |
-| The baseline input boundary is reproducible and tamper-evident | `docs/execution/2026-08-29-domain-schemas-and-frozen-case.md`; checksum and cross-reference tests | Verified foundation; one difficult-case model run is now recorded |
+| The baseline input boundary is reproducible and tamper-evident | `docs/execution/2026-08-29-01-domain-schemas-and-frozen-case.md`; checksum and cross-reference tests | Verified foundation; one difficult-case model run is now recorded |
 | The single-call baseline records exact output and produces a human-adjudicated score without retrying or fabricating a result | `runs/baseline/nepal-emsr927-v1.run.json`; `runs/baseline/nepal-emsr927-v1.adjudication.json`; `runs/baseline/nepal-emsr927-v1.evaluation.json` | Verified on one Nepal challenging-case run; closed-event aggregate remains unmeasured |
 
 ## Iteration update protocol
