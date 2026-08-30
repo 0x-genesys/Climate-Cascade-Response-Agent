@@ -75,6 +75,21 @@ Bound retries, make operations idempotent, preserve tool responses, and distingu
 
 If an iteration changes data, prompts, tools, model, rubric, or gold labels, document the resource difference and rerun the baseline.
 
+## Major Checkpoint Documentation
+
+A major code checkpoint is a completed planned capability, contract or schema change, API or dashboard behavior change, workflow or safety-policy change, provider compatibility repair, or any change that affects reproducibility. A major evaluation checkpoint is a completed or failed benchmark, human adjudication, or changed metric result.
+
+Before closing either checkpoint, update the applicable records in the same change:
+
+- `docs/execution/YYYY-MM-DD-NN-short-description.md`: every major code and evaluation checkpoint. Record sequence, commands, tests, verification, artifacts, failures, and the next decision. Use the zero-padded sequence in the filename and preserve prior records.
+- `docs/solution_improvement/README.md`: every major code and evaluation checkpoint. Update the affected stage with the final finding, evidence paths, decision, and learning. Add a dedicated findings section when a result is the baseline or a key iteration comparison.
+- `docs/evaluation/README.md` and the relevant evaluation guide: every major evaluation checkpoint. Record measured or failed status, exact metric values, safety results, resource use, artifact paths, and limits of the claim. Do not update metrics before the artifact exists.
+- `docs/story/README.md`: every measured evaluation checkpoint. Update the baseline or iteration narrative, claims ledger, strongest observed failure, and demo language so they remain evidence-bound.
+- `README.md`: when setup, commands, artifacts, benchmark status, runtime, cost, or reproducibility guidance changes.
+- `docs/product.md` and the ADR: when scope, architecture, agents, tools, data contracts, safety boundaries, or implementation status changes.
+
+Do not leave a final result only in an artifact or a wide changelog table. The final baseline and each retained major iteration must have a concise, easy-to-find finding with direct artifact links.
+
 ## Test and execution evidence protocol
 
 Before implementing a deterministic behavior, define its acceptance criteria and focused tests. For agent behavior, define the frozen cases, output contract, safety checks, and evaluation metric before changing prompts, tools, or policies.
@@ -84,7 +99,7 @@ For every meaningful implementation step:
 1. Add or update focused tests with the code or fixture change.
 2. Run the focused tests, then the relevant full suite.
 3. Verify the user-visible or artifact behavior when the change has a dashboard, API, export, fixture, or trajectory effect.
-4. Record exact setup, test, and verification commands plus pass, fail, retry, runtime, and environment details in `docs/execution/`.
+4. Record exact setup, test, and verification commands plus pass, fail, retry, runtime, and environment details in a sequenced `docs/execution/YYYY-MM-DD-NN-short-description.md` record.
 5. Append the implementation finding and evidence path to `docs/solution_improvement/README.md`.
 6. Update the product, evaluation, ADR, and story documents when the result changes their claims or scope.
 7. Do not mark a stage complete while required tests fail, fixture integrity is unverified, or documentation omits the finding.

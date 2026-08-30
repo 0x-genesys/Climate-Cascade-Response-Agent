@@ -45,6 +45,17 @@ Maintain evidence while building:
 - append meaningful iteration notes to the improvement changelog as the work evolves
 - keep representative agent trajectories instead of trying to reconstruct them later
 
+## Major Checkpoint Records
+
+Treat a completed capability, contract/API/dashboard/workflow change, safety change, provider repair, benchmark run, or human adjudication as a major checkpoint. Close it only after updating the records that apply:
+
+- `docs/execution/YYYY-MM-DD-NN-short-description.md` for every major code or evaluation checkpoint, with exact commands, tests, verification, artifacts, failures, decision, and a zero-padded same-day sequence in the filename.
+- `docs/solution_improvement/README.md` for every major checkpoint, with final findings, metric or non-metric evidence, artifact links, decision, and learning. Make baseline and key-iteration findings easy to locate outside a wide table.
+- `docs/evaluation/README.md` and the relevant evaluation guide after each completed or failed evaluation, with metric values, safety results, resources, artifact paths, and claim limits.
+- `docs/story/README.md` after each measured evaluation, including the claims ledger and observed failure.
+- `README.md` when reproducibility, setup, commands, artifacts, or benchmark status changes.
+- Product and architecture records when scope, system design, safety boundaries, data, or implementation status changes.
+
 ## README discipline
 
 Keep the root `README.md` aligned with the Micro1 submission guidance. It must introduce the intended user and bottleneck, explain the value and scope boundary, give clean-environment setup plus exact baseline, solution, and evaluation commands, identify required data and expected outputs, and state where secrets are supplied without committing them.

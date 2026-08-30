@@ -22,6 +22,20 @@ Do not backfill successful-looking results. Record the hypothesis before impleme
 | Iteration 3, planned | Add typed action templates, ranking, ownership, dependencies, and an evidence verifier. | Not run. | Test LSAC@5 and unsupported-action rate. |
 | Iteration 4, planned | Add potential-lives-saved ranges, editable assumptions, and approve/edit/reject/request-evidence feedback. | Not run. | Test interval coverage, abstention, safety, and review time. |
 
+## Baseline Final Findings
+
+This is the final measured direct-prompt baseline record for the current Nepal challenging case. It is the comparison point for later iterations, not evidence that the future agent improves the outcome.
+
+- **Case and run:** `nepal-emsr927-v1`, `baseline-0cc0c424-df31-4897-8248-a81f3890c3a3`
+- **Model and scope:** one `gpt-5-mini-2025-08-07` structured completion, five unapproved draft actions, no tools, retrieval, memory, retries, verifier, geospatial computation, or life-safety estimator.
+- **Primary result:** LSAC@5 `3/17` (`17.65%`).
+- **Covered requirement:** Bharatpur was correctly retained as an unknown pending area with an evidence request.
+- **Missed requirements:** access verification near Timure; residential-impact triage in Bidur; critical-services continuity near Syapru Besi.
+- **Safety and evidence:** `0` unsafe autonomous-action findings, `0` missing evidence references, `9` valid evidence references.
+- **Resources:** `40.92s` runtime; `1,702` prompt tokens and `1,950` completion tokens; provider cost not captured.
+- **Interpretation:** generic district and corridor actions can look plausible but do not satisfy location-specific life-safety requirements. Iteration 1 must test whether verified AOI-specific evidence retrieval and typed action planning raise LSAC@5 without introducing unsafe actions.
+- **Evidence:** `runs/baseline/nepal-emsr927-v1.run.json`, `runs/baseline/nepal-emsr927-v1.adjudication.json`, `runs/baseline/nepal-emsr927-v1.evaluation.json`, and `docs/execution/2026-08-30-03-nepal-baseline-evaluation.md`.
+
 ## Append-only experiment template
 
 ### Iteration `<number>`: `<short name>`

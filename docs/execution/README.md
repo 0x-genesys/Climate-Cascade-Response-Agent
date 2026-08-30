@@ -18,6 +18,8 @@ Create one entry before or immediately after each meaningful implementation step
 - Documentation updates made
 - Decision and next step
 
+Name every execution record `YYYY-MM-DD-NN-short-description.md`, where `NN` is its zero-padded sequence within that date. Update links when a record is renamed.
+
 ## Rules
 
 - Write tests before or alongside implementation for every behavior that can fail deterministically.
