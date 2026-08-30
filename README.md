@@ -12,7 +12,7 @@ The pilot case is Nepal `EMSR927`. It is a deliberately difficult, evolving even
 
 ADR step 2 is implemented. The baseline makes one structured model call over the checksum-verified Nepal fixture, records the exact response, and produces an evaluation artifact. It has no tools, retrieval, memory, retries, verifier, human-feedback loop, geospatial calculation, or life-safety estimator.
 
-No credentialed model benchmark has been recorded yet. The project does not claim a numeric baseline score, improvement, model cost, or runtime until a live run and human coverage adjudication are stored. The implementation and known gaps are recorded in [the baseline evaluation guide](docs/evaluation/baseline.md) and [execution ledger](docs/execution/2026-08-29-single-call-baseline.md).
+One credentialed Nepal baseline is recorded: `gpt-5-mini-2025-08-07` produced five draft actions, and human adjudication measured LSAC@5 at `3/17` (`17.65%`). The run had zero deterministic unsafe-action findings and zero missing evidence references. This is one difficult, open-event case, not a closed-event aggregate or evidence of improvement. Model cost is not recorded. The implementation and result are documented in [the baseline evaluation guide](docs/evaluation/baseline.md) and [execution ledger](docs/execution/2026-08-30-nepal-baseline-evaluation.md).
 
 ## Quick start
 
@@ -52,7 +52,7 @@ uv run climate-cascade-baseline \
   --case data/fixtures/cases/nepal-emsr927-v1 \
   --model gpt-5-mini \
   --output var/runs/nepal-baseline.run.json \
-  --evaluation-output var/runs/nepal-baseline.evaluation.json
+  --evaluation-output var/runs/nepal-baseline.initial-evaluation.json
 ```
 
 The command writes both JSON artifacts. Exit `0` means the response met the output contract. Exit `2` means it recorded a fail-closed result such as missing credentials, provider failure, schema failure, or an unknown evidence ID. Do not retry a failed call within the same benchmark run.
