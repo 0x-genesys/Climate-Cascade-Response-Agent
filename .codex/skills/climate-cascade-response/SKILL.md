@@ -90,6 +90,18 @@ Before closing either checkpoint, update the applicable records in the same chan
 
 Do not leave a final result only in an artifact or a wide changelog table. The final baseline and each retained major iteration must have a concise, easy-to-find finding with direct artifact links.
 
+## Measured Baseline Gaps
+
+The current direct-prompt baseline has one human-adjudicated Nepal challenging-case result: LSAC@5 `3/17` (`17.65%`), with `0` unsafe autonomous-action findings and `0` missing evidence references. It covered only the Bharatpur pending-data-gap requirement.
+
+Treat these as the starting, testable failure hypotheses for Iteration 1:
+
+- The baseline did not prioritize access verification for communities near Timure before dependent field actions.
+- The baseline did not use cited damage evidence to triage residential response needs in Bidur.
+- The baseline did not request a critical-services continuity check near Syapru Besi.
+
+The next workflow must not merely name these locations. It must retrieve and verify AOI-specific evidence, draft a human-reviewed action that meets the frozen outcome and time window, and rerun the same adjudicated evaluation. Preserve the zero unsafe-action and zero missing-evidence findings while testing for LSAC@5 improvement. Evidence: `runs/baseline/nepal-emsr927-v1.run.json`, `runs/baseline/nepal-emsr927-v1.adjudication.json`, and `runs/baseline/nepal-emsr927-v1.evaluation.json`.
+
 ## Test and execution evidence protocol
 
 Before implementing a deterministic behavior, define its acceptance criteria and focused tests. For agent behavior, define the frozen cases, output contract, safety checks, and evaluation metric before changing prompts, tools, or policies.
