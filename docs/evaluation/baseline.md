@@ -9,6 +9,24 @@ This baseline is a fair comparison point for later agent iterations. It receives
 
 The command preserves the rendered prompt and exact raw model response. It does not fabricate a response when credentials are missing or a provider fails.
 
+## Final Recorded Baseline Result
+
+The current direct-prompt comparison point is the successful, human-adjudicated Nepal run, not either earlier failed verification attempt.
+
+| Field | Recorded value |
+| --- | --- |
+| Case | `nepal-emsr927-v1` challenging open-event case |
+| Model | `gpt-5-mini-2025-08-07` |
+| Actions | `5` unapproved drafts |
+| LSAC@5 | `3/17` (`17.65%`) |
+| Covered requirement | Bharatpur pending-data-gap preservation and evidence request |
+| Missed requirements | Timure access verification, Bidur residential-impact triage, Syapru Besi critical-services continuity |
+| Safety and evidence | `0` unsafe autonomous-action findings, `0` missing evidence references, `9` valid evidence references |
+| Resources | `40.92s`; `1,702` prompt tokens; `1,950` completion tokens; provider cost not captured |
+| Limits | One difficult open-event case only. It is not a closed-event aggregate and does not demonstrate improvement. |
+
+Artifacts: `runs/baseline/nepal-emsr927-v1.run.json`, `runs/baseline/nepal-emsr927-v1.adjudication.json`, and `runs/baseline/nepal-emsr927-v1.evaluation.json`.
+
 ## Run a live baseline
 
 Set a non-committed `OPENAI_API_KEY`, then run:
@@ -99,7 +117,9 @@ The evaluation report contains:
 - validated evidence-reference count
 - explicit `not_evaluated` and `not_applicable` metrics where evidence does not exist
 
-## Current benchmark record and placeholder inventory
+## Historical Execution History
+
+The first two records below are retained failed attempts. They are not the current baseline result.
 
 | Date | Case | Command outcome | Benchmark status | Evidence |
 | --- | --- | --- | --- | --- |
@@ -109,9 +129,8 @@ The evaluation report contains:
 
 The following are intentionally unresolved, not numeric placeholders:
 
-- Closed-event fixture directories and aggregate results remain unmeasured. The recorded Nepal result must not be substituted for them.
-- Model cost is unmeasured because provider billing data was not captured in the run artifact.
 - Ten closed CEMS fixture directories and their baseline results.
 - Aggregate benchmark metric. Nepal remains the open challenging case and is excluded from closed-event impact-accuracy aggregates.
+- Model cost is unmeasured because provider billing data was not captured in the run artifact.
 
 Do not replace these values with zero or infer them from tests. The focused tests use a local static gateway only to verify contracts and evaluator arithmetic; they are not model-quality evidence.
