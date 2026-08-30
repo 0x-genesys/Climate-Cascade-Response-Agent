@@ -1,0 +1,38 @@
+{
+  "schema_version": "1",
+  "case_id": "nepal-emsr927-v1",
+  "run_id": "baseline-0cc0c424-df31-4897-8248-a81f3890c3a3",
+  "reviewer_id": "replace-with-reviewer-id",
+  "reviewer_role": "Replace with reviewer role",
+  "decided_at": "REPLACE_WITH_TIMEZONE_AWARE_ISO8601_TIMESTAMP",
+  "decisions": [
+    {
+      "schema_version": "1",
+      "gold_action_id": "verify-access-timure",
+      "covered": "REPLACE_WITH_TRUE_OR_FALSE",
+      "proposal_action_id": null,
+      "rationale": "Record why the proposal does or does not meet the required outcome, location, timing, and human-review conditions."
+    },
+    {
+      "schema_version": "1",
+      "gold_action_id": "triage-residential-impact-bidur",
+      "covered": "REPLACE_WITH_TRUE_OR_FALSE",
+      "proposal_action_id": null,
+      "rationale": "Record why the proposal does or does not meet the required outcome, location, timing, and human-review conditions."
+    },
+    {
+      "schema_version": "1",
+      "gold_action_id": "check-critical-services-syapru-besi",
+      "covered": "REPLACE_WITH_TRUE_OR_FALSE",
+      "proposal_action_id": null,
+      "rationale": "Record why the proposal does or does not meet the required outcome, location, timing, and human-review conditions."
+    },
+    {
+      "schema_version": "1",
+      "gold_action_id": "preserve-bharatpur-data-gap",
+      "covered": "REPLACE_WITH_TRUE_OR_FALSE",
+      "proposal_action_id": null,
+      "rationale": "Record why the proposal does or does not meet the required outcome, location, timing, and human-review conditions."
+    }
+  ]
+}

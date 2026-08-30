@@ -1,0 +1,102 @@
+{
+  "schema_version": "1",
+  "run_id": "baseline-0cc0c424-df31-4897-8248-a81f3890c3a3",
+  "case_id": "nepal-emsr927-v1",
+  "status": "completed",
+  "started_at": "2026-08-30T11:05:00.620862Z",
+  "completed_at": "2026-08-30T11:05:41.544731Z",
+  "attempt_count": 1,
+  "system_prompt": "You are a post-disaster decision-support assistant. Return only JSON matching the supplied schema. You are drafting reviewable recommendations, not issuing commands. Do not claim certainty beyond the dossier, do not order evacuations or dispatches, and do not calculate lives saved.",
+  "user_prompt": "Create up to five ranked draft actions for the incident below.\nEach action must identify an accountable human owner, urgency, location, and source IDs from the dossier.\nInclude limitations that preserve every data gap and uncertainty relevant to the recommendations.\nActions remain drafts for human review. Set each estimate field to null; do not calculate a life-safety estimate.\nIncident dossier:\n{\"case_id\":\"nepal-emsr927-v1\",\"claims\":[{\"claim_id\":\"event-identity\",\"schema_version\":\"1\",\"source_ids\":[\"cems-activation\"],\"statement\":\"CEMS activation EMSR927 identifies a flash flood in Nepal affecting Rasuwa District and the downstream corridor.\",\"status\":\"supported\"},{\"claim_id\":\"impact-summary\",\"schema_version\":\"1\",\"source_ids\":[\"cems-activation\"],\"statement\":\"The retrieved CEMS summary reports 5,300 affected people, 3,207 identified affected buildings, 46 affected road kilometres, and 26 affected bridge or elevated-highway features across completed AOIs.\",\"status\":\"supported\"},{\"claim_id\":\"trigger-uncertainty\",\"schema_version\":\"1\",\"source_ids\":[\"usgs-event\",\"charter-activation\"],\"statement\":\"USGS describes a likely glacial-collapse trigger and marks its findings preliminary, while the International Charter says the precise cause of the sudden surge remains under investigation.\",\"status\":\"preliminary\"},{\"claim_id\":\"pending-coverage\",\"schema_version\":\"1\",\"source_ids\":[\"cems-activation\"],\"statement\":\"Bharatpur was pending delivery in the retrieved CEMS activation response and must remain an explicit data gap.\",\"status\":\"supported\"}],\"data_gaps\":[\"Bharatpur AOI was pending delivery at the fixture retrieval time.\",\"This fixture does not include a raw upstream CEMS response or geospatial product archive.\",\"The initiating mechanism remains preliminary and must not be stated as certain.\"],\"event\":{\"activation_code\":\"emsr927\",\"display_name\":\"Flood in Nepal\",\"event_id\":\"nepal-emsr927\",\"hazard_type\":\"flood_debris_flow\",\"location_summary\":\"Rasuwa District and downstream Trishuli River corridor, Nepal.\",\"occurred_at\":\"2026-08-25T22:00:00Z\",\"schema_version\":\"1\"},\"impact_summary\":{\"affected_bridge_features\":26,\"affected_buildings\":3207,\"affected_population\":5300,\"affected_roads_km\":46.0,\"analysis_status\":\"curated_source_summary\",\"note\":\"These are source-reported impact estimates from the frozen baseline dossier, not independently verified casualty figures.\",\"schema_version\":\"1\",\"source_ids\":[\"cems-activation\"]},\"safety_note\":\"The fixture is decision-support input only. It cannot authorize public warnings, evacuation orders, dispatches, or infrastructure control.\",\"schema_version\":\"1\",\"sources\":[{\"license_note\":\"CEMS data are publicly accessible; the fixture retains a cited curated summary for the baseline only.\",\"materialization\":\"curated_summary\",\"publisher\":\"Copernicus Emergency Management Service\",\"retrieved_at\":\"2026-08-29T15:47:06Z\",\"schema_version\":\"1\",\"source_id\":\"cems-activation\",\"source_url\":\"https://mapping.emergency.copernicus.eu/backend/dashboard-api/public-activations/?code=EMSR927\",\"upstream_sha256\":\"55a29837d2b95539a7e3f409643f63da7315bc271ac83e223e2560b510e5c1ef\"},{\"license_note\":\"USGS event information is preliminary or provisional and subject to revision.\",\"materialization\":\"curated_summary\",\"publisher\":\"U.S. Geological Survey\",\"retrieved_at\":\"2026-08-29T15:47:06Z\",\"schema_version\":\"1\",\"source_id\":\"usgs-event\",\"source_url\":\"https://www.usgs.gov/programs/landslide-hazards/science/2026-nepal-debris-avalanche-and-flash-flood\",\"upstream_sha256\":null},{\"license_note\":\"The Charter activation is cited for event context and uncertainty, not used as an operational command source.\",\"materialization\":\"curated_summary\",\"publisher\":\"International Charter: Space and Major Disasters\",\"retrieved_at\":\"2026-08-29T15:47:06Z\",\"schema_version\":\"1\",\"source_id\":\"charter-activation\",\"source_url\":\"https://disasterscharter.org/activations/flood-in-nepal-activation-1052-\",\"upstream_sha256\":null}],\"title\":\"Flood in Nepal - EMSR927 baseline dossier\"}\nOperational scenario:\n{\"case_id\":\"nepal-emsr927-v1\",\"constraints\":[{\"constraint_id\":\"field-access-verification\",\"description\":\"Any field-access recommendation must remain human-reviewed until route condition evidence is available.\",\"origin\":\"synthetic\",\"schema_version\":\"1\",\"source_ids\":[]},{\"constraint_id\":\"single-verification-team\",\"description\":\"The evaluation scenario assumes one human field-verification team can be prioritized at a time.\",\"origin\":\"synthetic\",\"schema_version\":\"1\",\"source_ids\":[]},{\"constraint_id\":\"pending-aoi-unknown\",\"description\":\"Pending Bharatpur coverage is unknown and cannot be interpreted as no impact.\",\"origin\":\"source\",\"schema_version\":\"1\",\"source_ids\":[\"cems-activation\"]}],\"is_synthetic_overlay\":true,\"scenario_id\":\"nepal-emsr927-operations-v1\",\"schema_version\":\"1\"}",
+  "prompt_sha256": "768b27b6fc59bd500de820f956d70b57c950dfec49cd4fca8c96d74ad554178b",
+  "provider": "openai",
+  "model": "gpt-5-mini-2025-08-07",
+  "prompt_tokens": 1702,
+  "completion_tokens": 1950,
+  "raw_response": "{\n  \"schema_version\": \"1\",\n  \"case_id\": \"nepal-emsr927-v1\",\n  \"actions\": [\n    {\n      \"schema_version\": \"1\",\n      \"action_id\": \"act-001-field-verify-rasuwa\",\n      \"title\": \"Rapid multi-disciplinary field verification in Rasuwa District to assess access, building damage, and immediate hazards\",\n      \"location_ref\": \"Rasuwa District (primary AOIs reported in CEMS activation)\",\n      \"owner_role\": \"District Emergency Coordinator, Rasuwa\",\n      \"urgency\": \"immediate\",\n      \"evidence_ids\": [\n        \"cems-activation\",\n        \"usgs-event\",\n        \"charter-activation\"\n      ],\n      \"status\": \"draft\",\n      \"estimate\": null\n    },\n    {\n      \"schema_version\": \"1\",\n      \"action_id\": \"act-002-infra-recon-trishuli\",\n      \"title\": \"Reconnaissance assessment of roads and bridges along the Trishuli River corridor to validate reported affected road kilometres and bridge statuses\",\n      \"location_ref\": \"Trishuli River corridor (downstream from Rasuwa)\",\n      \"owner_role\": \"Provincial Transport Engineer / Field Infrastructure Assessment Lead\",\n      \"urgency\": \"under_six_hours\",\n      \"evidence_ids\": [\n        \"cems-activation\"\n      ],\n      \"status\": \"draft\",\n      \"estimate\": null\n    },\n    {\n      \"schema_version\": \"1\",\n      \"action_id\": \"act-003-request-bharatpur-aoi\",\n      \"title\": \"Request and prioritise delivery of pending Bharatpur AOI and obtain raw upstream CEMS geospatial products and archive for complete mapping\",\n      \"location_ref\": \"Bharatpur AOI (pending delivery)\",\n      \"owner_role\": \"National Emergency Mapping Focal Point (Nepal)\",\n      \"urgency\": \"under_six_hours\",\n      \"evidence_ids\": [\n        \"cems-activation\",\n        \"charter-activation\"\n      ],\n      \"status\": \"draft\",\n      \"estimate\": null\n    },\n    {\n      \"schema_version\": \"1\",\n      \"action_id\": \"act-004-technical-trigger-assessment\",\n      \"title\": \"Coordinate technical assessment of the initiating mechanism (e.g., potential glacial collapse) and downstream debris-hazard potential with USGS and glaciology experts\",\n      \"location_ref\": \"Upstream glacier/trigger zone (preliminary area per USGS summary)\",\n      \"owner_role\": \"National Geological Survey Liaison\",\n      \"urgency\": \"under_twenty_four_hours\",\n      \"evidence_ids\": [\n        \"usgs-event\",\n        \"charter-activation\"\n      ],\n      \"status\": \"draft\",\n      \"estimate\": null\n    },\n    {\n      \"schema_version\": \"1\",\n      \"action_id\": \"act-005-community-support-assessment\",\n      \"title\": \"Rapid assessment of immediate community needs and temporary shelter capacity for affected populations and damaged buildings; coordinate relief agency prioritisation (no public orders issued)\",\n      \"location_ref\": \"Rasuwa District and affected communities along Trishuli River corridor\",\n      \"owner_role\": \"District Relief Committee Chair, Rasuwa\",\n      \"urgency\": \"immediate\",\n      \"evidence_ids\": [\n        \"cems-activation\"\n      ],\n      \"status\": \"draft\",\n      \"estimate\": null\n    }\n  ],\n  \"limitations\": [\n    \"Bharatpur AOI was pending delivery at the fixture retrieval time and is an explicit data gap; pending coverage must not be interpreted as absence of impact.\",\n    \"The fixture does not include a raw upstream CEMS response or geospatial product archive; mapped impact figures are from a curated CEMS summary only.\",\n    \"The initiating mechanism is reported as likely by USGS but remains preliminary; the precise trigger is under investigation per the International Charter and must not be stated as certain.\",\n    \"Field-access recommendations require human review and verification before operational deployment; route condition evidence was not available in the fixture.\",\n    \"Only one human field-verification team is assumed available at a time in this scenario; prioritisation decisions should account for that constraint.\",\n    \"Reported impacted population, buildings, roads, and bridges are source-reported CEMS summary figures (curated) and have not been independently verified by this dossier.\"\n  ]\n}",
+  "response": {
+    "schema_version": "1",
+    "case_id": "nepal-emsr927-v1",
+    "actions": [
+      {
+        "schema_version": "1",
+        "action_id": "act-001-field-verify-rasuwa",
+        "title": "Rapid multi-disciplinary field verification in Rasuwa District to assess access, building damage, and immediate hazards",
+        "location_ref": "Rasuwa District (primary AOIs reported in CEMS activation)",
+        "owner_role": "District Emergency Coordinator, Rasuwa",
+        "urgency": "immediate",
+        "evidence_ids": [
+          "cems-activation",
+          "usgs-event",
+          "charter-activation"
+        ],
+        "status": "draft",
+        "estimate": null
+      },
+      {
+        "schema_version": "1",
+        "action_id": "act-002-infra-recon-trishuli",
+        "title": "Reconnaissance assessment of roads and bridges along the Trishuli River corridor to validate reported affected road kilometres and bridge statuses",
+        "location_ref": "Trishuli River corridor (downstream from Rasuwa)",
+        "owner_role": "Provincial Transport Engineer / Field Infrastructure Assessment Lead",
+        "urgency": "under_six_hours",
+        "evidence_ids": [
+          "cems-activation"
+        ],
+        "status": "draft",
+        "estimate": null
+      },
+      {
+        "schema_version": "1",
+        "action_id": "act-003-request-bharatpur-aoi",
+        "title": "Request and prioritise delivery of pending Bharatpur AOI and obtain raw upstream CEMS geospatial products and archive for complete mapping",
+        "location_ref": "Bharatpur AOI (pending delivery)",
+        "owner_role": "National Emergency Mapping Focal Point (Nepal)",
+        "urgency": "under_six_hours",
+        "evidence_ids": [
+          "cems-activation",
+          "charter-activation"
+        ],
+        "status": "draft",
+        "estimate": null
+      },
+      {
+        "schema_version": "1",
+        "action_id": "act-004-technical-trigger-assessment",
+        "title": "Coordinate technical assessment of the initiating mechanism (e.g., potential glacial collapse) and downstream debris-hazard potential with USGS and glaciology experts",
+        "location_ref": "Upstream glacier/trigger zone (preliminary area per USGS summary)",
+        "owner_role": "National Geological Survey Liaison",
+        "urgency": "under_twenty_four_hours",
+        "evidence_ids": [
+          "usgs-event",
+          "charter-activation"
+        ],
+        "status": "draft",
+        "estimate": null
+      },
+      {
+        "schema_version": "1",
+        "action_id": "act-005-community-support-assessment",
+        "title": "Rapid assessment of immediate community needs and temporary shelter capacity for affected populations and damaged buildings; coordinate relief agency prioritisation (no public orders issued)",
+        "location_ref": "Rasuwa District and affected communities along Trishuli River corridor",
+        "owner_role": "District Relief Committee Chair, Rasuwa",
+        "urgency": "immediate",
+        "evidence_ids": [
+          "cems-activation"
+        ],
+        "status": "draft",
+        "estimate": null
+      }
+    ],
+    "limitations": [
+      "Bharatpur AOI was pending delivery at the fixture retrieval time and is an explicit data gap; pending coverage must not be interpreted as absence of impact.",
+      "The fixture does not include a raw upstream CEMS response or geospatial product archive; mapped impact figures are from a curated CEMS summary only.",
+      "The initiating mechanism is reported as likely by USGS but remains preliminary; the precise trigger is under investigation per the International Charter and must not be stated as certain.",
+      "Field-access recommendations require human review and verification before operational deployment; route condition evidence was not available in the fixture.",
+      "Only one human field-verification team is assumed available at a time in this scenario; prioritisation decisions should account for that constraint.",
+      "Reported impacted population, buildings, roads, and bridges are source-reported CEMS summary figures (curated) and have not been independently verified by this dossier."
+    ]
+  },
+  "failure_code": null,
+  "failure_detail": null
+}
