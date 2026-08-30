@@ -8,9 +8,10 @@ import os
 from pathlib import Path
 
 from climate_cascade.baseline import OpenAIChatCompletionsGateway, run_baseline
-from climate_cascade.baseline.runner import BaselineRunStatus, write_run_artifact
+from climate_cascade.baseline.runner import BaselineRunArtifact, BaselineRunStatus, write_run_artifact
 from climate_cascade.domain import load_frozen_case
 from climate_cascade.evaluation import CoverageAdjudication, evaluate_baseline
+from climate_cascade.evaluation.scoring import EvaluationStatus
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -22,8 +23,7 @@ def main(argv: list[str] | None = None) -> int:
     run = run_baseline(case, gateway)
     write_run_artifact(args.output, run)
 
-    adjudication = _load_adjudication(args.adjudication) if args.adjudication else None
-    report = evaluate_baseline(case, run, adjudication)
+    report = evaluate_baseline(case, run)
     _write_json(args.evaluation_output, report.model_dump(mode="json"))
     print(
         json.dumps(
@@ -39,6 +39,28 @@ def main(argv: list[str] | None = None) -> int:
     return 0 if run.status is BaselineRunStatus.COMPLETED else 2
 
 
+def evaluate_main(argv: list[str] | None = None) -> int:
+    """Evaluate an existing baseline run without issuing another model request."""
+
+    args = _parse_evaluate_args(argv)
+    case = load_frozen_case(args.case)
+    run = BaselineRunArtifact.model_validate_json(args.run.read_text(encoding="utf-8"))
+    adjudication = _load_adjudication(args.adjudication)
+    report = evaluate_baseline(case, run, adjudication)
+    _write_json(args.evaluation_output, report.model_dump(mode="json"))
+    print(
+        json.dumps(
+            {
+                "run_id": run.run_id,
+                "evaluation_status": report.status,
+                "evaluation_artifact": str(args.evaluation_output),
+            },
+            sort_keys=True,
+        )
+    )
+    return 0 if report.status is EvaluationStatus.COMPLETE else 2
+
+
 def _parse_args(argv: list[str] | None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run the one-call Climate Cascade baseline.")
     parser.add_argument("--case", type=Path, required=True, help="Frozen case directory.")
@@ -46,10 +68,18 @@ def _parse_args(argv: list[str] | None) -> argparse.Namespace:
     parser.add_argument(
         "--evaluation-output", type=Path, required=True, help="Path for the evaluation report JSON."
     )
-    parser.add_argument("--adjudication", type=Path, help="Optional human coverage-adjudication JSON.")
     parser.add_argument("--provider", choices=["openai"], default="openai")
     parser.add_argument("--model", required=True, help="Structured-output model identifier available to the account.")
     parser.add_argument("--api-key-env", default="OPENAI_API_KEY")
+    return parser.parse_args(argv)
+
+
+def _parse_evaluate_args(argv: list[str] | None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Evaluate an existing Climate Cascade baseline run.")
+    parser.add_argument("--case", type=Path, required=True, help="Frozen case directory.")
+    parser.add_argument("--run", type=Path, required=True, help="Completed baseline run artifact JSON.")
+    parser.add_argument("--adjudication", type=Path, required=True, help="Completed human coverage-adjudication JSON.")
+    parser.add_argument("--evaluation-output", type=Path, required=True, help="Path for the evaluation report JSON.")
     return parser.parse_args(argv)
 
 

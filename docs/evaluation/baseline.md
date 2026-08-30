@@ -16,40 +16,69 @@ Set a non-committed `OPENAI_API_KEY`, then run:
 ```bash
 uv run climate-cascade-baseline \
   --case data/fixtures/cases/nepal-emsr927-v1 \
-  --model YOUR_STRUCTURED_OUTPUT_MODEL \
+  --model gpt-5-mini \
   --output var/runs/nepal-baseline.run.json \
   --evaluation-output var/runs/nepal-baseline.evaluation.json
 ```
 
-The command makes one OpenAI Chat Completions request with JSON-schema structured output. Supply a model that your account can use with structured outputs. The selected model is an input to the experiment, not a project-wide default. Record its exact identifier, date, runtime, token counts, and cost in the execution ledger.
+The command makes one OpenAI Chat Completions request with JSON-schema structured output. `gpt-5-mini` rejects an explicit `temperature: 0`, so the gateway omits `temperature` and uses the model's provider default. Supply another structured-output model only when recording it as a resource difference in the experiment. Record the exact returned model identifier, date, runtime, token counts, and cost in the execution ledger.
 
 Exit status `0` means the response passed the baseline output contract. Exit status `2` means the command still wrote inspectable artifacts but the model run did not complete. Do not retry within the same benchmark run.
 
 ## Score LSAC@5
 
-After a successful run, create a human coverage-adjudication JSON. It must decide every gold action and, when covered, name the proposal action that covered it.
+After a successful run, create a human coverage-adjudication JSON. It must decide every gold action and, when covered, name the proposal action that covered it. This is a manual semantic review. It does not issue another model call.
 
 ```json
 {
   "schema_version": "1",
   "case_id": "nepal-emsr927-v1",
-  "run_id": "baseline-REPLACE-WITH-RUN-ID",
-  "reviewer_id": "benchmark-reviewer",
+  "run_id": "COPY-RUN-ID-FROM-RUN-ARTIFACT",
+  "reviewer_id": "your-reviewer-id",
   "reviewer_role": "emergency operations analyst",
-  "decided_at": "2026-08-29T18:00:00Z",
+  "decided_at": "2026-08-30T18:00:00Z",
   "decisions": [
     {
       "schema_version": "1",
       "gold_action_id": "verify-access-timure",
-      "covered": true,
-      "proposal_action_id": "REPLACE-WITH-PROPOSAL-ACTION-ID",
-      "rationale": "Explain the protective outcome, location, time window, evidence, and retained human authority."
+      "covered": false,
+      "rationale": "Replace with a decision after checking whether a proposal preserves human-reviewed access verification near Timure."
+    },
+    {
+      "schema_version": "1",
+      "gold_action_id": "triage-residential-impact-bidur",
+      "covered": false,
+      "rationale": "Replace with a decision after checking whether a proposal targets cited residential impact around Bidur."
+    },
+    {
+      "schema_version": "1",
+      "gold_action_id": "check-critical-services-syapru-besi",
+      "covered": false,
+      "rationale": "Replace with a decision after checking whether a proposal requests a critical-services continuity check near Syapru Besi."
+    },
+    {
+      "schema_version": "1",
+      "gold_action_id": "preserve-bharatpur-data-gap",
+      "covered": false,
+      "rationale": "Replace with a decision after checking whether a proposal keeps Bharatpur unknown and requests evidence rather than asserting no impact."
     }
   ]
 }
 ```
 
-The example is intentionally incomplete and is not a valid adjudication. It is a field template only. A valid file must contain exactly the four current Nepal gold-action decisions. Rerun the command with `--adjudication path/to/adjudication.json` to produce a complete LSAC@5 report.
+The template is deliberately not a completed adjudication. For each `covered: true` decision, add `proposal_action_id` from the saved run's `response.actions`; for every `covered: false` decision, omit it. Replace every rationale with the reviewer finding. A valid file contains exactly these four current Nepal gold-action decisions.
+
+Run the no-model evaluator after saving the completed file:
+
+```bash
+uv run climate-cascade-evaluate-baseline \
+  --case data/fixtures/cases/nepal-emsr927-v1 \
+  --run var/runs/nepal-baseline.run.json \
+  --adjudication var/runs/nepal-baseline.adjudication.json \
+  --evaluation-output var/runs/nepal-baseline.evaluation.json
+```
+
+Exit `0` means the report is complete. This command validates the case ID, run ID, all four gold-action decisions, and every referenced proposal ID before calculating LSAC@5. It does not call OpenAI.
 
 The evaluator calculates LSAC@5 from the reviewer decisions and frozen severity weights. It never asks another model to infer semantic coverage.
 
@@ -75,6 +104,7 @@ The evaluation report contains:
 | Date | Case | Command outcome | Benchmark status | Evidence |
 | --- | --- | --- | --- | --- |
 | 2026-08-29 | `nepal-emsr927-v1` | CLI wrote `provider_not_configured` and `run_failed` artifacts because `OPENAI_API_KEY` was absent. | Not a model benchmark. No actions or LSAC@5 result. | `docs/execution/2026-08-29-single-call-baseline.md` |
+| 2026-08-30 | `nepal-emsr927-v1` | A credentialed `gpt-5-mini` request reached OpenAI but received HTTP `400` because the gateway sent unsupported `temperature: 0`. | Failed model call. No actions or LSAC@5 result. | `var/runs/nepal-baseline.run.json`; `docs/execution/2026-08-30-gpt5-mini-compatibility.md` |
 
 The following are intentionally unresolved, not numeric placeholders:
 

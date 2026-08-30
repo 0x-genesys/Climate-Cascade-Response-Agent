@@ -10,7 +10,7 @@ The pilot case is Nepal `EMSR927`. It is a deliberately difficult, evolving even
 
 ## Current status
 
-ADR step 2 is implemented on the `baseline` branch. The baseline makes one structured model call over the checksum-verified Nepal fixture, records the exact response, and produces an evaluation artifact. It has no tools, retrieval, memory, retries, verifier, human-feedback loop, geospatial calculation, or life-safety estimator.
+ADR step 2 is implemented. The baseline makes one structured model call over the checksum-verified Nepal fixture, records the exact response, and produces an evaluation artifact. It has no tools, retrieval, memory, retries, verifier, human-feedback loop, geospatial calculation, or life-safety estimator.
 
 No credentialed model benchmark has been recorded yet. The project does not claim a numeric baseline score, improvement, model cost, or runtime until a live run and human coverage adjudication are stored. The implementation and known gaps are recorded in [the baseline evaluation guide](docs/evaluation/baseline.md) and [execution ledger](docs/execution/2026-08-29-single-call-baseline.md).
 
@@ -45,19 +45,29 @@ You can use a different environment-variable name with `--api-key-env YOUR_VARIA
 
 ## Run the baseline
 
-Choose a structured-output model available to your OpenAI account and run exactly one baseline attempt:
+Choose a structured-output model available to your OpenAI account and run exactly one baseline attempt. `gpt-5-mini` uses the provider default temperature, so the baseline does not send a `temperature` parameter.
 
 ```bash
 uv run climate-cascade-baseline \
   --case data/fixtures/cases/nepal-emsr927-v1 \
-  --model YOUR_STRUCTURED_OUTPUT_MODEL \
+  --model gpt-5-mini \
   --output var/runs/nepal-baseline.run.json \
   --evaluation-output var/runs/nepal-baseline.evaluation.json
 ```
 
 The command writes both JSON artifacts. Exit `0` means the response met the output contract. Exit `2` means it recorded a fail-closed result such as missing credentials, provider failure, schema failure, or an unknown evidence ID. Do not retry a failed call within the same benchmark run.
 
-LSAC@5 requires an explicit human coverage-adjudication file that maps every frozen gold action to a proposed action or marks it uncovered. Rerun the same command with `--adjudication path/to/adjudication.json`. The exact format and evaluation semantics are in [docs/evaluation/baseline.md](docs/evaluation/baseline.md).
+LSAC@5 requires an explicit human coverage-adjudication file that maps every frozen gold action to a proposed action or marks it uncovered. Score the saved run without another model call:
+
+```bash
+uv run climate-cascade-evaluate-baseline \
+  --case data/fixtures/cases/nepal-emsr927-v1 \
+  --run var/runs/nepal-baseline.run.json \
+  --adjudication var/runs/nepal-baseline.adjudication.json \
+  --evaluation-output var/runs/nepal-baseline.evaluation.json
+```
+
+The exact four-decision template and evaluation semantics are in [docs/evaluation/baseline.md](docs/evaluation/baseline.md).
 
 ## Evidence and submission record
 
