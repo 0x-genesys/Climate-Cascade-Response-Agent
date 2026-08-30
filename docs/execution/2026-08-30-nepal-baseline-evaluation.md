@@ -1,6 +1,7 @@
 # Nepal Baseline Evaluation
 
 Date: 2026-08-30
+Sequence: 03
 
 ADR step: 2 - Implement the single-call baseline and evaluation output
 

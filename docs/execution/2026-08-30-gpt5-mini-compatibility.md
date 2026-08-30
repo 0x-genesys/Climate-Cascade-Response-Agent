@@ -1,6 +1,7 @@
 # Execution Record: GPT-5 Mini Compatibility and Manual Adjudication
 
 Date: 2026-08-30
+Sequence: 02
 Branch: `iteration_1`
 Scope: repair the credentialed baseline failure, preserve the result, and separate manual scoring from model execution.
 

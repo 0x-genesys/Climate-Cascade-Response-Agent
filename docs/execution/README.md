@@ -7,6 +7,7 @@ Create one entry before or immediately after each meaningful implementation step
 ## Required entry fields
 
 - Date and scope
+- Sequence number within the date, zero-padded from `01`, so same-day records have an unambiguous order
 - ADR step or iteration being implemented
 - Assumption and acceptance criteria
 - Files changed
