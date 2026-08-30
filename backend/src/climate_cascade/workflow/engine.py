@@ -6,9 +6,10 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
+from climate_cascade.agents import ResponseSupervisorRunStatus, load_response_supervisor_config, run_response_supervisor
 from climate_cascade.baseline import ModelGateway, run_baseline
 from climate_cascade.domain import EvidenceStatus, RunMode, RunState, VerifiedEvidencePackage, load_frozen_case
-from climate_cascade.evaluation import evaluate_baseline
+from climate_cascade.evaluation import evaluate_agent_run, evaluate_baseline
 from climate_cascade.persistence import LocalArtifactStore, RunRepository, RunSnapshot
 from climate_cascade.sources import build_evidence_package_for_run
 
@@ -33,6 +34,7 @@ class WorkflowEngine:
         case_root: Path,
         gateway_factory: GatewayFactory,
         evidence_package_factory: EvidencePackageFactory | None = None,
+        response_supervisor_config_path: Path | None = None,
         lease_seconds: int = 120,
     ) -> None:
         self._repository = repository
@@ -41,6 +43,9 @@ class WorkflowEngine:
         self._gateway_factory = gateway_factory
         self._evidence_package_factory = evidence_package_factory or (
             lambda run: build_evidence_package_for_run(run=run, case_root=self._case_root)
+        )
+        self._response_supervisor_config_path = response_supervisor_config_path or Path(
+            "config/agents/response_supervisor.json"
         )
         self._lease_seconds = lease_seconds
 
@@ -71,20 +76,20 @@ class WorkflowEngine:
     def _process_claimed(self, run: RunSnapshot, *, worker_id: str) -> RunSnapshot:
         current = run
         if current.mode is RunMode.AGENT:
-            return self._process_agent_source_intake(current, worker_id=worker_id)
+            return self._process_agent(current, worker_id=worker_id)
         while current.state not in {RunState.BLOCKED, RunState.AWAITING_HUMAN_REVIEW, RunState.REJECTED, RunState.EXPORTED}:
             self._repository.renew_lease(current.run_id, worker_id=worker_id, lease_seconds=self._lease_seconds)
             current = self._advance_baseline(current, worker_id=worker_id)
         return current
 
-    def _process_agent_source_intake(self, run: RunSnapshot, *, worker_id: str) -> RunSnapshot:
+    def _process_agent(self, run: RunSnapshot, *, worker_id: str) -> RunSnapshot:
         current = run
         while current.state not in {RunState.BLOCKED, RunState.AWAITING_HUMAN_REVIEW, RunState.REJECTED, RunState.EXPORTED}:
             self._repository.renew_lease(current.run_id, worker_id=worker_id, lease_seconds=self._lease_seconds)
-            current = self._advance_agent_source_intake(current, worker_id=worker_id)
+            current = self._advance_agent(current, worker_id=worker_id)
         return current
 
-    def _advance_agent_source_intake(self, run: RunSnapshot, *, worker_id: str) -> RunSnapshot:
+    def _advance_agent(self, run: RunSnapshot, *, worker_id: str) -> RunSnapshot:
         if run.state is RunState.RECEIVED:
             return self._repository.transition(
                 run.run_id,
@@ -109,11 +114,23 @@ class WorkflowEngine:
             return self._repository.transition(
                 run.run_id,
                 worker_id=worker_id,
-                to_state=RunState.BLOCKED,
-                message="Iteration 1 source intake is complete; deterministic impact analysis is pending ADR step 7.",
-                event_type="impact_analysis_pending",
+                to_state=RunState.IMPACT_ANALYSIS,
+                message="Source evidence is pinned. Iteration 1 uses this verified source picture without claiming deterministic impact analysis.",
+                event_type="source_evidence_ready",
             )
-        raise RuntimeError(f"agent source intake cannot advance from {run.state.value}")
+        if run.state is RunState.IMPACT_ANALYSIS:
+            return self._repository.transition(
+                run.run_id,
+                worker_id=worker_id,
+                to_state=RunState.ACTION_DRAFTING,
+                message="Response supervisor is preparing human-reviewable draft actions from verified source evidence.",
+                event_type="response_supervisor_queued",
+            )
+        if run.state is RunState.ACTION_DRAFTING:
+            return self._execute_response_supervisor(run, worker_id=worker_id)
+        if run.state is RunState.EVIDENCE_VERIFICATION:
+            return self._evaluate_response_supervisor(run, worker_id=worker_id)
+        raise RuntimeError(f"agent workflow cannot advance from {run.state.value}")
 
     def _verify_agent_sources(self, run: RunSnapshot, *, worker_id: str) -> RunSnapshot:
         package = self._evidence_package_factory(run)
@@ -141,6 +158,72 @@ class WorkflowEngine:
             evidence_ids=evidence_ids,
             event_type="source_verified",
         )
+
+    def _execute_response_supervisor(self, run: RunSnapshot, *, worker_id: str) -> RunSnapshot:
+        evidence = self._load_evidence_package(run.run_id)
+        case = load_frozen_case(self._case_root / run.case_id) if run.fixture_mode else None
+        config = load_response_supervisor_config(self._response_supervisor_config_path)
+        artifact = run_response_supervisor(
+            run_id=run.run_id,
+            case_id=run.case_id,
+            evidence=evidence,
+            config=config,
+            gateway=self._gateway_factory(run.config),
+            case=case,
+        )
+        stored = self._artifact_store.put_json(artifact.model_dump(mode="json"))
+        self._repository.store_artifact(run.run_id, logical_name="response_supervisor_run", artifact=stored)
+        if artifact.status is not ResponseSupervisorRunStatus.COMPLETED:
+            return self._repository.transition(
+                run.run_id,
+                worker_id=worker_id,
+                to_state=RunState.BLOCKED,
+                message=f"Response supervisor failed with {artifact.failure_code}; inspect its immutable run artifact.",
+                event_type="response_supervisor_failed",
+            )
+        assert artifact.response is not None
+        return self._repository.transition(
+            run.run_id,
+            worker_id=worker_id,
+            to_state=RunState.EVIDENCE_VERIFICATION,
+            message=(
+                f"Response supervisor stored {len(artifact.response.actions)} draft action(s); "
+                "deterministic evidence and safety checks are running."
+            ),
+            evidence_ids=tuple(
+                sorted({evidence_id for action in artifact.response.actions for evidence_id in action.evidence_ids})
+            ),
+            event_type="response_supervisor_completed",
+        )
+
+    def _evaluate_response_supervisor(self, run: RunSnapshot, *, worker_id: str) -> RunSnapshot:
+        from climate_cascade.agents import ResponseSupervisorRunArtifact
+
+        evidence = self._load_evidence_package(run.run_id)
+        stored_run = self._repository.get_artifact(run.run_id, "response_supervisor_run")
+        if stored_run is None:
+            raise RuntimeError("response supervisor run artifact is missing")
+        supervisor_run = ResponseSupervisorRunArtifact.model_validate_json(stored_run.storage_path.read_text(encoding="utf-8"))
+        case = load_frozen_case(self._case_root / run.case_id) if run.fixture_mode else None
+        report = evaluate_agent_run(run=supervisor_run, evidence=evidence, case=case)
+        stored_report = self._artifact_store.put_json(report.model_dump(mode="json"))
+        self._repository.store_artifact(run.run_id, logical_name="agent_evaluation", artifact=stored_report)
+        return self._repository.transition(
+            run.run_id,
+            worker_id=worker_id,
+            to_state=RunState.AWAITING_HUMAN_REVIEW,
+            message=(
+                "Draft actions passed deterministic evidence and safety checks; "
+                "a qualified human must adjudicate coverage before LSAC@5 is reported."
+            ),
+            event_type="agent_evaluation_completed",
+        )
+
+    def _load_evidence_package(self, run_id: str) -> VerifiedEvidencePackage:
+        stored = self._repository.get_artifact(run_id, "source_evidence_package")
+        if stored is None:
+            raise RuntimeError("source evidence package artifact is missing")
+        return VerifiedEvidencePackage.model_validate_json(stored.storage_path.read_text(encoding="utf-8"))
 
     def _advance_baseline(self, run: RunSnapshot, *, worker_id: str) -> RunSnapshot:
         transitions = {

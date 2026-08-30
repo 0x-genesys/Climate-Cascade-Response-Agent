@@ -19,7 +19,9 @@ DASHBOARD_ROOT = REPOSITORY_ROOT / "dashboard"
 
 
 class StaticGateway:
-    def complete_json(self, *, system_prompt: str, user_prompt: str, schema: dict) -> ModelCompletion:
+    def complete_json(
+        self, *, system_prompt: str, user_prompt: str, schema: dict, schema_name: str = "baseline_action_response"
+    ) -> ModelCompletion:
         return ModelCompletion(
             raw_response=json.dumps(
                 {
@@ -152,6 +154,10 @@ def test_api_creates_idempotent_run_and_replays_sse_events(tmp_path: Path) -> No
     assert "event: run_event" in events.text
     assert '"event_type":"run_created"' in events.text
 
+    listed = client.get("/v1/runs?limit=25")
+    assert listed.status_code == 200
+    assert listed.json()["runs"][0]["run_id"] == run_id
+
 
 def test_api_baseline_run_exposes_worker_artifacts(tmp_path: Path) -> None:
     database_url = sqlite_url(tmp_path / "workflow.db")
@@ -194,20 +200,21 @@ def test_worker_runs_agent_source_intake_to_impact_block(tmp_path: Path) -> None
         case_id="nepal-emsr927-v1",
         mode=RunMode.AGENT,
         fixture_mode=True,
-        config={},
+        config={"model": "static-test-model"},
         idempotency_key="agent-source-test-key",
     )
     engine = WorkflowEngine(
         repository=repository,
         artifact_store=LocalArtifactStore(tmp_path / "artifacts"),
         case_root=CASE_ROOT,
-        gateway_factory=lambda _config: None,
+        gateway_factory=lambda _config: StaticGateway(),
+        response_supervisor_config_path=REPOSITORY_ROOT / "config" / "agents" / "response_supervisor.json",
     )
 
     result = engine.process_next(worker_id="agent-source-worker")
 
     assert result is not None
-    assert result.state is RunState.BLOCKED
+    assert result.state is RunState.AWAITING_HUMAN_REVIEW
     evidence_artifact = repository.get_artifact(run.run_id, "source_evidence_package")
     assert evidence_artifact is not None
     evidence = json.loads(evidence_artifact.storage_path.read_text(encoding="utf-8"))
@@ -216,7 +223,10 @@ def test_worker_runs_agent_source_intake_to_impact_block(tmp_path: Path) -> None
     event_types = [event.event_type for event in repository.list_events(run.run_id)]
     assert "source_verified" in event_types
     assert "source_snapshot_pinned" in event_types
-    assert "impact_analysis_pending" in event_types
+    assert "response_supervisor_completed" in event_types
+    assert "agent_evaluation_completed" in event_types
+    assert repository.get_artifact(run.run_id, "response_supervisor_run") is not None
+    assert repository.get_artifact(run.run_id, "agent_evaluation") is not None
 
 
 def test_api_agent_run_allows_live_activation_and_exposes_evidence(tmp_path: Path) -> None:
@@ -232,7 +242,13 @@ def test_api_agent_run_allows_live_activation_and_exposes_evidence(tmp_path: Pat
     created = client.post(
         "/v1/agent/runs",
         headers={"Idempotency-Key": "api-agent-live-key"},
-        json={"case_id": "emsr756", "mode": "agent", "fixture_mode": False, "activation": "EMSR756"},
+        json={
+            "case_id": "emsr756",
+            "mode": "agent",
+            "fixture_mode": False,
+            "activation": "EMSR756",
+            "model": "static-test-model",
+        },
     )
     assert created.status_code == 202
     run_id = created.json()["run_id"]
@@ -241,8 +257,9 @@ def test_api_agent_run_allows_live_activation_and_exposes_evidence(tmp_path: Pat
         repository=services.repository,
         artifact_store=LocalArtifactStore(artifact_root),
         case_root=CASE_ROOT,
-        gateway_factory=lambda _config: None,
+        gateway_factory=lambda _config: StaticGateway(),
         evidence_package_factory=lambda _run: build_fixture_evidence_package(case),
+        response_supervisor_config_path=REPOSITORY_ROOT / "config" / "agents" / "response_supervisor.json",
     )
 
     engine.process_next(worker_id="api-agent-source-worker")
@@ -252,6 +269,8 @@ def test_api_agent_run_allows_live_activation_and_exposes_evidence(tmp_path: Pat
     assert status.json()["state"] == "blocked"
     assert evidence.status_code == 200
     assert evidence.json()["source_evidence_package"]["activation_code"] == "EMSR927"
+    agent = client.get(f"/v1/runs/{run_id}/agent")
+    assert agent.json()["response_supervisor_run"]["status"] == "failed"
 
 
 def test_api_serves_dashboard_static_files(tmp_path: Path) -> None:
@@ -270,4 +289,5 @@ def test_api_serves_dashboard_static_files(tmp_path: Path) -> None:
     assert index.status_code == 200
     assert "Climate Cascade Response" in index.text
     assert script.status_code == 200
-    assert "/v1/runs/${runId}/evidence" in script.text
+    assert "/v1/runs?limit=25" in script.text
+    assert "/v1/runs/${state.runId}/evidence" in script.text

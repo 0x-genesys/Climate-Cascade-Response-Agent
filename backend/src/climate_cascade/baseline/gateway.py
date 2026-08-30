@@ -27,7 +27,9 @@ class ModelCompletion:
 class ModelGateway(Protocol):
     """The baseline may make exactly one call through this boundary."""
 
-    def complete_json(self, *, system_prompt: str, user_prompt: str, schema: dict) -> ModelCompletion: ...
+    def complete_json(
+        self, *, system_prompt: str, user_prompt: str, schema: dict, schema_name: str = "baseline_action_response"
+    ) -> ModelCompletion: ...
 
 
 class OpenAIChatCompletionsGateway:
@@ -40,7 +42,9 @@ class OpenAIChatCompletionsGateway:
         self._model = model
         self._timeout_seconds = timeout_seconds
 
-    def complete_json(self, *, system_prompt: str, user_prompt: str, schema: dict) -> ModelCompletion:
+    def complete_json(
+        self, *, system_prompt: str, user_prompt: str, schema: dict, schema_name: str = "baseline_action_response"
+    ) -> ModelCompletion:
         payload = {
             "model": self._model,
             "messages": [
@@ -50,7 +54,7 @@ class OpenAIChatCompletionsGateway:
             "response_format": {
                 "type": "json_schema",
                 "json_schema": {
-                    "name": "baseline_action_response",
+                    "name": schema_name,
                     "strict": True,
                     "schema": schema,
                 },

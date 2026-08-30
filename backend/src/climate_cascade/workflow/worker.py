@@ -33,6 +33,7 @@ def build_worker_engine(
         artifact_store=LocalArtifactStore(artifact_root),
         case_root=case_root,
         gateway_factory=gateway_factory,
+        response_supervisor_config_path=repository_root / "config" / "agents" / "response_supervisor.json",
     )
 
 

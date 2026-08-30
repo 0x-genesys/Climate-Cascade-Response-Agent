@@ -1,7 +1,7 @@
 # Evaluation Plan
 
-Status: Baseline evaluated; Iteration 1 source-intake contract verified, action-quality evaluation pending
-Last updated: 2026-08-30
+Status: Baseline evaluated; Iteration 1 source and draft-response contracts verified, human action-quality evaluation pending
+Last updated: 2026-08-31
 
 ## Evaluation question
 
@@ -45,11 +45,13 @@ See [the baseline run and adjudication guide](baseline.md) for the exact command
 
 The frozen `nepal-emsr927-v1` challenging case has one credentialed baseline run using `gpt-5-mini-2025-08-07`. A human adjudicator found only the Bharatpur pending-data-gap requirement covered: LSAC@5 is `3/17` (`17.65%`). The deterministic evaluator found `0` unsafe autonomous-action patterns, `0` missing evidence references, and `9` valid evidence references across five draft actions. Runtime was `40.92` seconds; prompt and completion tokens were `1,702` and `1,950`. Provider cost was not captured. This is not a closed-event aggregate and does not establish improvement. See the committed [run](../../runs/baseline/nepal-emsr927-v1.run.json), [adjudication](../../runs/baseline/nepal-emsr927-v1.adjudication.json), and [evaluation](../../runs/baseline/nepal-emsr927-v1.evaluation.json).
 
-### Iteration 1 source-intake verification
+### Iteration 1 source and response-supervisor verification
 
-Iteration 1 has an executable source-verification check, not an LSAC@5 comparison. Three live CEMS activations were run through the same source adapter on 2026-08-30. Nepal `EMSR927` produced `preliminary` evidence because the activation remained open and two AOI products were waiting for data. Closed flood activations Poland `EMSR756` and Sri Lanka `EMSR851` produced `supported` evidence with no source-level data gaps. All three workflow runs stopped intentionally at `blocked` with `impact_analysis_pending`: deterministic impact analysis and action drafting are later ADR steps.
+Three live CEMS activations were run through the source adapter on 2026-08-30. Nepal `EMSR927` produced `preliminary` evidence because the activation remained open and two AOI products were waiting for data. Closed flood activations Poland `EMSR756` and Sri Lanka `EMSR851` produced `supported` evidence with no source-level data gaps. Those historical records are retained as source-intake evidence; they intentionally predate the response supervisor.
 
-The evidence package records the canonical public CEMS JSON payload, source URL, publisher, retrieval timestamp, SHA-256, license note, claims, AOI product statuses, findings, and data gaps. This validates the source adapter's status handling and the fail-closed workflow boundary. It does not measure evidence precision, unsupported action rate, LSAC@5, runtime comparison, model cost, or life-safety benefit because this iteration emits no action proposals and calls no model. See [run summary](../../runs/iteration_1/iteration1-source-round-summary.json), individual evidence artifacts in [the Iteration 1 run folder](../../runs/iteration_1/), and [the execution record](../execution/2026-08-30-06-iteration-1-source-intake-dashboard.md).
+The current Iteration 1 workflow continues from a supported or preliminary source package through one bounded response-supervisor call, deterministic action evidence and safety checks, and `awaiting_human_review`. Contract tests verify that the supervisor context excludes raw source payloads and frozen gold actions, rejects unknown evidence IDs, stores failure states, and produces an LSAC-ready evaluation report without a second model judge. The evidence package records canonical public CEMS JSON, source URL, publisher, retrieval timestamp, SHA-256, license note, claims, AOI product statuses, findings, and data gaps. See [run summary](../../runs/iteration_1/iteration1-source-round-summary.json), [agent evaluation guide](agent.md), and [the continuation record](../execution/2026-08-31-07-iteration-1-response-supervisor-dashboard.md).
+
+No credentialed response-supervisor output has yet been human-adjudicated. Therefore the project does not claim Iteration 1 evidence precision, LSAC@5, runtime comparison, model cost, action-quality improvement, or life-safety benefit. Static-gateway tests prove contracts only.
 
 ### Agent solution
 

@@ -15,7 +15,7 @@ from fastapi.staticfiles import StaticFiles
 from climate_cascade.domain import RunMode
 from climate_cascade.persistence import LocalArtifactStore, RunRepository, RunSnapshot, create_sqlite_engine, migrate_database
 
-from .models import CreateBaselineRunRequest, CreateRunRequest, RunResponse
+from .models import CreateBaselineRunRequest, CreateRunRequest, RunListResponse, RunResponse
 
 
 @dataclass(frozen=True)
@@ -82,6 +82,14 @@ def create_app(*, services: ApiServices) -> FastAPI:
             cases.append({"case_id": manifest["fixture_id"], "hazard_type": manifest["hazard_type"]})
         return {"cases": cases}
 
+    @app.get("/v1/runs", response_model=RunListResponse)
+    def list_runs(limit: int = 25) -> RunListResponse:
+        try:
+            runs = services.repository.list_runs(limit=limit)
+        except ValueError as error:
+            raise HTTPException(status_code=400, detail=str(error)) from error
+        return RunListResponse(runs=[_run_response(run) for run in runs])
+
     @app.post("/v1/runs", response_model=RunResponse, status_code=202)
     def create_run(
         request: Request,
@@ -111,7 +119,7 @@ def create_app(*, services: ApiServices) -> FastAPI:
         payload: CreateRunRequest,
         idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
     ) -> RunResponse:
-        run_request = payload.model_copy(update={"mode": RunMode.AGENT})
+        run_request = CreateRunRequest(**payload.model_dump(exclude={"mode"}), mode=RunMode.AGENT)
         return _create_run(request, run_request, idempotency_key=idempotency_key, services=services)
 
     @app.get("/v1/runs/{run_id}", response_model=RunResponse)
@@ -138,6 +146,16 @@ def create_app(*, services: ApiServices) -> FastAPI:
             "run_id": run_id,
             "source_evidence_package": json.loads(artifact.storage_path.read_text(encoding="utf-8")),
         }
+
+    @app.get("/v1/runs/{run_id}/agent")
+    def get_agent_artifacts(run_id: str) -> dict[str, object]:
+        services.repository.get_run(run_id)
+        payload: dict[str, object] = {"run_id": run_id}
+        for logical_name in ("response_supervisor_run", "agent_evaluation"):
+            artifact = services.repository.get_artifact(run_id, logical_name)
+            if artifact is not None:
+                payload[logical_name] = json.loads(artifact.storage_path.read_text(encoding="utf-8"))
+        return payload
 
     @app.get("/v1/runs/{run_id}/events")
     async def stream_events(

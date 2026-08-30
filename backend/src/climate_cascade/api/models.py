@@ -32,6 +32,8 @@ class CreateRunRequest(ApiModel):
     def live_agent_runs_require_activation(self) -> "CreateRunRequest":
         if self.mode is RunMode.AGENT and not self.fixture_mode and not self.activation:
             raise ValueError("live agent runs require an activation code")
+        if self.mode is RunMode.AGENT and not self.model:
+            raise ValueError("agent runs require a structured-output model identifier")
         return self
 
 
@@ -55,6 +57,10 @@ class RunResponse(ApiModel):
     completed_at: datetime | None
     created_at: datetime
     updated_at: datetime
+
+
+class RunListResponse(ApiModel):
+    runs: list[RunResponse]
 
 
 class ErrorDetail(ApiModel):

@@ -1,284 +1,37 @@
-const state = {
-  runId: "",
-  eventSource: null,
-};
+const state = {runId: "", eventSource: null, runs: []};
+const elements = Object.fromEntries(["connectionStatus","modelInput","caseSelect","activationCode","runSelect","startFixtureRun","startLiveRun","inspectRun","refreshRun","runTitle","runSubtitle","runState","runStateBox","runMode","incidentTitle","incidentBadge","incidentPanel","mapPanel","actionStatus","actionPanel","evaluationPanel","evidencePanel","evidenceStatus","eventList","eventCount"].map((id) => [id, document.querySelector(`#${id}`)]));
 
-const elements = {
-  connectionStatus: document.querySelector("#connectionStatus"),
-  caseSelect: document.querySelector("#caseSelect"),
-  activationCode: document.querySelector("#activationCode"),
-  runIdInput: document.querySelector("#runIdInput"),
-  startFixtureRun: document.querySelector("#startFixtureRun"),
-  startLiveRun: document.querySelector("#startLiveRun"),
-  inspectRun: document.querySelector("#inspectRun"),
-  refreshRun: document.querySelector("#refreshRun"),
-  runTitle: document.querySelector("#runTitle"),
-  runState: document.querySelector("#runState"),
-  runMode: document.querySelector("#runMode"),
-  eventList: document.querySelector("#eventList"),
-  evidencePanel: document.querySelector("#evidencePanel"),
-  evidenceStatus: document.querySelector("#evidenceStatus"),
-};
-
-async function api(path, options = {}) {
-  const response = await fetch(path, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...(options.headers || {}),
-    },
-  });
-  if (!response.ok) {
-    const body = await response.text();
-    throw new Error(`${response.status} ${body}`);
-  }
-  return response.json();
-}
-
-async function boot() {
-  bindEvents();
-  await checkApi();
-  await loadCases();
-}
-
-function bindEvents() {
-  elements.startFixtureRun.addEventListener("click", startFixtureRun);
-  elements.startLiveRun.addEventListener("click", startLiveRun);
-  elements.inspectRun.addEventListener("click", () => inspectRun(elements.runIdInput.value.trim()));
-  elements.refreshRun.addEventListener("click", refreshActiveRun);
-}
-
-async function checkApi() {
-  try {
-    await api("/v1/health");
-    elements.connectionStatus.textContent = "API ready";
-  } catch (error) {
-    elements.connectionStatus.textContent = "API unavailable";
-    elements.connectionStatus.classList.add("tag", "blocker");
-  }
-}
-
-async function loadCases() {
-  const payload = await api("/v1/cases");
-  elements.caseSelect.innerHTML = "";
-  for (const item of payload.cases) {
-    const option = document.createElement("option");
-    option.value = item.case_id;
-    option.textContent = `${item.case_id} (${item.hazard_type})`;
-    elements.caseSelect.append(option);
-  }
-}
-
-async function startFixtureRun() {
-  const caseId = elements.caseSelect.value || "nepal-emsr927-v1";
-  const run = await api("/v1/agent/runs", {
-    method: "POST",
-    headers: {"Idempotency-Key": `dashboard-fixture-${caseId}-${newId()}`},
-    body: JSON.stringify({case_id: caseId, mode: "agent", fixture_mode: true}),
-  });
-  inspectRun(run.run_id);
-}
-
-async function startLiveRun() {
-  const activation = elements.activationCode.value.trim().toUpperCase();
-  const caseId = activation.toLowerCase();
-  const run = await api("/v1/agent/runs", {
-    method: "POST",
-    headers: {"Idempotency-Key": `dashboard-live-${caseId}-${newId()}`},
-    body: JSON.stringify({case_id: caseId, mode: "agent", fixture_mode: false, activation}),
-  });
-  inspectRun(run.run_id);
-}
-
-async function inspectRun(runId) {
-  if (!runId) {
-    return;
-  }
-  state.runId = runId;
-  elements.runIdInput.value = runId;
-  elements.eventList.innerHTML = "";
-  closeEventSource();
-  await refreshActiveRun();
-  connectEvents(runId);
-}
-
-async function refreshActiveRun() {
-  if (!state.runId) {
-    return;
-  }
-  const run = await api(`/v1/runs/${state.runId}`);
-  renderRun(run);
-  await renderEvents(state.runId);
-  await renderEvidence(state.runId);
-}
-
-function connectEvents(runId) {
-  state.eventSource = new EventSource(`/v1/runs/${runId}/events?follow=true`);
-  state.eventSource.addEventListener("run_event", async () => {
-    await refreshActiveRun();
-  });
-  state.eventSource.onerror = () => {
-    closeEventSource();
-  };
-}
-
-function closeEventSource() {
-  if (state.eventSource) {
-    state.eventSource.close();
-    state.eventSource = null;
-  }
-}
-
-function renderRun(run) {
-  elements.runTitle.textContent = run.run_id;
-  elements.runState.textContent = run.state;
-  elements.runMode.textContent = `${run.mode} / ${run.case_id}`;
-}
-
-async function renderEvents(runId) {
-  const response = await fetch(`/v1/runs/${runId}/events?follow=false`);
-  const text = await response.text();
-  const events = parseSse(text);
-  elements.eventList.innerHTML = "";
-  for (const event of events) {
-    const item = document.createElement("li");
-    item.className = "event";
-    item.innerHTML = `
-      <strong>${escapeHtml(event.event_type)} - ${escapeHtml(event.stage)}</strong>
-      <span>${escapeHtml(event.message)}</span>
-      <small>#${event.sequence} ${escapeHtml(event.created_at)}</small>
-    `;
-    elements.eventList.append(item);
-  }
-}
-
-async function renderEvidence(runId) {
-  const payload = await api(`/v1/runs/${runId}/evidence`);
-  const evidence = payload.source_evidence_package;
-  if (!evidence) {
-    elements.evidenceStatus.textContent = "No package";
-    elements.evidencePanel.className = "empty-state";
-    elements.evidencePanel.textContent = "Source evidence has not been produced yet.";
-    return;
-  }
-  elements.evidenceStatus.textContent = evidence.verification_status;
-  elements.evidencePanel.className = "evidence-grid";
-  const cems = evidence.cems_activation;
-  elements.evidencePanel.innerHTML = `
-    <section>
-      <div class="tags">
-        <span class="tag">${escapeHtml(evidence.activation_code)}</span>
-        <span class="tag ${evidence.verification_status === "conflicting" ? "blocker" : evidence.verification_status === "preliminary" ? "warning" : ""}">${escapeHtml(evidence.verification_status)}</span>
-        <span class="tag">${escapeHtml(evidence.hazard_type)}</span>
-      </div>
-    </section>
-    ${cems ? renderCems(cems) : ""}
-    ${renderFindings(evidence.findings || [])}
-    ${renderDataGaps(evidence.data_gaps || [])}
-    ${renderSnapshots(evidence.snapshots || [])}
-  `;
-}
-
-function renderCems(cems) {
-  const aois = cems.aois || [];
-  return `
-    <section>
-      <h3>${escapeHtml(cems.name)}</h3>
-      <p class="meta">${escapeHtml(cems.category)}${cems.sub_category ? ` / ${escapeHtml(cems.sub_category)}` : ""} - ${cems.closed ? "closed" : "open"}</p>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr><th>AOI</th><th>Product</th><th>Status</th><th>Delivery</th></tr>
-          </thead>
-          <tbody>
-            ${aois.map((aoi) => `
-              <tr>
-                <td>${aoi.aoi_number}. ${escapeHtml(aoi.aoi_name)}</td>
-                <td>${escapeHtml(aoi.product_type)}</td>
-                <td>${escapeHtml(aoi.status_label)}</td>
-                <td>${escapeHtml(aoi.delivery_time || aoi.expected_delivery || "not available")}</td>
-              </tr>
-            `).join("") || `<tr><td colspan="4">No AOI product detail in this package.</td></tr>`}
-          </tbody>
-        </table>
-      </div>
-    </section>
-  `;
-}
-
-function renderFindings(findings) {
-  return `
-    <section>
-      <h3>Verification Findings</h3>
-      ${findings.map((finding) => `
-        <div class="finding ${escapeHtml(finding.severity)}">
-          <strong>${escapeHtml(finding.finding_id)}</strong>
-          <p>${escapeHtml(finding.message)}</p>
-          <small>${escapeHtml(finding.status)}</small>
-        </div>
-      `).join("")}
-    </section>
-  `;
-}
-
-function renderDataGaps(gaps) {
-  return `
-    <section>
-      <h3>Data Gaps</h3>
-      ${gaps.length ? `<ul>${gaps.map((gap) => `<li>${escapeHtml(gap)}</li>`).join("")}</ul>` : `<p class="meta">No source-level data gaps recorded.</p>`}
-    </section>
-  `;
-}
-
-function renderSnapshots(snapshots) {
-  return `
-    <section>
-      <h3>Snapshots</h3>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Source</th><th>Kind</th><th>SHA-256</th></tr></thead>
-          <tbody>
-            ${snapshots.map((snapshot) => `
-              <tr>
-                <td>${escapeHtml(snapshot.publisher)}</td>
-                <td>${escapeHtml(snapshot.kind)}</td>
-                <td><code>${escapeHtml(snapshot.content_sha256.slice(0, 16))}...</code></td>
-              </tr>
-            `).join("")}
-          </tbody>
-        </table>
-      </div>
-    </section>
-  `;
-}
-
-function parseSse(text) {
-  return text
-    .split("\n\n")
-    .map((chunk) => chunk.split("\n").find((line) => line.startsWith("data:")))
-    .filter(Boolean)
-    .map((line) => JSON.parse(line.slice(5).trim()));
-}
-
-function escapeHtml(value) {
-  return String(value)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
-
-function newId() {
-  if (crypto.randomUUID) {
-    return crypto.randomUUID();
-  }
-  return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
-}
-
-boot().catch((error) => {
-  elements.connectionStatus.textContent = "Dashboard error";
-  elements.connectionStatus.classList.add("tag", "blocker");
-  elements.evidencePanel.className = "empty-state";
-  elements.evidencePanel.textContent = error.message;
-});
+async function api(path, options = {}) { const response = await fetch(path, {...options, headers:{"Content-Type":"application/json", ...(options.headers || {})}}); if (!response.ok) throw new Error(`${response.status} ${await response.text()}`); return response.json(); }
+async function boot() { bindEvents(); await checkApi(); await Promise.all([loadCases(), loadRuns()]); }
+function bindEvents() { elements.startFixtureRun.addEventListener("click", () => startFixtureRun().catch(showError)); elements.startLiveRun.addEventListener("click", () => startLiveRun().catch(showError)); elements.inspectRun.addEventListener("click", () => inspectRun(elements.runSelect.value).catch(showError)); elements.refreshRun.addEventListener("click", () => refreshActiveRun().catch(showError)); document.querySelectorAll(".example").forEach((button) => button.addEventListener("click", () => { elements.activationCode.value = button.dataset.activation; startLiveRun().catch(showError); })); }
+async function checkApi() { try { await api("/v1/health"); elements.connectionStatus.textContent = "Local service ready"; } catch { elements.connectionStatus.textContent = "Local service unavailable"; } }
+async function loadCases() { const payload = await api("/v1/cases"); elements.caseSelect.innerHTML = ""; payload.cases.forEach((item) => { const option = document.createElement("option"); option.value = item.case_id; option.textContent = `${item.case_id} - ${friendlyHazard(item.hazard_type)}`; elements.caseSelect.append(option); }); }
+async function loadRuns() { const payload = await api("/v1/runs?limit=25"); state.runs = payload.runs; elements.runSelect.innerHTML = `<option value="">Choose a previous run</option>`; state.runs.forEach((run) => { const option = document.createElement("option"); option.value = run.run_id; option.textContent = `${friendlyRunState(run.state)} - ${run.case_id} - ${shortTime(run.created_at)}`; elements.runSelect.append(option); }); if (state.runId) elements.runSelect.value = state.runId; }
+function model() { const value = elements.modelInput.value.trim(); if (!value) throw new Error("Enter a structured-output model name before starting a response review."); return value; }
+async function startFixtureRun() { const caseId = elements.caseSelect.value || "nepal-emsr927-v1"; const run = await createAgentRun({case_id:caseId, mode:"agent", fixture_mode:true, model:model()}, `dashboard-fixture-${caseId}-${newId()}`); await inspectRun(run.run_id); }
+async function startLiveRun() { const activation = elements.activationCode.value.trim().toUpperCase(); if (!/^EMSR\d{3}$/.test(activation)) throw new Error("Use a CEMS code such as EMSR927."); const run = await createAgentRun({case_id:activation.toLowerCase(), mode:"agent", fixture_mode:false, activation, model:model()}, `dashboard-live-${activation.toLowerCase()}-${newId()}`); await inspectRun(run.run_id); }
+function createAgentRun(payload, idempotencyKey) { return api("/v1/agent/runs", {method:"POST", headers:{"Idempotency-Key":idempotencyKey}, body:JSON.stringify(payload)}); }
+async function inspectRun(runId) { if (!runId) return; state.runId = runId; closeEventSource(); await refreshActiveRun(); connectEvents(runId); }
+async function refreshActiveRun() { if (!state.runId) return; const [run, evidencePayload, agentPayload] = await Promise.all([api(`/v1/runs/${state.runId}`), api(`/v1/runs/${state.runId}/evidence`), api(`/v1/runs/${state.runId}/agent`)]); renderRun(run); renderIncident(evidencePayload.source_evidence_package); renderMap(evidencePayload.source_evidence_package); renderActions(agentPayload.response_supervisor_run); renderEvaluation(agentPayload.agent_evaluation, run); renderEvidence(evidencePayload.source_evidence_package); await renderEvents(state.runId); await loadRuns(); }
+function connectEvents(runId) { state.eventSource = new EventSource(`/v1/runs/${runId}/events?follow=true`); state.eventSource.addEventListener("run_event", () => refreshActiveRun()); state.eventSource.onerror = closeEventSource; }
+function closeEventSource() { if (state.eventSource) state.eventSource.close(); state.eventSource = null; }
+function showError(error) { elements.connectionStatus.textContent = "Dashboard needs attention"; elements.runSubtitle.textContent = error.message; }
+function renderRun(run) { elements.runTitle.textContent = `${friendlyCase(run.case_id)} review`; elements.runSubtitle.textContent = stateDescription(run.state); elements.runState.textContent = friendlyRunState(run.state); elements.runMode.textContent = `${run.fixture_mode ? "Pinned practice case" : "Live CEMS source"} - ${run.run_id}`; elements.runStateBox.dataset.state = run.state; }
+function renderIncident(evidence) { if (!evidence) return resetIncident(); const cems = evidence.cems_activation; elements.incidentTitle.textContent = cems?.name || evidence.activation_code; elements.incidentBadge.className = `badge ${badgeClass(evidence.verification_status)}`; elements.incidentBadge.textContent = friendlyEvidenceStatus(evidence.verification_status); const stats = cems?.stats || {}; const cards = [["People reported affected",stats["Population [No.]"],"Source-reported, not a life-saved estimate"],["Buildings identified",stats["Identified buildings [No.]"],"Source-reported"],["Roads reported affected",stats["Roads [km]"],"Source-reported kilometres"]].filter(([,value]) => value !== undefined); elements.incidentPanel.className = "incident-content"; elements.incidentPanel.innerHTML = `<p class="incident-summary">${escapeHtml(incidentDescription(cems, evidence))}</p><div class="metric-row">${cards.map(([label,value,note]) => `<div class="metric"><strong>${escapeHtml(number(value))}</strong><span>${escapeHtml(label)}</span><small>${escapeHtml(note)}</small></div>`).join("")}</div><div class="uncertainty-callout"><strong>What still needs care:</strong> ${escapeHtml(evidence.data_gaps.length ? evidence.data_gaps.join(" ") : "No source-level data gaps were reported in this package.")}</div>`; }
+function resetIncident() { elements.incidentTitle.textContent = "No disaster selected"; elements.incidentBadge.className = "badge"; elements.incidentBadge.textContent = "Waiting"; elements.incidentPanel.className = "empty-state"; elements.incidentPanel.textContent = "Start a run to see the verified public event summary, reported impacts, and what remains uncertain."; }
+function renderMap(evidence) { if (!evidence?.cems_activation) return; const cems = evidence.cems_activation; const links = [[cems.report_link,"Open official event report"],[cems.products_path,"Open CEMS product package"],[cems.charter_url,"Open International Charter context"]].filter(([url]) => url).map(([url,label]) => `<a href="${escapeAttribute(url)}" target="_blank" rel="noreferrer">${label}</a>`).join(""); elements.mapPanel.className = "map-content"; elements.mapPanel.innerHTML = `<div class="map-schematic" aria-label="AOI product availability schematic"><span class="river-line"></span>${(cems.aois || []).map((aoi) => `<div class="aoi-node ${aoi.status_code === "F" ? "ready" : "pending"}"><strong>${escapeHtml(aoi.aoi_name)}</strong><small>${escapeHtml(aoi.status_label)}</small></div>`).join("") || `<p>No AOI product detail is available in this source package.</p>`}</div><p class="map-note">These are official map-product availability markers, not a generated geographic map. Spatial overlays arrive with the validated geometry pipeline in Iteration 2.</p><div class="external-links">${links || `<span class="muted">No external map link was supplied by this package.</span>`}</div>`; }
+function renderActions(supervisorRun) { const response = supervisorRun?.response; if (!response) { elements.actionStatus.textContent = supervisorRun?.status === "failed" ? "Needs attention" : "Waiting"; elements.actionStatus.className = `badge ${supervisorRun?.status === "failed" ? "danger" : ""}`; elements.actionPanel.className = "empty-state"; elements.actionPanel.textContent = supervisorRun?.failure_detail || "The response supervisor will place short, cited draft actions here. They are never automatic field commands."; return; } elements.actionStatus.textContent = `${response.actions.length} draft${response.actions.length === 1 ? "" : "s"}`; elements.actionStatus.className = "badge good"; elements.actionPanel.className = "action-list"; elements.actionPanel.innerHTML = `${response.actions.map((action,index) => `<article class="action-card"><div class="action-number">${index + 1}</div><div><p class="action-meta">${escapeHtml(friendlyUrgency(action.urgency))} - ${escapeHtml(action.owner_role.replaceAll("_", " "))}</p><h4>${escapeHtml(action.title)}</h4><p>${escapeHtml(action.location_ref.replace("aoi:", "Area: "))}</p><div class="evidence-chips">${action.evidence_ids.map((id) => `<span>${escapeHtml(id)}</span>`).join("")}</div></div><span class="draft-label">Draft only</span></article>`).join("")}<p class="limitations"><strong>Limitations:</strong> ${escapeHtml(response.limitations.join(" "))}</p>`; }
+function renderEvaluation(report, run) { if (!report) { elements.evaluationPanel.className = "empty-state"; elements.evaluationPanel.textContent = run.state === "blocked" ? "The run stopped safely. Read the progress panel for the failure reason." : "Deterministic evidence and safety feedback will appear after the response supervisor returns a draft."; return; } const coverage = report.lsac_at_5; const safety = report.unsafe_autonomous_action_count; const evidence = report.missing_evidence_reference_count; elements.evaluationPanel.className = "evaluation-content"; elements.evaluationPanel.innerHTML = `<div class="check-row"><span class="check ${safety.value === 0 ? "pass" : "fail"}">${safety.value === 0 ? "Pass" : "Review"}</span><div><strong>Autonomous-action safety check</strong><p>${escapeHtml(safety.note)}</p></div></div><div class="check-row"><span class="check ${evidence.value === 0 ? "pass" : "fail"}">${evidence.value === 0 ? "Pass" : "Review"}</span><div><strong>Evidence-reference check</strong><p>${escapeHtml(evidence.note)}</p></div></div><div class="review-next"><strong>${coverage.status === "measured" ? `LSAC@5: ${percent(coverage.value)}` : "Next: human coverage review"}</strong><p>${escapeHtml(coverage.note)}</p>${report.coverage_adjudication_required ? `<code>climate-cascade-evaluate-agent</code> can score the saved draft after a reviewer records decisions.` : ""}</div>`; }
+function renderEvidence(evidence) { if (!evidence) return; elements.evidenceStatus.textContent = friendlyEvidenceStatus(evidence.verification_status); elements.evidenceStatus.className = `badge ${badgeClass(evidence.verification_status)}`; elements.evidencePanel.className = "evidence-content"; elements.evidencePanel.innerHTML = `<div class="finding-list">${evidence.findings.map((finding) => `<div class="finding ${escapeHtml(finding.severity)}"><strong>${escapeHtml(friendlyFinding(finding.finding_id))}</strong><p>${escapeHtml(finding.message)}</p></div>`).join("")}</div><div class="source-list"><h4>Saved sources</h4>${evidence.snapshots.map((snapshot) => `<a href="${escapeAttribute(snapshot.source_url)}" target="_blank" rel="noreferrer"><span>${escapeHtml(snapshot.publisher)}</span><small>${escapeHtml(snapshot.kind.replaceAll("_", " "))} - ${escapeHtml(snapshot.content_sha256.slice(0,12))}...</small></a>`).join("")}</div>`; }
+async function renderEvents(runId) { const response = await fetch(`/v1/runs/${runId}/events?follow=false`); const events = parseSse(await response.text()); elements.eventCount.textContent = `${events.length} step${events.length === 1 ? "" : "s"}`; elements.eventList.innerHTML = events.map((event) => `<li class="event"><span class="event-dot ${event.status}"></span><div><strong>${escapeHtml(friendlyEvent(event.event_type))}</strong><p>${escapeHtml(event.message)}</p><small>${escapeHtml(shortTime(event.created_at))}</small></div></li>`).join(""); }
+function incidentDescription(cems,evidence) { if (!cems) return `Verified source package ${evidence.activation_code}.`; return `${cems.name} is listed by Copernicus EMS as ${cems.category}${cems.sub_category ? ` / ${cems.sub_category}` : ""}. The activation is ${cems.closed ? "closed, so the mapped source is historical evidence" : "still open, so new products and statistics may still arrive"}.`; }
+function friendlyRunState(value) { return ({received:"Waiting for worker",source_check:"Checking official sources",verified:"Sources verified",data_snapshot:"Evidence saved",impact_analysis:"Preparing response",action_drafting:"Drafting recommendations",evidence_verification:"Checking the draft",awaiting_human_review:"Ready for human review",blocked:"Needs attention",rejected:"Rejected",exported:"Exported"})[value] || value; }
+function stateDescription(value) { return ({awaiting_human_review:"The draft is ready for a qualified human to assess. No action has been taken.",blocked:"The run stopped safely. Read the feedback and progress panels before starting another run.",action_drafting:"The response supervisor is turning verified facts into draft recommendations.",evidence_verification:"The system is checking every draft against its saved sources and safety rules."})[value] || "The worker is recording each step so the review remains auditable."; }
+function friendlyEvidenceStatus(value) { return ({supported:"Source checked",preliminary:"Useful, but incomplete",conflicting:"Source conflict",unknown:"Unknown"})[value] || value; }
+function badgeClass(value) { return ({supported:"good",preliminary:"warning",conflicting:"danger"})[value] || ""; }
+function friendlyEvent(value) { return ({run_created:"Run started",lease_acquired:"Worker started",source_verified:"Source check complete",source_snapshot_pinned:"Evidence saved",source_evidence_ready:"Evidence ready",response_supervisor_queued:"Response review started",response_supervisor_completed:"Draft actions created",agent_evaluation_completed:"Draft checks complete",response_supervisor_failed:"Drafting needs attention",lease_released:"Worker finished"})[value] || value.replaceAll("_"," "); }
+function friendlyFinding(value) { return ({"cems-source-reachable":"Official source reached","cems-activation-open":"Event is still evolving","cems-products-pending":"Map coverage is incomplete","fixture-integrity-verified":"Practice-case integrity checked","fixture-preliminary-claims":"Some facts remain preliminary"})[value] || value.replaceAll("-"," "); }
+function friendlyUrgency(value) { return ({immediate:"Immediate review",under_six_hours:"Review within 6 hours",under_twenty_four_hours:"Review within 24 hours",monitor:"Monitor"})[value] || value; }
+function friendlyCase(value) { return value === "nepal-emsr927-v1" ? "Nepal flood practice case" : value.toUpperCase(); } function friendlyHazard(value) { return value.replaceAll("_"," "); } function number(value) { return new Intl.NumberFormat().format(value); } function percent(value) { return new Intl.NumberFormat(undefined,{style:"percent",maximumFractionDigits:1}).format(value); } function shortTime(value) { return new Date(value).toLocaleString([],{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"}); }
+function parseSse(text) { return text.split("\n\n").map((chunk) => chunk.split("\n").find((line) => line.startsWith("data:"))).filter(Boolean).map((line) => JSON.parse(line.slice(5).trim())); } function escapeHtml(value) { return String(value).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;"); } function escapeAttribute(value) { return escapeHtml(value); } function newId() { return crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`; }
+boot().catch(showError);

@@ -140,6 +140,13 @@ class RunRepository:
                 raise UnknownRunError(run_id)
             return _snapshot(record)
 
+    def list_runs(self, *, limit: int = 25) -> list[RunSnapshot]:
+        if not 1 <= limit <= 100:
+            raise ValueError("limit must be between 1 and 100")
+        with self._sessions() as session:
+            rows = session.scalars(select(RunRecord).order_by(RunRecord.created_at.desc()).limit(limit)).all()
+            return [_snapshot(row) for row in rows]
+
     def list_events(self, run_id: str, *, after_sequence: int = 0) -> list[RunEvent]:
         with self._sessions() as session:
             rows = session.scalars(
