@@ -1,0 +1,38 @@
+{
+  "schema_version": "1",
+  "case_id": "nepal-emsr927-v1",
+  "run_id": "baseline-0cc0c424-df31-4897-8248-a81f3890c3a3",
+  "reviewer_id": "karanahuja",
+  "reviewer_role": "human_adjudicator",
+  "decided_at": "2026-08-30T17:01:34+05:30",
+  "decisions": [
+    {
+      "schema_version": "1",
+      "gold_action_id": "verify-access-timure",
+      "covered": false,
+      "proposal_action_id": null,
+      "rationale": "act-001 proposes generic Rasuwa District verification and mentions access, but it does not identify communities near Timure or make their access verification the priority before dependent field actions."
+    },
+    {
+      "schema_version": "1",
+      "gold_action_id": "triage-residential-impact-bidur",
+      "covered": false,
+      "proposal_action_id": null,
+      "rationale": "No proposed action identifies Bidur or uses cited residential-damage evidence to assess response needs there. The generic Rasuwa and Trishuli actions cannot be credited for this location-specific requirement."
+    },
+    {
+      "schema_version": "1",
+      "gold_action_id": "check-critical-services-syapru-besi",
+      "covered": false,
+      "proposal_action_id": null,
+      "rationale": "No proposed action identifies Syapru Besi or asks for a continuity check of critical services. act-002 concerns roads and bridges on the Trishuli corridor, which is not an equivalent critical-services assessment."
+    },
+    {
+      "schema_version": "1",
+      "gold_action_id": "preserve-bharatpur-data-gap",
+      "covered": true,
+      "proposal_action_id": "act-003-request-bharatpur-aoi",
+      "rationale": "The action explicitly requests evidence for Bharatpur and preserves it as a pending data gap without asserting no impact."
+    }
+  ]
+}

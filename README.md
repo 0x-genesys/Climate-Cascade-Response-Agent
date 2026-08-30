@@ -10,9 +10,9 @@ The pilot case is Nepal `EMSR927`. It is a deliberately difficult, evolving even
 
 ## Current status
 
-ADR step 2 is implemented on the `baseline` branch. The baseline makes one structured model call over the checksum-verified Nepal fixture, records the exact response, and produces an evaluation artifact. It has no tools, retrieval, memory, retries, verifier, human-feedback loop, geospatial calculation, or life-safety estimator.
+ADR step 2 is implemented. The baseline makes one structured model call over the checksum-verified Nepal fixture, records the exact response, and produces an evaluation artifact. It has no tools, retrieval, memory, retries, verifier, human-feedback loop, geospatial calculation, or life-safety estimator.
 
-No credentialed model benchmark has been recorded yet. The project does not claim a numeric baseline score, improvement, model cost, or runtime until a live run and human coverage adjudication are stored. The implementation and known gaps are recorded in [the baseline evaluation guide](docs/evaluation/baseline.md) and [execution ledger](docs/execution/2026-08-29-single-call-baseline.md).
+One credentialed Nepal baseline is recorded: `gpt-5-mini-2025-08-07` produced five draft actions, and human adjudication measured LSAC@5 at `3/17` (`17.65%`). The run had zero deterministic unsafe-action findings and zero missing evidence references. This is one difficult, open-event case, not a closed-event aggregate or evidence of improvement. Model cost is not recorded. The implementation and result are documented in [the baseline evaluation guide](docs/evaluation/baseline.md) and [execution ledger](docs/execution/2026-08-30-03-nepal-baseline-evaluation.md).
 
 ## Quick start
 
@@ -45,19 +45,29 @@ You can use a different environment-variable name with `--api-key-env YOUR_VARIA
 
 ## Run the baseline
 
-Choose a structured-output model available to your OpenAI account and run exactly one baseline attempt:
+Choose a structured-output model available to your OpenAI account and run exactly one baseline attempt. `gpt-5-mini` uses the provider default temperature, so the baseline does not send a `temperature` parameter.
 
 ```bash
 uv run climate-cascade-baseline \
   --case data/fixtures/cases/nepal-emsr927-v1 \
-  --model YOUR_STRUCTURED_OUTPUT_MODEL \
+  --model gpt-5-mini \
   --output var/runs/nepal-baseline.run.json \
-  --evaluation-output var/runs/nepal-baseline.evaluation.json
+  --evaluation-output var/runs/nepal-baseline.initial-evaluation.json
 ```
 
 The command writes both JSON artifacts. Exit `0` means the response met the output contract. Exit `2` means it recorded a fail-closed result such as missing credentials, provider failure, schema failure, or an unknown evidence ID. Do not retry a failed call within the same benchmark run.
 
-LSAC@5 requires an explicit human coverage-adjudication file that maps every frozen gold action to a proposed action or marks it uncovered. Rerun the same command with `--adjudication path/to/adjudication.json`. The exact format and evaluation semantics are in [docs/evaluation/baseline.md](docs/evaluation/baseline.md).
+LSAC@5 requires an explicit human coverage-adjudication file that maps every frozen gold action to a proposed action or marks it uncovered. Score the saved run without another model call:
+
+```bash
+uv run climate-cascade-evaluate-baseline \
+  --case data/fixtures/cases/nepal-emsr927-v1 \
+  --run var/runs/nepal-baseline.run.json \
+  --adjudication var/runs/nepal-baseline.adjudication.json \
+  --evaluation-output var/runs/nepal-baseline.evaluation.json
+```
+
+The exact four-decision template and evaluation semantics are in [docs/evaluation/baseline.md](docs/evaluation/baseline.md).
 
 ## Evidence and submission record
 
@@ -71,6 +81,21 @@ The [maintained Micro1 brief](docs/micro1-hackathon-brief.md) asks for a meaning
 - [Execution ledger](docs/execution/README.md) - exact commands, test outcomes, and limitations.
 
 The final submission will also include representative trajectories for every agent, including instructions, tool responses, retries, verifier feedback, and human checkpoints. The current baseline is not an agent and has no tools or retries; its prompt and raw response are preserved in each run artifact instead.
+
+## Reviewer Evidence
+
+| Review focus | Evidence | What to verify |
+| --- | --- | --- |
+| Problem, user, scope, and safety boundary | [Product plan](docs/product.md) | Flood and debris-flow MVP only; actions remain human-reviewed drafts. |
+| Architecture and iteration order | [ADR](docs/architecture/ADR-0001-iterative-agentic-architecture.md) | Direct-prompt baseline is distinct from the planned agentic workflow and its deterministic tools. |
+| Frozen benchmark input | [Nepal fixture](data/fixtures/cases/nepal-emsr927-v1/README.md) | Cited, checksum-verified input with explicit uncertainty and synthetic operational constraints. |
+| Live baseline trajectory | [Baseline evidence folder](runs/baseline/) and [saved run](runs/baseline/nepal-emsr927-v1.run.json) | One `gpt-5-mini-2025-08-07` call produced five unapproved actions. |
+| Human semantic review | [Coverage adjudication](runs/baseline/nepal-emsr927-v1.adjudication.json) | Only Bharatpur's pending-data-gap action is covered; Timure, Bidur, and Syapru Besi remain missed. |
+| Deterministic score and safety checks | [Evaluation report](runs/baseline/nepal-emsr927-v1.evaluation.json) and [evaluation guide](docs/evaluation/baseline.md) | LSAC@5 is `3/17` (`17.65%`); zero unsafe autonomous-action findings and zero missing evidence references. |
+| Reproducible execution history | [Execution ledger](docs/execution/README.md) and [final baseline record](docs/execution/2026-08-30-03-nepal-baseline-evaluation.md) | Records are sequenced in filenames and retain failed attempts alongside the successful result. |
+| Measured baseline limitations and next hypothesis | [Improvement changelog](docs/solution_improvement/README.md) | The next iteration must improve AOI-specific life-safety coverage without losing safety or evidence performance. |
+| Judge-facing narrative and claim limits | [Project story](docs/story/README.md) | No claim of final-agent improvement, lives saved, or multi-hazard validation is made before evidence exists. |
+| Project operating rules | [Climate Cascade skill](.codex/skills/climate-cascade-response/SKILL.md) and [Micro1 build skill](.codex/skills/micro1-build/SKILL.md) | Major checkpoints require synchronized execution, evaluation, improvement, story, README, and architecture records. |
 
 ## Data and safety
 

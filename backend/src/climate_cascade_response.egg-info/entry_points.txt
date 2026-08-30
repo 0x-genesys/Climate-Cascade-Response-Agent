@@ -1,2 +1,3 @@
 [console_scripts]
 climate-cascade-baseline = climate_cascade.cli:main
+climate-cascade-evaluate-baseline = climate_cascade.cli:evaluate_main

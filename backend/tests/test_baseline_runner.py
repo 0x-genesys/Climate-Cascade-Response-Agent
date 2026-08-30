@@ -3,7 +3,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from climate_cascade.baseline.gateway import ModelCompletion, ModelGatewayError
+from climate_cascade.baseline import gateway as gateway_module
+from climate_cascade.baseline.gateway import ModelCompletion, OpenAIChatCompletionsGateway
 from climate_cascade.baseline.runner import BaselineFailureCode, BaselineRunStatus, run_baseline
 from climate_cascade.domain import load_frozen_case
 
@@ -127,3 +128,42 @@ def test_baseline_rejects_unknown_evidence_references_after_one_call() -> None:
     assert run.failure_code is BaselineFailureCode.OUTPUT_POLICY
     assert "unknown evidence" in (run.failure_detail or "")
     assert gateway.call_count == 1
+
+
+def test_openai_gateway_omits_unsupported_temperature_parameter(monkeypatch) -> None:
+    captured: dict = {}
+
+    class FakeHttpResponse:
+        def __enter__(self) -> "FakeHttpResponse":
+            return self
+
+        def __exit__(self, exc_type, exc_value, traceback) -> None:
+            return None
+
+        def read(self) -> bytes:
+            return json.dumps(
+                {
+                    "model": "gpt-5-mini",
+                    "choices": [{"message": {"content": json.dumps(valid_response())}}],
+                    "usage": {"prompt_tokens": 10, "completion_tokens": 20},
+                }
+            ).encode("utf-8")
+
+    def fake_urlopen(request, timeout: float) -> FakeHttpResponse:
+        captured["payload"] = json.loads(request.data.decode("utf-8"))
+        captured["timeout"] = timeout
+        return FakeHttpResponse()
+
+    monkeypatch.setattr(gateway_module, "urlopen", fake_urlopen)
+    gateway = OpenAIChatCompletionsGateway(api_key="test-key", model="gpt-5-mini")
+
+    completion = gateway.complete_json(
+        system_prompt="system",
+        user_prompt="user",
+        schema={"type": "object", "additionalProperties": False, "properties": {}, "required": []},
+    )
+
+    assert captured["payload"]["model"] == "gpt-5-mini"
+    assert "temperature" not in captured["payload"]
+    assert completion.prompt_tokens == 10
+    assert completion.completion_tokens == 20

@@ -1,7 +1,7 @@
 # Project Story
 
-Status: Narrative scaffold, to be updated after every measured iteration  
-Last updated: 2026-08-29
+Status: Narrative scaffold, updated with baseline evidence
+Last updated: 2026-08-30
 
 ## Working title
 
@@ -27,7 +27,7 @@ An emergency operations analyst needs to turn fragmented, evolving evidence into
 
 The baseline copies the available incident summary into one general-purpose structured-model request and asks for reviewable draft recommendations. It has no retrieval, tools, memory, retries, verifier, geospatial calculations, life-safety estimator, or human-feedback loop. The run artifact preserves the full prompt and exact model response; a deterministic evaluator then checks evidence references and policy patterns, while a human records the semantic gold-action coverage required for LSAC@5.
 
-The baseline implementation has passed its focused contract and end-to-end tests. It does not yet have a credentialed live-model result or a numeric LSAC@5 value, so no claim about baseline quality is currently made.
+One credentialed baseline run with `gpt-5-mini-2025-08-07` produced five draft actions. Human adjudication measured LSAC@5 at `3/17` (`17.65%`): the model preserved Bharatpur as a pending data gap, but its generic Rasuwa and Trishuli actions did not cover the location-specific Timure access, Bidur residential-triage, or Syapru Besi critical-services requirements. The deterministic evaluator found no unsafe autonomous-action patterns and no missing evidence references. This is a single difficult open-event result, not a claim that the final workflow improves it.
 
 ## Product story
 
@@ -102,8 +102,8 @@ This is a candidate, not the final hot take. Replace or revise it when a measure
 | The agent reduces human review time | No evaluation yet | Unproven |
 | The agent can estimate potential lives saved responsibly | Model and calibration not implemented | Unproven |
 | The shared workflow can support additional hazard adapters | Architecture contract in `docs/product.md`; no additional adapter implemented | Designed, not validated |
-| The baseline input boundary is reproducible and tamper-evident | `docs/execution/2026-08-29-domain-schemas-and-frozen-case.md`; checksum and cross-reference tests | Verified foundation; no baseline model result yet |
-| The single-call baseline records failures, exact output, and evaluation state without retrying or fabricating a score | `docs/execution/2026-08-29-single-call-baseline.md`; baseline focused tests | Verified implementation; live model quality remains unmeasured |
+| The baseline input boundary is reproducible and tamper-evident | `docs/execution/2026-08-29-01-domain-schemas-and-frozen-case.md`; checksum and cross-reference tests | Verified foundation; one difficult-case model run is now recorded |
+| The single-call baseline records exact output and produces a human-adjudicated score without retrying or fabricating a result | `runs/baseline/nepal-emsr927-v1.run.json`; `runs/baseline/nepal-emsr927-v1.adjudication.json`; `runs/baseline/nepal-emsr927-v1.evaluation.json` | Verified on one Nepal challenging-case run; closed-event aggregate remains unmeasured |
 
 ## Iteration update protocol
 

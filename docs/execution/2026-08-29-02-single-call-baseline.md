@@ -1,6 +1,7 @@
 # Execution Record: Single-Call Baseline and Evaluation Output
 
 Date: 2026-08-29
+Sequence: 02
 ADR step: 2 - Implement the single-call baseline and evaluation output
 Branch: `baseline`
 

@@ -7,6 +7,7 @@ Create one entry before or immediately after each meaningful implementation step
 ## Required entry fields
 
 - Date and scope
+- Sequence number within the date, zero-padded from `01`, so same-day records have an unambiguous order
 - ADR step or iteration being implemented
 - Assumption and acceptance criteria
 - Files changed
@@ -16,6 +17,8 @@ Create one entry before or immediately after each meaningful implementation step
 - Failures, deviations, and unresolved risks
 - Documentation updates made
 - Decision and next step
+
+Name every execution record `YYYY-MM-DD-NN-short-description.md`, where `NN` is its zero-padded sequence within that date. Update links when a record is renamed.
 
 ## Rules
 

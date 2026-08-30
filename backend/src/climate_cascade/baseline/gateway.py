@@ -43,7 +43,6 @@ class OpenAIChatCompletionsGateway:
     def complete_json(self, *, system_prompt: str, user_prompt: str, schema: dict) -> ModelCompletion:
         payload = {
             "model": self._model,
-            "temperature": 0,
             "messages": [
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},

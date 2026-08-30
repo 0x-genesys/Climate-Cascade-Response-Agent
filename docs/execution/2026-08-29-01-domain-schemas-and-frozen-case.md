@@ -1,6 +1,7 @@
 # Domain Schemas and Frozen Case Execution
 
 Date: 2026-08-29  
+Sequence: 01
 Status: Complete  
 ADR step: `1. Define domain schemas and frozen case format`
 
