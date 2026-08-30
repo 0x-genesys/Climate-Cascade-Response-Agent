@@ -29,7 +29,15 @@ uv sync --group dev
 uv run pytest
 ```
 
-Expected result: all contract, frozen-fixture, baseline-runner, evaluator, and CLI tests pass. Tests use a local static gateway and do not consume an API key or provide model-quality evidence.
+Expected result: all contract, frozen-fixture, baseline-runner, evaluator, local-runtime, API, worker, and CLI tests pass. Tests use a local static gateway and do not consume an API key or provide model-quality evidence.
+
+Initialize the local SQLite runtime:
+
+```bash
+uv run climate-cascade-local init
+```
+
+Expected result: the command creates `var/climate-cascade.db`, applies the checked-in Alembic migrations, and prepares `var/artifacts/`.
 
 ## Configure an OpenAI API key
 
@@ -71,16 +79,26 @@ The exact four-decision template and evaluation semantics are in [docs/evaluatio
 
 ## Run The Control Plane
 
-The API and worker use the same SQLite database. Start them in separate terminals:
+The fastest local path starts the API and a worker in one process against the same SQLite database:
+
+```bash
+uv run climate-cascade-local serve
+```
+
+Open `http://127.0.0.1:8000/v1/health` and expect `{"status":"ready"}`.
+
+For process-isolation testing, start the API and worker in separate terminals:
 
 ```bash
 uv run climate-cascade-api \
-  --database-url sqlite:///var/climate-cascade.db
+  --database-url sqlite:///var/climate-cascade.db \
+  --artifact-root var/artifacts
 ```
 
 ```bash
 uv run climate-cascade-worker \
-  --database-url sqlite:///var/climate-cascade.db
+  --database-url sqlite:///var/climate-cascade.db \
+  --artifact-root var/artifacts
 ```
 
 Create a queued baseline run with an idempotency key. The worker makes the one model call only after it leases this run. It stores immutable run and evaluation artifacts under `var/artifacts/` and stops at `awaiting_human_review`.
@@ -117,7 +135,7 @@ The final submission will also include representative trajectories for every age
 | Live baseline trajectory | [Baseline evidence folder](runs/baseline/) and [saved run](runs/baseline/nepal-emsr927-v1.run.json) | One `gpt-5-mini-2025-08-07` call produced five unapproved actions. |
 | Human semantic review | [Coverage adjudication](runs/baseline/nepal-emsr927-v1.adjudication.json) | Only Bharatpur's pending-data-gap action is covered; Timure, Bidur, and Syapru Besi remain missed. |
 | Deterministic score and safety checks | [Evaluation report](runs/baseline/nepal-emsr927-v1.evaluation.json) and [evaluation guide](docs/evaluation/baseline.md) | LSAC@5 is `3/17` (`17.65%`); zero unsafe autonomous-action findings and zero missing evidence references. |
-| Durable run control plane | [Workflow execution record](docs/execution/2026-08-30-04-durable-workflow-api-and-worker.md), [API package](backend/src/climate_cascade/api/), and [workflow package](backend/src/climate_cascade/workflow/) | SQLite migrations, idempotent run creation, ordered reconnectable SSE, immutable artifacts, worker leases, and baseline pause at human review. |
+| Durable run control plane | [Workflow execution record](docs/execution/2026-08-30-04-durable-workflow-api-and-worker.md), [local runtime record](docs/execution/2026-08-30-05-local-runtime-sqlite-setup.md), [API package](backend/src/climate_cascade/api/), and [workflow package](backend/src/climate_cascade/workflow/) | `uv run` setup, SQLite migrations, idempotent run creation, ordered reconnectable SSE, immutable artifacts, worker leases, and baseline pause at human review. |
 | Reproducible execution history | [Execution ledger](docs/execution/README.md) and [final baseline record](docs/execution/2026-08-30-03-nepal-baseline-evaluation.md) | Records are sequenced in filenames and retain failed attempts alongside the successful result. |
 | Measured baseline limitations and next hypothesis | [Improvement changelog](docs/solution_improvement/README.md) | The next iteration must improve AOI-specific life-safety coverage without losing safety or evidence performance. |
 | Judge-facing narrative and claim limits | [Project story](docs/story/README.md) | No claim of final-agent improvement, lives saved, or multi-hazard validation is made before evidence exists. |
@@ -136,5 +154,6 @@ backend/                  Python domain contracts, baseline, evaluation, API, pe
 data/fixtures/            Checksum-verified frozen disaster cases
 docs/                     Product, Micro1 brief, architecture, evaluation, execution, story, and changelog
 var/artifacts/            Local content-addressed artifacts, excluded from version control
+var/climate-cascade.db    Local SQLite workflow database, excluded from version control
 var/                      Local generated run artifacts, excluded from version control
 ```

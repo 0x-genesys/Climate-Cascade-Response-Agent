@@ -14,8 +14,11 @@ from climate_cascade.persistence import LocalArtifactStore, RunRepository, creat
 from .engine import WorkflowEngine
 
 
-def build_worker_engine(*, database_url: str, artifact_root: Path, case_root: Path, repository_root: Path) -> WorkflowEngine:
-    migrate_database(database_url, repository_root=repository_root)
+def build_worker_engine(
+    *, database_url: str, artifact_root: Path, case_root: Path, repository_root: Path, run_migrations: bool = True
+) -> WorkflowEngine:
+    if run_migrations:
+        migrate_database(database_url, repository_root=repository_root)
     repository = RunRepository(create_sqlite_engine(database_url))
 
     def gateway_factory(config: dict[str, object]):

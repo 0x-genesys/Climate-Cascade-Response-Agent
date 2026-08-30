@@ -24,8 +24,11 @@ class ApiServices:
     case_root: Path
 
 
-def build_services(*, database_url: str, artifact_root: Path, case_root: Path, repository_root: Path) -> ApiServices:
-    migrate_database(database_url, repository_root=repository_root)
+def build_services(
+    *, database_url: str, artifact_root: Path, case_root: Path, repository_root: Path, run_migrations: bool = True
+) -> ApiServices:
+    if run_migrations:
+        migrate_database(database_url, repository_root=repository_root)
     return ApiServices(
         repository=RunRepository(create_sqlite_engine(database_url)),
         artifact_store=LocalArtifactStore(artifact_root),

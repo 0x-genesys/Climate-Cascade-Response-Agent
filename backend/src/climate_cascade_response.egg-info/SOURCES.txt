@@ -2,6 +2,7 @@ README.md
 pyproject.toml
 backend/src/climate_cascade/__init__.py
 backend/src/climate_cascade/cli.py
+backend/src/climate_cascade/local.py
 backend/src/climate_cascade/api/__init__.py
 backend/src/climate_cascade/api/app.py
 backend/src/climate_cascade/api/models.py
