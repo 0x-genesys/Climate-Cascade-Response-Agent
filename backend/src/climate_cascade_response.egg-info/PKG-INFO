@@ -4,7 +4,11 @@ Version: 0.1.0
 Summary: Post-disaster decision support for the Micro1 flood and debris-flow MVP.
 Requires-Python: >=3.11
 Description-Content-Type: text/markdown
+Requires-Dist: alembic<2,>=1.17
+Requires-Dist: fastapi<1,>=0.128
 Requires-Dist: pydantic<3,>=2.13
+Requires-Dist: sqlalchemy<3,>=2.0
+Requires-Dist: uvicorn<1,>=0.39
 
 # Climate Cascade Response Agent
 
