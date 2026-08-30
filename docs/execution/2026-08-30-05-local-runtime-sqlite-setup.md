@@ -142,6 +142,72 @@ uv run python -m compileall -q backend/src
 
 Result: passed.
 
+## Primary Checkout Verification
+
+After pushing commit `0bc49f5`, the primary checkout was fast-forwarded and the user-facing install/startup path was rerun from `/Users/karanahuja/AI_Workload/micro1_hackathon`.
+
+Install:
+
+```bash
+uv sync --group dev
+```
+
+Result: passed and installed `climate-cascade-response==0.1.0` from the primary checkout.
+
+Full suite:
+
+```bash
+uv run pytest
+```
+
+Result: `28 passed, 1 warning in 1.88s`.
+
+Local command help:
+
+```bash
+uv run climate-cascade-local --help
+```
+
+Result: passed.
+
+Local SQLite initialization:
+
+```bash
+uv run climate-cascade-local init \
+  --database-url sqlite:////tmp/climate-cascade-primary-local-test.db \
+  --artifact-root /tmp/climate-cascade-primary-local-artifacts \
+  --repository-root /Users/karanahuja/AI_Workload/micro1_hackathon
+```
+
+Result: passed and applied migration `0001_workflow_store`.
+
+Local server smoke:
+
+```bash
+uv run climate-cascade-local serve \
+  --database-url sqlite:////tmp/climate-cascade-primary-local-smoke-8017.db \
+  --artifact-root /tmp/climate-cascade-primary-local-smoke-artifacts-8017 \
+  --repository-root /Users/karanahuja/AI_Workload/micro1_hackathon \
+  --case-root /Users/karanahuja/AI_Workload/micro1_hackathon/data/fixtures/cases \
+  --host 127.0.0.1 \
+  --port 8017 \
+  --worker-once
+```
+
+Health check:
+
+```bash
+curl -s http://127.0.0.1:8017/v1/health
+```
+
+Result:
+
+```json
+{"status":"ready"}
+```
+
+The primary smoke-test server was stopped with `Ctrl-C` after the health check.
+
 ## Implementation Notes
 
 - `ensure_sqlite_parent()` now creates the parent directory for non-memory SQLite database URLs before `create_engine()` and before Alembic migrations.
