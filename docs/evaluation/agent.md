@@ -19,6 +19,8 @@ The **Run Feedback** dashboard panel is an automatic pre-review only. After a su
 
 The final comparable score is the local CLI report after a reviewer completes the adjudication JSON. This separation keeps the semantic judgement explicit and prevents a second model or dashboard shortcut from silently deciding whether an action covered a gold requirement.
 
+The dashboard also consumes the persisted run SSE stream to show observable lifecycle updates such as source intake, constrained draft generation, receipt of the structured response, and deterministic checks. It does not show token streaming or private model reasoning. The completed structured response is retained in the supervisor-run artifact; action cards appear only after the output contract accepts it.
+
 ## Start and inspect a practice run
 
 Set `OPENAI_API_KEY`, start the local service, then select **Nepal flood practice case** in the dashboard and enter a structured-output model such as `gpt-5-mini`. The run should finish as `Ready for human review`, not `blocked`.
@@ -34,6 +36,8 @@ curl -s http://127.0.0.1:8000/v1/runs/RUN_ID/evidence \
 ```
 
 Read `response.actions` in `nepal-response-supervisor.run.json`. Each action's `action_id` is the only valid value for a covered decision's `proposal_action_id`. The action evidence chips are immutable source `snapshot_id` values, such as `cems-activation-snapshot`; they are checked automatically before human adjudication.
+
+The supervisor prompt names those snapshot IDs explicitly. If a provider instead returns the corresponding source ID such as `cems-activation`, the application records the raw response but normalizes the persisted action citation to the one immutable snapshot ID before deterministic checking. Any ID that is neither a known snapshot ID nor a known source alias still fails closed.
 
 ## Record human coverage
 

@@ -145,6 +145,7 @@ def run_response_supervisor(
             failure_detail=_compact_validation_error(error),
         )
 
+    response = _canonicalize_evidence_references(response, evidence=evidence)
     policy_failure = _validate_response(response, case_id=case_id, evidence=evidence, max_actions=config.max_actions)
     if policy_failure is not None:
         return ResponseSupervisorRunArtifact(
@@ -190,10 +191,11 @@ def _render_user_prompt(
         "task": "Draft a small, human-reviewable response queue from verified source evidence.",
         "case_id": case_id,
         "maximum_actions": max_actions,
+        "allowed_action_evidence_ids": [snapshot.snapshot_id for snapshot in evidence.snapshots],
         "source_evidence": source_view,
         "operational_scenario": scenario,
         "response_rules": [
-            "Use only evidence IDs listed in source_evidence.snapshots.",
+            "For every action.evidence_ids value, use an exact value from allowed_action_evidence_ids. Do not use source_id or claim_id values.",
             "Every action is a draft for a qualified human; do not issue an order, dispatch, or public warning.",
             "Keep open activations, pending products, and preliminary facts visible as uncertainty.",
             "When data are missing, request evidence or verification rather than infer no impact.",
@@ -202,6 +204,28 @@ def _render_user_prompt(
         ],
     }
     return json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
+
+
+def _canonicalize_evidence_references(
+    response: ResponseSupervisorActionResponse, *, evidence: VerifiedEvidencePackage
+) -> ResponseSupervisorActionResponse:
+    """Persist citations against immutable snapshots, accepting a source ID model alias."""
+
+    snapshot_id_by_source_id = {snapshot.source_id: snapshot.snapshot_id for snapshot in evidence.snapshots}
+    return response.model_copy(
+        update={
+            "actions": [
+                action.model_copy(
+                    update={
+                        "evidence_ids": [
+                            snapshot_id_by_source_id.get(evidence_id, evidence_id) for evidence_id in action.evidence_ids
+                        ]
+                    }
+                )
+                for action in response.actions
+            ]
+        }
+    )
 
 
 def _validate_response(

@@ -67,7 +67,7 @@ Load the pinned `EMSR927` Nepal fixture. Show USGS, CEMS, and International Char
 
 ### Beat 2: The agent works in public
 
-Show the live dashboard run feed moving through source verification, source snapshot, response-supervisor drafting, and deterministic draft checks. Surface the stored warning that `EMSR927` is open and that Bidur and Bharatpur contain pending products. The dashboard reaches `Ready for human review` only when the draft has cited saved evidence and passed deterministic policy checks. It does not claim deterministic impact analysis, a geographic overlay, lives saved, or human approval.
+Show the live dashboard run feed moving through source retrieval, source verification, source snapshot, constrained response-supervisor drafting, receipt of the stored structured response, and deterministic draft checks. The dashboard exposes these persisted milestones, not token streaming or private model reasoning. Surface the stored warning that `EMSR927` is open and that Bidur and Bharatpur contain pending products. The dashboard reaches `Ready for human review` only when the draft has cited saved evidence and passed deterministic policy checks. It does not claim deterministic impact analysis, a geographic overlay, lives saved, or human approval.
 
 ### Beat 3: Damage becomes an action
 

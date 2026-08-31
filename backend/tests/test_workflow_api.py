@@ -224,7 +224,11 @@ def test_worker_runs_agent_source_intake_to_impact_block(tmp_path: Path) -> None
     event_types = [event.event_type for event in repository.list_events(run.run_id)]
     assert "source_verified" in event_types
     assert "source_snapshot_pinned" in event_types
+    assert "source_intake_started" in event_types
+    assert "response_supervisor_started" in event_types
+    assert "response_supervisor_response_received" in event_types
     assert "response_supervisor_completed" in event_types
+    assert "draft_checks_started" in event_types
     assert "agent_evaluation_completed" in event_types
     assert repository.get_artifact(run.run_id, "response_supervisor_run") is not None
     assert repository.get_artifact(run.run_id, "agent_evaluation") is not None
@@ -295,3 +299,5 @@ def test_api_serves_dashboard_static_files(tmp_path: Path) -> None:
     assert "Life-safety estimate:" in script.text
     assert "Drafts rejected" in script.text
     assert "Draft checks did not run:" in script.text
+    assert "liveStatus" in index.text
+    assert "response_supervisor_started" in script.text

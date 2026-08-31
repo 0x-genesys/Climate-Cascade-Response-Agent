@@ -129,6 +129,33 @@ def test_response_supervisor_fails_closed_on_unknown_evidence_reference() -> Non
     assert "unknown evidence" in (artifact.failure_detail or "")
 
 
+def test_response_supervisor_canonicalizes_source_id_aliases_to_snapshot_ids() -> None:
+    response = _response()
+    response["actions"][0]["evidence_ids"] = ["cems-activation"]
+    response["actions"][1]["evidence_ids"] = ["cems-activation"]
+    response["actions"][2]["evidence_ids"] = ["usgs-event", "charter-activation"]
+    response["actions"][3]["evidence_ids"] = ["cems-activation"]
+    artifact = run_response_supervisor(
+        run_id="run-23232323-2323-4232-8232-232323232323",
+        case_id=CASE.manifest.fixture_id,
+        evidence=build_fixture_evidence_package(CASE),
+        config=CONFIG,
+        gateway=StaticGateway(response),
+        case=CASE,
+        now=lambda: FROZEN_NOW,
+    )
+
+    assert artifact.status is ResponseSupervisorRunStatus.COMPLETED
+    assert artifact.response is not None
+    assert [action.evidence_ids for action in artifact.response.actions] == [
+        ["cems-activation-snapshot"],
+        ["cems-activation-snapshot"],
+        ["usgs-event-snapshot", "charter-activation-snapshot"],
+        ["cems-activation-snapshot"],
+    ]
+    assert '"allowed_action_evidence_ids"' in artifact.user_prompt
+
+
 def test_response_supervisor_records_model_validation_errors_with_value_error_context() -> None:
     response = _response()
     response["actions"][1]["action_id"] = response["actions"][0]["action_id"]

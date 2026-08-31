@@ -243,6 +243,28 @@ class RunRepository:
             )
             return _snapshot(record)
 
+    def record_progress(
+        self,
+        run_id: str,
+        *,
+        worker_id: str,
+        event_type: str,
+        message: str,
+        evidence_ids: tuple[str, ...] = (),
+    ) -> None:
+        """Append an observable in-stage update without changing workflow state."""
+
+        with self._sessions.begin() as session:
+            record = self._require_owned_run(session, run_id, worker_id)
+            self._append_event(
+                session,
+                record,
+                event_type=event_type,
+                status="working",
+                message=message,
+                evidence_ids=evidence_ids,
+            )
+
     def store_artifact(self, run_id: str, *, logical_name: str, artifact: StoredArtifact) -> None:
         with self._sessions.begin() as session:
             record = session.get(RunRecord, run_id)

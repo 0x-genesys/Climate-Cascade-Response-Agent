@@ -560,6 +560,12 @@ Before invoking an agent, `ContextBuilder` supplies:
 
 Raw rasters, full source archives, unrelated run history, hidden model reasoning, and secrets never enter the prompt. Context limits and truncation decisions are recorded in the invocation.
 
+### Observable progress contract
+
+The persisted `run_events` stream is the one dashboard progress channel. A worker appends ordered non-transition `working` events before slow source retrieval, before the bounded response-supervisor call, after the structured response is saved, and before deterministic draft checks. SSE clients reconnect by sequence ID and render these exact events immediately, then refresh durable artifacts.
+
+The dashboard may say that the system is retrieving, drafting, or checking because those are observable workflow operations. It must not fabricate token-by-token streaming, hidden chain-of-thought, or a claim that a model is "thinking." The user-visible model output is the stored structured response after validation. Citation compatibility is handled at the supervisor boundary: a known `source_id` alias is normalized to its one immutable `snapshot_id`; all unknown IDs fail closed.
+
 ## FastAPI contracts
 
 All endpoints use `/v1`, JSON request and response bodies, Pydantic validation, UTC timestamps, structured error codes, and request correlation IDs.

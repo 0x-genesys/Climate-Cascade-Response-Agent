@@ -133,6 +133,12 @@ class WorkflowEngine:
         raise RuntimeError(f"agent workflow cannot advance from {run.state.value}")
 
     def _verify_agent_sources(self, run: RunSnapshot, *, worker_id: str) -> RunSnapshot:
+        self._repository.record_progress(
+            run.run_id,
+            worker_id=worker_id,
+            event_type="source_intake_started",
+            message="Working: retrieving and checking authoritative source snapshots before drafting any response.",
+        )
         package = self._evidence_package_factory(run)
         stored = self._artifact_store.put_json(package.model_dump(mode="json"))
         self._repository.store_artifact(run.run_id, logical_name="source_evidence_package", artifact=stored)
@@ -163,6 +169,15 @@ class WorkflowEngine:
         evidence = self._load_evidence_package(run.run_id)
         case = load_frozen_case(self._case_root / run.case_id) if run.fixture_mode else None
         config = load_response_supervisor_config(self._response_supervisor_config_path)
+        self._repository.record_progress(
+            run.run_id,
+            worker_id=worker_id,
+            event_type="response_supervisor_started",
+            message=(
+                "Working: the response supervisor is generating a constrained structured draft from saved evidence. "
+                "Private model reasoning is not displayed."
+            ),
+        )
         artifact = run_response_supervisor(
             run_id=run.run_id,
             case_id=run.case_id,
@@ -173,6 +188,15 @@ class WorkflowEngine:
         )
         stored = self._artifact_store.put_json(artifact.model_dump(mode="json"))
         self._repository.store_artifact(run.run_id, logical_name="response_supervisor_run", artifact=stored)
+        self._repository.record_progress(
+            run.run_id,
+            worker_id=worker_id,
+            event_type="response_supervisor_response_received",
+            message=(
+                "Structured response received and saved. The workflow is applying the output contract before "
+                "showing any draft to a reviewer."
+            ),
+        )
         if artifact.status is not ResponseSupervisorRunStatus.COMPLETED:
             return self._repository.transition(
                 run.run_id,
@@ -205,6 +229,12 @@ class WorkflowEngine:
             raise RuntimeError("response supervisor run artifact is missing")
         supervisor_run = ResponseSupervisorRunArtifact.model_validate_json(stored_run.storage_path.read_text(encoding="utf-8"))
         case = load_frozen_case(self._case_root / run.case_id) if run.fixture_mode else None
+        self._repository.record_progress(
+            run.run_id,
+            worker_id=worker_id,
+            event_type="draft_checks_started",
+            message="Analyzing: deterministic safety and evidence-reference checks are running on the saved draft.",
+        )
         report = evaluate_agent_run(run=supervisor_run, evidence=evidence, case=case)
         stored_report = self._artifact_store.put_json(report.model_dump(mode="json"))
         self._repository.store_artifact(run.run_id, logical_name="agent_evaluation", artifact=stored_report)
