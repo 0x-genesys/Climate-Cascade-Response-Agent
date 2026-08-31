@@ -75,6 +75,8 @@ You can use a different environment-variable name with `--api-key-env YOUR_VARIA
 
 Choose a structured-output model available to your OpenAI account and run exactly one baseline attempt. `gpt-5-mini` uses the provider default temperature, so the baseline does not send a `temperature` parameter.
 
+This is a **prompt-only baseline**. The `--case` path does not give the model a fixture, incident dossier, CEMS snapshot, AOI facts, map, or tool. It only selects the fixed `case_id`, output contract, and later deterministic human-adjudication rubric so the saved response can be evaluated consistently.
+
 ```bash
 uv run climate-cascade-baseline \
   --case data/fixtures/cases/nepal-emsr927-v1 \
@@ -213,4 +215,3 @@ var/artifacts/            Local content-addressed artifacts, excluded from versi
 var/climate-cascade.db    Local SQLite workflow database, excluded from version control
 var/                      Local generated run artifacts, excluded from version control
 ```
-
