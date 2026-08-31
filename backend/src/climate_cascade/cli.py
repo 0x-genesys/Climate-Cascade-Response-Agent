@@ -89,6 +89,38 @@ def evaluate_agent_main(argv: list[str] | None = None) -> int:
     return 0 if report.status is AgentEvaluationStatus.COMPLETE else 2
 
 
+def create_live_comparison_adjudication_main(argv: list[str] | None = None) -> int:
+    """Create two explicit human-decision templates from a frozen rubric."""
+    args = _parse_live_template_args(argv)
+    case = load_frozen_case(args.case)
+    baseline = json.loads(args.baseline_run.read_text(encoding="utf-8"))["baseline_run"]
+    agent = json.loads(args.agent_run.read_text(encoding="utf-8"))["response_supervisor_run"]
+    decisions = [{"gold_action_id": item.gold_action_id, "covered": None, "proposal_action_id": None, "rationale": "Fill after human review."} for item in case.gold_actions.actions]
+    payload = {"schema_version": "1", "rubric_case_id": case.manifest.fixture_id, "claim_boundary": "Rubric transfer only unless this rubric was frozen before both live runs.", "baseline": {"run_id": baseline["run_id"], "decisions": decisions}, "agent": {"run_id": agent["run_id"], "decisions": decisions}}
+    _write_json(args.output, payload)
+    print(json.dumps({"adjudication_template": str(args.output)}, sort_keys=True))
+    return 0
+
+
+def evaluate_live_comparison_main(argv: list[str] | None = None) -> int:
+    """Score human-entered paired rubric-transfer decisions without calling an LLM."""
+    args = _parse_live_evaluate_args(argv)
+    case = load_frozen_case(args.case)
+    template = json.loads(args.adjudication.read_text(encoding="utf-8"))
+    if any(item["covered"] is None for side in ("baseline", "agent") for item in template[side]["decisions"]):
+        raise ValueError("complete every covered decision before evaluation")
+    from climate_cascade.evaluation.scoring import CoverageAdjudication
+    baseline = BaselineRunArtifact.model_validate(json.loads(args.baseline_run.read_text(encoding="utf-8"))["baseline_run"]).model_copy(update={"case_id": case.manifest.fixture_id})
+    agent = ResponseSupervisorRunArtifact.model_validate(json.loads(args.agent_run.read_text(encoding="utf-8"))["response_supervisor_run"]).model_copy(update={"case_id": case.manifest.fixture_id})
+    evidence = VerifiedEvidencePackage.model_validate(json.loads(args.evidence.read_text(encoding="utf-8"))["source_evidence_package"])
+    def adjudication(side, run_id):
+        return CoverageAdjudication(case_id=case.manifest.fixture_id, run_id=run_id, reviewer_id=args.reviewer_id, reviewer_role=args.reviewer_role, decided_at=args.decided_at, decisions=template[side]["decisions"])
+    output = {"claim_boundary": template["claim_boundary"], "baseline": evaluate_baseline(case, baseline, adjudication("baseline", baseline.run_id)).model_dump(mode="json"), "agent": evaluate_agent_run(run=agent, evidence=evidence, case=case, adjudication=adjudication("agent", agent.run_id)).model_dump(mode="json")}
+    _write_json(args.output, output)
+    print(json.dumps({"evaluation_output": str(args.output), "claim_boundary": output["claim_boundary"]}, sort_keys=True))
+    return 0
+
+
 def _parse_args(argv: list[str] | None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run the one-call Climate Cascade baseline.")
     parser.add_argument("--case", type=Path, required=True, help="Frozen case directory.")
@@ -118,6 +150,19 @@ def _parse_evaluate_agent_args(argv: list[str] | None) -> argparse.Namespace:
     parser.add_argument("--evidence", type=Path, required=True, help="Stored verified evidence-package JSON.")
     parser.add_argument("--adjudication", type=Path, help="Completed human coverage-adjudication JSON.")
     parser.add_argument("--evaluation-output", type=Path, required=True, help="Path for the evaluation report JSON.")
+    return parser.parse_args(argv)
+
+
+def _parse_live_template_args(argv):
+    parser = argparse.ArgumentParser(description="Create paired live-comparison human adjudication template.")
+    parser.add_argument("--case", type=Path, required=True); parser.add_argument("--baseline-run", type=Path, required=True); parser.add_argument("--agent-run", type=Path, required=True); parser.add_argument("--output", type=Path, required=True)
+    return parser.parse_args(argv)
+
+
+def _parse_live_evaluate_args(argv):
+    from datetime import datetime
+    parser = argparse.ArgumentParser(description="Evaluate paired live-comparison human decisions.")
+    parser.add_argument("--case", type=Path, required=True); parser.add_argument("--baseline-run", type=Path, required=True); parser.add_argument("--agent-run", type=Path, required=True); parser.add_argument("--evidence", type=Path, required=True); parser.add_argument("--adjudication", type=Path, required=True); parser.add_argument("--output", type=Path, required=True); parser.add_argument("--reviewer-id", required=True); parser.add_argument("--reviewer-role", required=True); parser.add_argument("--decided-at", type=datetime.fromisoformat, required=True)
     return parser.parse_args(argv)
 
 

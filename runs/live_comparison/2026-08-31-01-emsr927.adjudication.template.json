@@ -1,0 +1,63 @@
+{
+  "schema_version": "1",
+  "rubric_case_id": "nepal-emsr927-v1",
+  "claim_boundary": "Rubric transfer only unless this rubric was frozen before both live runs.",
+  "baseline": {
+    "run_id": "baseline-1c6a52cc-2013-4dc3-b0f5-8b318cb8d621",
+    "decisions": [
+      {
+        "gold_action_id": "verify-access-timure",
+        "covered": null,
+        "proposal_action_id": null,
+        "rationale": "Fill after human review."
+      },
+      {
+        "gold_action_id": "triage-residential-impact-bidur",
+        "covered": null,
+        "proposal_action_id": null,
+        "rationale": "Fill after human review."
+      },
+      {
+        "gold_action_id": "check-critical-services-syapru-besi",
+        "covered": null,
+        "proposal_action_id": null,
+        "rationale": "Fill after human review."
+      },
+      {
+        "gold_action_id": "preserve-bharatpur-data-gap",
+        "covered": null,
+        "proposal_action_id": null,
+        "rationale": "Fill after human review."
+      }
+    ]
+  },
+  "agent": {
+    "run_id": "run-a50179a3-b497-41db-82df-92acfa0c8fa7",
+    "decisions": [
+      {
+        "gold_action_id": "verify-access-timure",
+        "covered": null,
+        "proposal_action_id": null,
+        "rationale": "Fill after human review."
+      },
+      {
+        "gold_action_id": "triage-residential-impact-bidur",
+        "covered": null,
+        "proposal_action_id": null,
+        "rationale": "Fill after human review."
+      },
+      {
+        "gold_action_id": "check-critical-services-syapru-besi",
+        "covered": null,
+        "proposal_action_id": null,
+        "rationale": "Fill after human review."
+      },
+      {
+        "gold_action_id": "preserve-bharatpur-data-gap",
+        "covered": null,
+        "proposal_action_id": null,
+        "rationale": "Fill after human review."
+      }
+    ]
+  }
+}
