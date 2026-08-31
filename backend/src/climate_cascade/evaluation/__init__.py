@@ -1,7 +1,7 @@
 """Deterministic evaluation contracts and scoring for frozen cases."""
 
 from .agent import AgentEvaluationReport, AgentEvaluationStatus, evaluate_agent_run
-from .scoring import BaselineEvaluationReport, CoverageAdjudication, evaluate_baseline
+from .scoring import BaselineEvaluationReport, CoverageAdjudication, evaluate_baseline, evaluate_live_baseline
 
 __all__ = [
     "AgentEvaluationReport",
@@ -10,4 +10,5 @@ __all__ = [
     "CoverageAdjudication",
     "evaluate_agent_run",
     "evaluate_baseline",
+    "evaluate_live_baseline",
 ]
