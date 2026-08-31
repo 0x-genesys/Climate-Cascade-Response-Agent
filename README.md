@@ -1,5 +1,15 @@
 # Climate Cascade Response Agent
 
+## Keep Four Questions In Mind
+
+### 01. Who Has This Problem?
+
+### 02. What Bottleneck Makes It Worth Solving?
+
+### 03. Does The Agent Solve It Well?
+
+### 04. Can Another Person Reproduce The Result?
+
 Climate Cascade Response turns a verified post-disaster flood or debris-flow case into a short, evidence-backed queue of actions for an emergency operations analyst. The analyst keeps authority: every action remains a draft for human review, and the product never sends public warnings, dispatches responders, or controls infrastructure.
 
 ## The problem
