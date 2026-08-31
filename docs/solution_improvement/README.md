@@ -32,6 +32,17 @@ Do not backfill successful-looking results. Record the hypothesis before impleme
 | Iteration 3: constrained action planning and independent verification, rerun and evaluated | Added a separately implemented evidence-and-safety supervisor after each structured response draft. It receives only the typed draft, saved evidence IDs, deterministic impact package, and public policy checks - never the response supervisor prompt or provider reasoning. It returns `pass`, `revise`, or `reject`; revision feedback can trigger at most two additional supervisor calls, and exhaustion blocks the run. The initial response-supervisor prompt template is restored to Iteration 2 and receives no verifier context unless revision is needed. | [Live run](../../runs/iteration_3/nepal-emsr927-live-v2.run.json), [independent review](../../runs/iteration_3/nepal-emsr927-live-v2.evidence-safety-review.json), [human adjudication](../../runs/iteration_3/nepal-emsr927-live-v2.adjudication.json), and [evaluation](../../runs/iteration_3/nepal-emsr927-live-v2.evaluation.json). Full regression verification: `uv run pytest` reported `53 passed` (one TestClient deprecation warning). | Keep the verifier and bounded fail-closed workflow. The corrected live POC passed independent review and scored `14/17`. It does not prove a baseline delta because the source is live and the review is project-owner, AI-assisted. |
 | Iteration 4, planned | Add potential-lives-saved ranges, editable assumptions, and approve/edit/reject/request-evidence feedback. | Not run. | Test interval coverage, abstention, safety, and review time. |
 
+## LSAC@5 Score Breakdown
+
+The frozen Nepal rubric awards `5` points for Timure access verification, `5` for Bidur residential triage, `4` for Syapru Besi critical-services continuity, and `3` for a concrete Bharatpur evidence-request action. A limitation alone does not earn Bharatpur coverage.
+
+| Stage | Total | Timure access | Bidur residential | Syapru continuity | Bharatpur evidence request |
+| --- | ---: | ---: | ---: | ---: |
+| Prompt-only baseline | `0/17` | `0/5` | `0/5` | `0/4` | `0/3` |
+| Iteration 1 live POC | `3/17` | `0/5` | `0/5` | `0/4` | `3/3` |
+| Iteration 2 live POC | `13/17` | `5/5` | `5/5` | `0/4` | `3/3` |
+| Iteration 3 live POC, restored prompt | `14/17` | `5/5` | `5/5` | `4/4` | `0/3` |
+
 ## Prompt-Only Baseline Findings
 
 - **Run:** `baseline-6f97a217-d44a-4aac-a478-0e14d253057f`, `gpt-5-mini-2025-08-07`.
