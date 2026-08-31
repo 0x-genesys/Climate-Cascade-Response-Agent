@@ -108,7 +108,6 @@ def create_app(*, services: ApiServices) -> FastAPI:
             case_id=payload.case_id,
             mode=RunMode.BASELINE,
             fixture_mode=payload.fixture_mode,
-            source_run_id=payload.source_run_id,
             model=payload.model,
             api_key_env=payload.api_key_env,
         )
@@ -211,17 +210,10 @@ def _create_run(
     fixture_exists = (services.case_root / payload.case_id / "manifest.json").is_file()
     if payload.fixture_mode and not fixture_exists:
         raise HTTPException(status_code=404, detail=f"Unknown pinned case: {payload.case_id}")
-    if not payload.fixture_mode and payload.mode is RunMode.AGENT and not payload.activation:
+    if not payload.fixture_mode and payload.mode is not RunMode.AGENT:
+        raise HTTPException(status_code=400, detail="Only agent runs can use live source intake")
+    if not payload.fixture_mode and not payload.activation:
         raise HTTPException(status_code=400, detail="Live agent runs require an activation code")
-    if not payload.fixture_mode and payload.mode is RunMode.BASELINE:
-        source_run_id = payload.source_run_id
-        if not source_run_id:
-            raise HTTPException(status_code=400, detail="Live baseline runs require a source_run_id")
-        source_run = services.repository.get_run(source_run_id)
-        if source_run.mode is not RunMode.AGENT or source_run.fixture_mode or source_run.case_id != payload.case_id:
-            raise HTTPException(status_code=400, detail="source_run_id must identify a live agent run for the same case")
-        if services.repository.get_artifact(source_run_id, "source_evidence_package") is None:
-            raise HTTPException(status_code=409, detail="source_run_id has no completed source evidence package yet")
     config = payload.model_dump(exclude={"case_id", "mode", "fixture_mode"}, exclude_none=True)
     try:
         run, _created = services.repository.create_run(

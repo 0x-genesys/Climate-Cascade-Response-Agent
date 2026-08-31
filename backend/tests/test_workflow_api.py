@@ -109,38 +109,6 @@ def test_worker_leases_and_runs_baseline_to_human_review(tmp_path: Path) -> None
     assert events[-2].event_type == "baseline_evaluated"
 
 
-def test_worker_runs_live_baseline_against_exact_saved_agent_evidence(tmp_path: Path) -> None:
-    database_url = sqlite_url(tmp_path / "workflow.db")
-    migrate_database(database_url, repository_root=REPOSITORY_ROOT)
-    repository = RunRepository(create_sqlite_engine(database_url))
-    store = LocalArtifactStore(tmp_path / "artifacts")
-    source_run, _ = repository.create_run(
-        case_id="nepal-emsr927-v1", mode=RunMode.AGENT, fixture_mode=False, config={"activation": "EMSR927"},
-        idempotency_key="shared-live-source-key",
-    )
-    source_artifact = store.put_json(build_fixture_evidence_package(load_frozen_case(CASE_ROOT / "nepal-emsr927-v1")).model_dump(mode="json"))
-    repository.store_artifact(source_run.run_id, logical_name="source_evidence_package", artifact=source_artifact)
-    leased_source = repository.lease_next_run(worker_id="source-worker", lease_seconds=30)
-    assert leased_source is not None
-    repository.transition(source_run.run_id, worker_id="source-worker", to_state=RunState.BLOCKED, message="Source snapshot retained for comparison test.")
-    repository.release_lease(source_run.run_id, worker_id="source-worker")
-    baseline_run, _ = repository.create_run(
-        case_id="nepal-emsr927-v1", mode=RunMode.BASELINE, fixture_mode=False,
-        config={"model": "static-test-model", "source_run_id": source_run.run_id}, idempotency_key="live-baseline-test-key",
-    )
-    engine = WorkflowEngine(repository=repository, artifact_store=store, case_root=CASE_ROOT, gateway_factory=lambda _config: StaticGateway())
-
-    result = engine.process_next(worker_id="live-baseline-worker")
-
-    assert result is not None
-    assert result.run_id == baseline_run.run_id
-    assert result.state is RunState.AWAITING_HUMAN_REVIEW
-    assert repository.get_artifact(baseline_run.run_id, "source_evidence_package").sha256 == source_artifact.sha256
-    report = json.loads(repository.get_artifact(baseline_run.run_id, "baseline_evaluation").storage_path.read_text())
-    assert report["missing_evidence_reference_count"]["value"] == 0
-    assert "baseline_source_reused" in [event.event_type for event in repository.list_events(baseline_run.run_id)]
-
-
 def test_expired_lease_can_be_reclaimed(tmp_path: Path) -> None:
     database_url = sqlite_url(tmp_path / "workflow.db")
     migrate_database(database_url, repository_root=REPOSITORY_ROOT)

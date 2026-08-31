@@ -7,9 +7,9 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from climate_cascade.agents import ResponseSupervisorRunStatus, load_response_supervisor_config, run_response_supervisor
-from climate_cascade.baseline import ModelGateway, run_baseline, run_live_baseline
+from climate_cascade.baseline import ModelGateway, run_baseline
 from climate_cascade.domain import EvidenceStatus, ImpactPackage, RunMode, RunState, VerifiedEvidencePackage, load_frozen_case
-from climate_cascade.evaluation import evaluate_agent_run, evaluate_baseline, evaluate_live_baseline
+from climate_cascade.evaluation import evaluate_agent_run, evaluate_baseline
 from climate_cascade.impacts import build_cems_product_impact_package
 from climate_cascade.persistence import LocalArtifactStore, RunRepository, RunSnapshot
 from climate_cascade.sources import build_evidence_package_for_run
@@ -282,33 +282,6 @@ class WorkflowEngine:
         return ImpactPackage.model_validate_json(stored.storage_path.read_text(encoding="utf-8"))
 
     def _advance_baseline(self, run: RunSnapshot, *, worker_id: str) -> RunSnapshot:
-        if not run.fixture_mode:
-            if run.state is RunState.RECEIVED:
-                return self._repository.transition(run.run_id, worker_id=worker_id, to_state=RunState.SOURCE_CHECK,
-                    message="Live comparison baseline queued to reuse an immutable source snapshot from the selected agent run.")
-            if run.state is RunState.SOURCE_CHECK:
-                source_run_id = run.config.get("source_run_id")
-                if not isinstance(source_run_id, str):
-                    raise RuntimeError("live baseline source_run_id is missing")
-                stored = self._repository.get_artifact(source_run_id, "source_evidence_package")
-                if stored is None:
-                    raise RuntimeError("selected live agent run has no source evidence package")
-                self._repository.store_artifact(run.run_id, logical_name="source_evidence_package", artifact=stored)
-                return self._repository.transition(run.run_id, worker_id=worker_id, to_state=RunState.VERIFIED,
-                    message=f"Baseline reused the exact source package from {source_run_id}; deterministic impact analysis remains unavailable.", event_type="baseline_source_reused")
-            transitions = {
-                RunState.VERIFIED: (RunState.DATA_SNAPSHOT, "Shared live source snapshot is pinned for the direct-prompt baseline."),
-                RunState.DATA_SNAPSHOT: (RunState.IMPACT_ANALYSIS, "Baseline intentionally skips deterministic impact analysis."),
-                RunState.IMPACT_ANALYSIS: (RunState.ACTION_DRAFTING, "Baseline action drafting is ready for its one structured model call."),
-            }
-            if run.state in transitions:
-                target, message = transitions[run.state]
-                return self._repository.transition(run.run_id, worker_id=worker_id, to_state=target, message=message)
-            if run.state is RunState.ACTION_DRAFTING:
-                return self._execute_baseline(run, worker_id=worker_id)
-            if run.state is RunState.EVIDENCE_VERIFICATION:
-                return self._write_baseline_evaluation(run, worker_id=worker_id)
-            raise RuntimeError(f"live baseline cannot advance from {run.state.value}")
         transitions = {
             RunState.RECEIVED: (RunState.SOURCE_CHECK, "Frozen fixture queued for integrity-checked source review."),
             RunState.SOURCE_CHECK: (RunState.VERIFIED, "Frozen fixture source references accepted for baseline execution."),
@@ -326,14 +299,12 @@ class WorkflowEngine:
         raise RuntimeError(f"baseline cannot advance from {run.state.value}")
 
     def _execute_baseline(self, run: RunSnapshot, *, worker_id: str) -> RunSnapshot:
-        case = load_frozen_case(self._case_root / run.case_id) if run.fixture_mode else None
-        artifact = run_baseline(case, self._gateway_factory(run.config)) if case is not None else run_live_baseline(
-            case_id=run.case_id, evidence=self._load_evidence_package(run.run_id), gateway=self._gateway_factory(run.config)
-        )
+        case = load_frozen_case(self._case_root / run.case_id)
+        artifact = run_baseline(case, self._gateway_factory(run.config))
         stored = self._artifact_store.put_json(artifact.model_dump(mode="json"))
         self._repository.store_artifact(run.run_id, logical_name="baseline_run", artifact=stored)
         if artifact.status.value != "completed":
-            report = evaluate_baseline(case, artifact) if case is not None else evaluate_live_baseline(artifact, self._load_evidence_package(run.run_id))
+            report = evaluate_baseline(case, artifact)
             report_artifact = self._artifact_store.put_json(report.model_dump(mode="json"))
             self._repository.store_artifact(run.run_id, logical_name="baseline_evaluation", artifact=report_artifact)
             return self._repository.transition(
@@ -352,16 +323,14 @@ class WorkflowEngine:
         )
 
     def _write_baseline_evaluation(self, run: RunSnapshot, *, worker_id: str) -> RunSnapshot:
-        case = load_frozen_case(self._case_root / run.case_id) if run.fixture_mode else None
+        case = load_frozen_case(self._case_root / run.case_id)
         stored_run = self._repository.get_artifact(run.run_id, "baseline_run")
         if stored_run is None:
             raise RuntimeError("baseline run artifact is missing")
         from climate_cascade.baseline.runner import BaselineRunArtifact
 
         baseline_run = BaselineRunArtifact.model_validate_json(stored_run.storage_path.read_text(encoding="utf-8"))
-        report = evaluate_baseline(case, baseline_run) if case is not None else evaluate_live_baseline(
-            baseline_run, self._load_evidence_package(run.run_id)
-        )
+        report = evaluate_baseline(case, baseline_run)
         stored_report = self._artifact_store.put_json(report.model_dump(mode="json"))
         self._repository.store_artifact(run.run_id, logical_name="baseline_evaluation", artifact=stored_report)
         return self._repository.transition(

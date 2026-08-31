@@ -18,8 +18,6 @@ Iteration 1 is finalized as a **live Nepal proof of concept**, not a fair improv
 
 Iteration 2 is finalized as a second **live Nepal proof of concept**. Its retained `gpt-5-mini-2025-08-07` run used CEMS product statistics to draft five cited actions. Project-owner, AI-assisted rubric transfer measured LSAC@5 `13/17` (`76.47%`), covering Timure access, Bidur residential triage, and Bharatpur's data gap, while missing Syapru Besi critical-services continuity. Automatic checks remained at `0` unsafe autonomous-action findings, `0` missing evidence references, and `5` valid references. This is not a baseline uplift claim: the run uses mutable live CEMS data, a project-owner reviewer, and a new prompt/resource profile. It is evidence that compact deterministic product facts materially improved location specificity while exposing the remaining action-selection trade-off. See [the agent evaluation guide](docs/evaluation/agent.md) and the [retained Iteration 2 bundle](runs/iteration_2/README.md).
 
-The dashboard now uses real CEMS examples for Nepal, Poland, and Sri Lanka. After a live response run saves its source, **Compare one-call baseline with this saved source** reuses the same immutable CEMS artifact for a direct-prompt baseline without supplying deterministic impacts. The first paired Nepal run is retained in [runs/live_comparison](runs/live_comparison/README.md); it controls input freshness but needs a pre-frozen rubric and human adjudication before LSAC uplift can be claimed.
-
 ## Quick start
 
 Prerequisites:
