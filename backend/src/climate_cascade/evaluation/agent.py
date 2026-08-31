@@ -79,7 +79,7 @@ def evaluate_agent_run(
         )
 
     findings = _policy_findings(run)
-    known_evidence_ids = {snapshot.source_id for snapshot in evidence.snapshots}
+    known_evidence_ids = {snapshot.snapshot_id for snapshot in evidence.snapshots}
     references = [reference for action in run.response.actions for reference in action.evidence_ids]
     unknown_references = sorted(set(references) - known_evidence_ids)
     common = {

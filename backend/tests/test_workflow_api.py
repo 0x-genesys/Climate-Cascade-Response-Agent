@@ -22,6 +22,7 @@ class StaticGateway:
     def complete_json(
         self, *, system_prompt: str, user_prompt: str, schema: dict, schema_name: str = "baseline_action_response"
     ) -> ModelCompletion:
+        evidence_id = "cems-activation-snapshot" if schema_name == "response_supervisor_action_response" else "cems-activation"
         return ModelCompletion(
             raw_response=json.dumps(
                 {
@@ -35,7 +36,7 @@ class StaticGateway:
                             "location_ref": "Bharatpur AOI",
                             "owner_role": "emergency operations analyst",
                             "urgency": "under_six_hours",
-                            "evidence_ids": ["cems-activation"],
+                            "evidence_ids": [evidence_id],
                             "status": "draft",
                             "estimate": None,
                         }
@@ -292,3 +293,5 @@ def test_api_serves_dashboard_static_files(tmp_path: Path) -> None:
     assert "/v1/runs?limit=25" in script.text
     assert "/v1/runs/${state.runId}/evidence" in script.text
     assert "Life-safety estimate:" in script.text
+    assert "Drafts rejected" in script.text
+    assert "Draft checks did not run:" in script.text

@@ -13,6 +13,12 @@ An Iteration 1 run performs three separate checks:
 
 The CLI never calls an LLM. A score is not available for live CEMS activation runs because they have no frozen gold-action set.
 
+## Dashboard versus score
+
+The **Run Feedback** dashboard panel is an automatic pre-review only. After a successful run it shows deterministic action-safety and snapshot-reference checks, then says that human coverage review is next. It does not collect reviewer decisions and does not calculate LSAC@5 in the browser.
+
+The final comparable score is the local CLI report after a reviewer completes the adjudication JSON. This separation keeps the semantic judgement explicit and prevents a second model or dashboard shortcut from silently deciding whether an action covered a gold requirement.
+
 ## Start and inspect a practice run
 
 Set `OPENAI_API_KEY`, start the local service, then select **Nepal flood practice case** in the dashboard and enter a structured-output model such as `gpt-5-mini`. The run should finish as `Ready for human review`, not `blocked`.
@@ -27,7 +33,7 @@ curl -s http://127.0.0.1:8000/v1/runs/RUN_ID/evidence \
   | jq '.source_evidence_package' > var/runs/iteration_1/nepal-response-supervisor.evidence.json
 ```
 
-Read `response.actions` in `nepal-response-supervisor.run.json`. Each action's `action_id` is the only valid value for a covered decision's `proposal_action_id`.
+Read `response.actions` in `nepal-response-supervisor.run.json`. Each action's `action_id` is the only valid value for a covered decision's `proposal_action_id`. The action evidence chips are immutable source `snapshot_id` values, such as `cems-activation-snapshot`; they are checked automatically before human adjudication.
 
 ## Record human coverage
 

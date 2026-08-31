@@ -211,7 +211,7 @@ def _validate_response(
         return "response.case_id does not match the run case"
     if len(response.actions) > max_actions:
         return f"response contains more than configured maximum {max_actions} actions"
-    known_evidence_ids = {snapshot.source_id for snapshot in evidence.snapshots}
+    known_evidence_ids = {snapshot.snapshot_id for snapshot in evidence.snapshots}
     unknown = sorted(
         {
             evidence_id
