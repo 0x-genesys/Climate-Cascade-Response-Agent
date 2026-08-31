@@ -6,7 +6,7 @@ Create one entry before or immediately after each meaningful implementation step
 
 ## Latest checkpoint
 
-[2026-08-31-18 Iteration 4 Final](2026-08-31-18-iteration-4-final.md) records deterministic abstention, qualified-review persistence, dashboard controls, live Nepal evaluation, and the retained `13/17` LSAC result.
+[2026-08-31-19 Dashboard Review Flow](2026-08-31-19-dashboard-review-flow.md) records the live-example selector, clearer CEMS coverage presentation, durable decision labels in the review queue, and responsive dashboard verification.
 
 ## Required entry fields
 
