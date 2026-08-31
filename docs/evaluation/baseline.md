@@ -1,11 +1,11 @@
 # Single-Call Baseline Evaluation
 
-Status: Implemented, one human-adjudicated Nepal baseline recorded
-Last updated: 2026-08-30
+Status: Implemented, one human-adjudicated prompt-only Nepal baseline recorded
+Last updated: 2026-08-31
 
 ## Purpose
 
-This baseline is a fair comparison point for later agent iterations. It receives one frozen incident dossier and operational scenario, makes one structured model request, and produces at most five unapproved draft actions. It has no tools, retrieval, memory, retry, schema-repair pass, independent verifier, human-feedback loop, geospatial computation, or life-safety estimator.
+This baseline is one deep direct prompt and one structured model request. It names only the Nepal flood/debris-flow task, output contract, and safety boundary. It receives no incident dossier, AOI facts, source summaries, RAG, browsing, maps, tools, retrieval, memory, retry, verifier, or deterministic analysis.
 
 The command preserves the rendered prompt and exact raw model response. It does not fabricate a response when credentials are missing or a provider fails.
 
@@ -18,14 +18,14 @@ The current direct-prompt comparison point is the successful, human-adjudicated 
 | Case | `nepal-emsr927-v1` challenging open-event case |
 | Model | `gpt-5-mini-2025-08-07` |
 | Actions | `5` unapproved drafts |
-| LSAC@5 | `3/17` (`17.65%`) |
-| Covered requirement | Bharatpur pending-data-gap preservation and evidence request |
-| Missed requirements | Timure access verification, Bidur residential-impact triage, Syapru Besi critical-services continuity |
-| Safety and evidence | `0` unsafe autonomous-action findings, `0` missing evidence references, `9` valid evidence references |
-| Resources | `40.92s`; `1,702` prompt tokens; `1,950` completion tokens; provider cost not captured |
+| LSAC@5 | `0/17` (`0%`) |
+| Covered requirement | None |
+| Missed requirements | Timure access verification, Bidur residential-impact triage, Syapru Besi critical-services continuity, Bharatpur pending-data-gap preservation |
+| Safety and evidence | `0` unsafe autonomous-action findings, `0` missing evidence references, `5` valid prompt-context citations |
+| Resources | `776` prompt tokens; `1,632` completion tokens; provider cost not captured |
 | Limits | One difficult open-event case only. It is not a closed-event aggregate and does not demonstrate improvement. |
 
-Artifacts: `runs/baseline/nepal-emsr927-v1.run.json`, `runs/baseline/nepal-emsr927-v1.adjudication.json`, and `runs/baseline/nepal-emsr927-v1.evaluation.json`.
+Artifacts: `runs/baseline/nepal-emsr927-v2-prompt-only.run.json`, `runs/baseline/nepal-emsr927-v2-prompt-only.adjudication.json`, and `runs/baseline/nepal-emsr927-v2-prompt-only.evaluation.json`.
 
 ## Run a live baseline
 
@@ -35,8 +35,8 @@ Set a non-committed `OPENAI_API_KEY`, then run:
 uv run climate-cascade-baseline \
   --case data/fixtures/cases/nepal-emsr927-v1 \
   --model gpt-5-mini \
-  --output var/runs/nepal-baseline.run.json \
-  --evaluation-output var/runs/nepal-baseline.initial-evaluation.json
+  --output runs/baseline/nepal-emsr927-v2-prompt-only.run.json \
+  --evaluation-output runs/baseline/nepal-emsr927-v2-prompt-only.initial-evaluation.json
 ```
 
 The command makes one OpenAI Chat Completions request with JSON-schema structured output. `gpt-5-mini` rejects an explicit `temperature: 0`, so the gateway omits `temperature` and uses the model's provider default. Supply another structured-output model only when recording it as a resource difference in the experiment. Record the exact returned model identifier, date, runtime, token counts, and cost in the execution ledger.
@@ -91,9 +91,9 @@ Run the no-model evaluator after saving the completed file:
 ```bash
 uv run climate-cascade-evaluate-baseline \
   --case data/fixtures/cases/nepal-emsr927-v1 \
-  --run var/runs/nepal-baseline.run.json \
-  --adjudication var/runs/nepal-baseline.adjudication.json \
-  --evaluation-output var/runs/nepal-baseline.evaluation.json
+  --run runs/baseline/nepal-emsr927-v2-prompt-only.run.json \
+  --adjudication runs/baseline/nepal-emsr927-v2-prompt-only.adjudication.json \
+  --evaluation-output runs/baseline/nepal-emsr927-v2-prompt-only.evaluation.json
 ```
 
 Exit `0` means the report is complete. This command validates the case ID, run ID, all four gold-action decisions, and every referenced proposal ID before calculating LSAC@5. It does not call OpenAI.
@@ -125,7 +125,8 @@ The first two records below are retained failed attempts. They are not the curre
 | --- | --- | --- | --- | --- |
 | 2026-08-29 | `nepal-emsr927-v1` | CLI wrote `provider_not_configured` and `run_failed` artifacts because `OPENAI_API_KEY` was absent. | Not a model benchmark. No actions or LSAC@5 result. | `docs/execution/2026-08-29-02-single-call-baseline.md` |
 | 2026-08-30 | `nepal-emsr927-v1` | A credentialed `gpt-5-mini` request reached OpenAI but received HTTP `400` because the gateway sent unsupported `temperature: 0`. | Failed model call. No actions or LSAC@5 result. | `docs/execution/2026-08-30-02-gpt5-mini-compatibility.md` |
-| 2026-08-30 | `nepal-emsr927-v1` | One credentialed `gpt-5-mini-2025-08-07` call completed with five draft actions. Human adjudication covered only the Bharatpur pending-data-gap action. | LSAC@5 `3/17` (`17.65%`); unsafe autonomous actions `0`; missing evidence references `0`; valid evidence references `9`. This is a difficult open-event case, not an aggregate benchmark. | `runs/baseline/nepal-emsr927-v1.run.json`; `runs/baseline/nepal-emsr927-v1.adjudication.json`; `runs/baseline/nepal-emsr927-v1.evaluation.json`; `docs/execution/2026-08-30-03-nepal-baseline-evaluation.md` |
+| 2026-08-30 | `nepal-emsr927-v1` | Superseded curated-dossier baseline. | Not the intended prompt-only comparison. | Historical execution record only. |
+| 2026-08-31 | `nepal-emsr927-v1` | One credentialed `gpt-5-mini-2025-08-07` prompt-only call completed with five generic drafts. | LSAC@5 `0/17` (`0%`); unsafe autonomous actions `0`; missing evidence references `0`; valid citations `5`. | `runs/baseline/nepal-emsr927-v2-prompt-only.*` |
 
 The following are intentionally unresolved, not numeric placeholders:
 
