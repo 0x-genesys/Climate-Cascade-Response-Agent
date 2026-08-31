@@ -53,3 +53,7 @@ uv run climate-cascade-evaluate-agent \
 ```
 
 Only that deterministic output can establish whether this run improves on the baseline LSAC@5 `3/17`.
+
+## Subsequent artifact-retention note
+
+On 2026-08-31, the project owner requested removal of this static frozen-supervisor bundle before Iteration 1 finalization. This document remains the chronological record of that earlier checkpoint; its artifact paths are not retained. The current live Nepal POC, its manual review, and its deterministic result are in [record 15](2026-08-31-15-iteration-1-live-poc-finalization.md). That POC uses changed live source data and therefore does not establish improvement over the frozen baseline.

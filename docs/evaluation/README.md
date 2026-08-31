@@ -1,6 +1,6 @@
 # Evaluation Plan
 
-Status: Baseline evaluated; Iteration 1 source and draft-response contracts verified, human action-quality evaluation pending
+Status: Baseline evaluated; Iteration 1 live POC evaluated with a clearly-labelled non-comparable rubric transfer
 Last updated: 2026-08-31
 
 ## Evaluation question
@@ -47,11 +47,11 @@ The frozen `nepal-emsr927-v1` challenging case has one credentialed baseline run
 
 ### Iteration 1 source and response-supervisor verification
 
-Three live CEMS activations were run through the source adapter on 2026-08-30. Nepal `EMSR927` produced `preliminary` evidence because the activation remained open and two AOI products were waiting for data. Closed flood activations Poland `EMSR756` and Sri Lanka `EMSR851` produced `supported` evidence with no source-level data gaps. Those historical records are retained as source-intake evidence; they intentionally predate the response supervisor.
+The finalized live POC is Nepal run `run-66147235-554b-4c98-88a1-45d56b8f4014`. It retrieved current CEMS `EMSR927` AOI metadata, including finished product markers for Syapru Besi, Timure, and Bidur and a waiting Bharatpur product. One bounded response-supervisor call produced four draft actions and reached `awaiting_human_review`. Automatic checks measured `0` unsafe autonomous-action patterns, `0` missing evidence references, and `4` valid evidence references. The current machine-readable run, evidence, event stream, adjudication, and evaluation report are retained in [the POC bundle](../../runs/iteration_1/README.md).
 
-The current Iteration 1 workflow continues from a supported or preliminary source package through one bounded response-supervisor call, deterministic action evidence and safety checks, and `awaiting_human_review`. Contract tests verify that the supervisor context excludes raw source payloads and frozen gold actions, rejects unknown evidence IDs, stores failure states, and produces an LSAC-ready evaluation report without a second model judge. The evidence package records canonical public CEMS JSON, source URL, publisher, retrieval timestamp, SHA-256, license note, claims, AOI product statuses, findings, and data gaps. See [run summary](../../runs/iteration_1/iteration1-source-round-summary.json), [agent evaluation guide](agent.md), and [the continuation record](../execution/2026-08-31-07-iteration-1-response-supervisor-dashboard.md).
+The project owner completed an AI-assisted manual coverage review against the frozen Nepal rubric. It found Bharatpur covered and Timure, Bidur, and Syapru Besi uncovered, yielding LSAC@5 `3/17` (`17.65%`). This is a **rubric-transfer proof of concept**, not a fair comparison to the frozen baseline: the live CEMS snapshot changed from the baseline's frozen input and the reviewer is not a credentialed emergency manager. It must not be reported as an Iteration 1 uplift, regression, or human-domain validation. Its observed failure is nevertheless actionable: product-status metadata makes locations visible but lacks the road, built-up-area, and critical-facility impact content required for specific protective actions. Iteration 2 must deterministically ingest and interpret those CEMS products before another fair benchmark is attempted.
 
-No credentialed response-supervisor output has yet been human-adjudicated. Therefore the project does not claim Iteration 1 evidence precision, LSAC@5, runtime comparison, model cost, action-quality improvement, or life-safety benefit. Static-gateway tests prove contracts only.
+Historical static source-run artifacts were removed from `runs/iteration_1/` during finalization at the project owner's request. Their execution records remain append-only historical context, not current evidence links.
 
 ### Agent solution
 

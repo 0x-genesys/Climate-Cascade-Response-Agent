@@ -1,6 +1,6 @@
 # Climate Cascade Response Agent
 
-Status: Iteration 1 response-review path implemented; quality result pending human adjudication
+Status: Iteration 1 finalized as a live Nepal POC; fair improvement benchmark deferred to Iteration 2
 Last updated: 2026-08-31
 Pilot event: 2026 Nepal debris avalanche and flash flood, Copernicus activation `EMSR927`
 
@@ -395,7 +395,7 @@ The baseline has:
 
 This is intentionally simple but realistic. It represents an analyst copying available information into a general-purpose assistant.
 
-Implementation status: the single-call structured baseline, deterministic evaluator, SQLite persistence, content-addressed artifact store, FastAPI run control plane, ordered SSE progress stream, leased worker workflow, local `uv run climate-cascade-local` setup/startup path, CEMS source adapter, versioned source-evidence package, configured response supervisor, deterministic draft checks, and response-review dashboard are implemented. The recorded Nepal baseline result is LSAC@5 `3/17` (`17.65%`) after human adjudication. Iteration 1 can now draft cited actions from verified evidence and stop at `awaiting_human_review`; it does not calculate deterministic impact, numeric life-safety estimates, or human approval decisions. The supervisor may only make a visible `not_estimable` abstention with a reason. The agent has no measured quality result until a credentialed response-supervisor run receives human adjudication. See [baseline evaluation](evaluation/baseline.md), [agent evaluation guide](evaluation/agent.md), and [the Iteration 1 continuation record](execution/2026-08-31-07-iteration-1-response-supervisor-dashboard.md).
+Implementation status: the single-call structured baseline, deterministic evaluator, SQLite persistence, content-addressed artifact store, FastAPI run control plane, ordered SSE progress stream, leased worker workflow, local `uv run climate-cascade-local` setup/startup path, CEMS source adapter, versioned source-evidence package, configured response supervisor, deterministic draft checks, and response-review dashboard are implemented. The recorded Nepal baseline result is LSAC@5 `3/17` (`17.65%`) after human adjudication. The finalized live Nepal POC also scored `3/17` through an explicitly non-comparable project-owner rubric transfer, with `0` unsafe and `0` missing-reference findings. It must not be treated as a quality delta because it used a changed live CEMS snapshot rather than the frozen baseline input. Iteration 1 can draft cited actions from verified evidence and stop at `awaiting_human_review`; it does not calculate deterministic impact, numeric life-safety estimates, or human approval decisions. The supervisor may only make a visible `not_estimable` abstention with a reason. Its observed gap is that AOI product statuses alone cannot produce Timure, Bidur, and Syapru Besi protective actions. See [baseline evaluation](evaluation/baseline.md), [agent evaluation guide](evaluation/agent.md), and [the Iteration 1 finalization record](execution/2026-08-31-15-iteration-1-live-poc-finalization.md).
 
 ### Iteration 1: verified event intake
 

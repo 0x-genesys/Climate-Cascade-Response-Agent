@@ -1,6 +1,6 @@
 # Project Story
 
-Status: Narrative scaffold, updated with baseline and Iteration 1 response-review implementation
+Status: Narrative scaffold, updated with baseline and Iteration 1 live POC findings
 Last updated: 2026-08-31
 
 ## Working title
@@ -41,7 +41,7 @@ The agent follows a visible lifecycle:
 6. ask a qualified human to approve, edit, request evidence, or reject
 7. export the signed action brief and complete audit trail
 
-The dashboard does not pretend that an estimated affected population equals lives saved. Each action displays a modelled low-central-high range or says `not estimable`, along with all assumptions.
+The dashboard does not pretend that an estimated affected population equals lives saved. In the current implementation, every action says `not estimable` with a reason because deterministic impact and life-safety calculations are not built yet.
 
 The final architecture deliberately uses only two model roles: a response supervisor drafts actions from verified evidence, and an independent evidence and safety supervisor challenges those drafts. A deterministic Python state machine controls the workflow, while typed tools perform source access, geospatial analysis, routing, estimation, persistence, and export. This keeps the agentic contribution visible and measurable.
 
@@ -67,13 +67,13 @@ Load the pinned `EMSR927` Nepal fixture. Show USGS, CEMS, and International Char
 
 ### Beat 2: The agent works in public
 
-Show the live dashboard run feed moving through source retrieval, source verification, source snapshot, constrained response-supervisor drafting, receipt of the stored structured response, and deterministic draft checks. The dashboard exposes these persisted milestones, not token streaming or private model reasoning. Surface the stored warning that `EMSR927` is open and that Bidur and Bharatpur contain pending products. The dashboard reaches `Ready for human review` only when the draft has cited saved evidence and passed deterministic policy checks. It does not claim deterministic impact analysis, a geographic overlay, lives saved, or human approval.
+Show the live dashboard run feed moving through source retrieval, source verification, source snapshot, constrained response-supervisor drafting, receipt of the stored structured response, and deterministic draft checks. The dashboard exposes these persisted milestones, not token streaming or private model reasoning. Surface the stored warning that `EMSR927` is open and that Bharatpur is waiting for a product. The dashboard reaches `Ready for human review` only when the draft has cited saved evidence and passed deterministic policy checks. It does not claim deterministic impact analysis, a geographic overlay, lives saved, or human approval.
 
 Use the glossary at the bottom of the dashboard if the reviewer needs to distinguish CEMS, USGS, the International Charter, AOIs, evidence snapshots, automatic Run Feedback, human adjudication, or LSAC@5. Each entry explains where it appears in the flow.
 
-### Beat 3: Damage becomes an action
+### Beat 3: The useful failure is visible
 
-Open an affected bridge or residential cluster on the map. Show the connected population, affected infrastructure, proposed owner, urgency, evidence, dependencies, and life-safety estimate or abstention.
+Show that current CEMS metadata identifies Syapru Besi, Timure, Bidur, and Bharatpur, but that the live POC covers only the Bharatpur missing-product request. Explain that an AOI product status is not the same as road, built-up-area, or facility impact evidence. The missing three actions become the testable Iteration 2 requirement rather than a hidden failure.
 
 ### Beat 4: A human remains accountable
 
@@ -106,8 +106,8 @@ This is a candidate, not the final hot take. Replace or revise it when a measure
 | The shared workflow can support additional hazard adapters | Architecture contract in `docs/product.md`; no additional adapter implemented | Designed, not validated |
 | The baseline input boundary is reproducible and tamper-evident | `docs/execution/2026-08-29-01-domain-schemas-and-frozen-case.md`; checksum and cross-reference tests | Verified foundation; one difficult-case model run is now recorded |
 | The single-call baseline records exact output and produces a human-adjudicated score without retrying or fabricating a result | `runs/baseline/nepal-emsr927-v1.run.json`; `runs/baseline/nepal-emsr927-v1.adjudication.json`; `runs/baseline/nepal-emsr927-v1.evaluation.json` | Verified on one Nepal challenging-case run; closed-event aggregate remains unmeasured |
-| The Iteration 1 workflow preserves CEMS freshness and incomplete-AOI warnings in a stored evidence package | `runs/iteration_1/iteration1-source-round-summary.json`; `docs/execution/2026-08-30-06-iteration-1-source-intake-dashboard.md` | Verified on live Nepal, Poland, and Sri Lanka source intake; it is not action-quality or LSAC evidence |
-| The Iteration 1 workflow can turn a verified package into bounded, cited draft actions and pause for human review | `runs/iteration_1/nepal-emsr927-response-supervisor.run.json`; `runs/iteration_1/nepal-emsr927-response-supervisor.evidence.json`; `docs/evaluation/agent.md` | Verified on one credentialed Nepal run: five drafts, `0` unsafe autonomous-action findings, `0` missing evidence references, and `7` valid references. Human LSAC@5 adjudication is still pending, so action quality and improvement remain unproven. |
+| The Iteration 1 workflow preserves live CEMS AOI freshness, uncertainty, and evidence references | `runs/iteration_1/nepal-emsr927-live-poc.evidence.json`; `docs/execution/2026-08-31-15-iteration-1-live-poc-finalization.md` | Verified on one live Nepal POC: automatic checks found `0` unsafe patterns, `0` missing references, and `4` valid references. |
+| Live product-status metadata alone does not improve location-specific action coverage | `runs/iteration_1/nepal-emsr927-live-poc.adjudication.json`; `runs/iteration_1/nepal-emsr927-live-poc.evaluation.json`; `docs/evaluation/agent.md` | Qualified finding, not a benchmark: project-owner rubric transfer scored `3/17`, covering Bharatpur but not Timure, Bidur, or Syapru Besi. Snapshot mismatch and reviewer role make this non-comparable with the frozen baseline. |
 
 ## Iteration update protocol
 

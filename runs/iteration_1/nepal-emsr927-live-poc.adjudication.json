@@ -1,0 +1,35 @@
+{
+  "schema_version": "1",
+  "case_id": "nepal-emsr927-v1",
+  "run_id": "run-66147235-554b-4c98-88a1-45d56b8f4014",
+  "reviewer_id": "project-owner-ai-assisted",
+  "reviewer_role": "Project owner manual rubric review, AI-assisted",
+  "decided_at": "2026-08-31T10:04:17Z",
+  "decisions": [
+    {
+      "schema_version": "1",
+      "gold_action_id": "verify-access-timure",
+      "covered": false,
+      "rationale": "Action action-002 names Timure only in a broad GRA-product review, while action-003 requests activation-wide reports. Neither creates an immediate, Timure-specific human access-verification priority before dependent field actions."
+    },
+    {
+      "schema_version": "1",
+      "gold_action_id": "triage-residential-impact-bidur",
+      "covered": false,
+      "rationale": "Action action-002 names Bidur but requests general damage and density overlays within 24 hours. It does not perform an immediate, Bidur-specific residential response-needs triage using damage evidence."
+    },
+    {
+      "schema_version": "1",
+      "gold_action_id": "check-critical-services-syapru-besi",
+      "covered": false,
+      "rationale": "Action action-002 names Syapru Besi but requests general product review. No action requests a critical-services continuity check near Syapru Besi within six hours."
+    },
+    {
+      "schema_version": "1",
+      "gold_action_id": "preserve-bharatpur-data-gap",
+      "covered": true,
+      "proposal_action_id": "action-001-verify-bharatpur-product",
+      "rationale": "The action cites the CEMS snapshot, keeps Bharatpur's waiting GRA product visible, and requests delivery details without asserting no impact. Its six-hour review timing is more conservative than the monitor window."
+    }
+  ]
+}

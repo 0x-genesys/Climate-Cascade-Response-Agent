@@ -1,6 +1,6 @@
 # Iteration 1 Response-Supervisor Evaluation
 
-Status: One credentialed Nepal run passed automatic checks; human action-quality adjudication pending
+Status: Live Nepal POC evaluated; result is a non-comparable rubric transfer, not an improvement benchmark
 Last updated: 2026-08-31
 
 ## What this evaluates
@@ -11,7 +11,7 @@ An Iteration 1 run performs three separate checks:
 2. The application deterministically checks draft-action evidence IDs and unsafe autonomous-action language.
 3. A human reviewer decides whether each frozen Nepal gold action is covered. Only then can the deterministic CLI calculate LSAC@5.
 
-The CLI never calls an LLM. A score is not available for live CEMS activation runs because they have no frozen gold-action set.
+The CLI never calls an LLM. A formal score for a live CEMS activation is unavailable because it has no frozen gold-action set. The retained Nepal POC below deliberately transfers the frozen Nepal rubric to live evidence for diagnosis only; it is not a benchmark.
 
 ## Dashboard versus score
 
@@ -39,11 +39,13 @@ Read `response.actions` in `nepal-response-supervisor.run.json`. Each action's `
 
 The supervisor prompt names those snapshot IDs explicitly. If a provider instead returns the corresponding source ID such as `cems-activation`, the application records the raw response but normalizes the persisted action citation to the one immutable snapshot ID before deterministic checking. Any ID that is neither a known snapshot ID nor a known source alias still fails closed.
 
-## Recorded run awaiting adjudication
+## Finalized live Nepal POC
 
-Run `run-e7be6463-07d6-4b74-843f-db59897d0faf` used `gpt-5-mini-2025-08-07` against the frozen Nepal practice case. It produced five draft actions and reached `awaiting_human_review`. Automatic checks found `0` unsafe autonomous-action patterns, `0` missing evidence references, and `7` valid snapshot references. All five life-safety fields correctly abstained as `not_estimable`.
+Run `run-66147235-554b-4c98-88a1-45d56b8f4014` used `gpt-5-mini-2025-08-07` with live CEMS `EMSR927` evidence. It reached `awaiting_human_review` with four draft actions. The immutable evidence package identified finished product markers for Syapru Besi, Timure, and Bidur and a waiting Bharatpur product. Automatic checks found `0` unsafe autonomous-action patterns, `0` missing evidence references, and `4` valid snapshot references. Every action remained a draft and every life-safety estimate abstained as `not_estimable`.
 
-The saved [supervisor run](../../runs/iteration_1/nepal-emsr927-response-supervisor.run.json), [evidence package](../../runs/iteration_1/nepal-emsr927-response-supervisor.evidence.json), and [human adjudication file](../../runs/iteration_1/nepal-emsr927-response-supervisor.adjudication.json) are the evaluation bundle. The LSAC@5 field remains `not_evaluated`; do not compare this run with the baseline `3/17` until the reviewer replaces all placeholder decisions and runs the deterministic evaluator.
+The project owner completed a manual, AI-assisted rubric-transfer review. Bharatpur was covered by `action-001-verify-bharatpur-product`; Timure, Bidur, and Syapru Besi were not. The deterministic evaluator recorded LSAC@5 `3/17` (`17.65%`). The full [run](../../runs/iteration_1/nepal-emsr927-live-poc.run.json), [evidence](../../runs/iteration_1/nepal-emsr927-live-poc.evidence.json), [event stream](../../runs/iteration_1/nepal-emsr927-live-poc.events.sse), [adjudication](../../runs/iteration_1/nepal-emsr927-live-poc.adjudication.json), and [evaluation](../../runs/iteration_1/nepal-emsr927-live-poc.evaluation.json) are retained.
+
+Do not compare this `3/17` to the baseline `3/17` as an outcome claim. The baseline used a frozen older CEMS snapshot; this POC retrieved a later live snapshot with different activation statistics. The reviewer was the project owner rather than a credentialed emergency manager. The result is evidence of workflow behavior and a diagnostic for Iteration 2, not a measured quality delta.
 
 ## Record human coverage
 
@@ -72,6 +74,6 @@ Exit `0` means the report is complete. The report includes LSAC@5, deterministic
 ## Important limits
 
 - A static gateway passing contract tests proves the implementation, not model quality.
-- Live CEMS runs receive deterministic draft checks but have `LSAC@5: not_evaluated`.
+- A live CEMS score requires a newly frozen case and qualified human adjudication. A rubric transfer may be used only as an explicitly non-comparable diagnostic.
 - An open source package remains preliminary even if the draft checks pass.
 - All actions remain drafts. This iteration has no approval API, dispatch capability, impact calculation, spatial overlay, or numeric lives-saved estimate. It accepts only `not_estimable` abstentions with a reason, which the dashboard shows beside the action.

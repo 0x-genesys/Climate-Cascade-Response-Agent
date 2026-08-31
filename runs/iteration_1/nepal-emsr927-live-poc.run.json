@@ -1,0 +1,126 @@
+{
+  "agent_id": "response-supervisor",
+  "agent_version": "1",
+  "attempt_count": 1,
+  "case_id": "emsr927",
+  "completed_at": "2026-08-31T09:56:59.122084Z",
+  "completion_tokens": 2093,
+  "failure_code": null,
+  "failure_detail": null,
+  "model": "gpt-5-mini-2025-08-07",
+  "prompt_sha256": "fae9801bf9ffcc8e6a373a9e842a0c56181bfcb776253559bef7848016dfe3b5",
+  "prompt_tokens": 2207,
+  "provider": "openai",
+  "raw_response": "{\n  \"schema_version\": \"1\",\n  \"case_id\": \"emsr927\",\n  \"actions\": [\n    {\n      \"schema_version\": \"1\",\n      \"action_id\": \"action-001-verify-bharatpur-product\",\n      \"title\": \"Verify status and expected delivery details for Bharatpur GRA product (AOI 4)\",\n      \"location_ref\": \"Bharatpur (AOI 4)\",\n      \"owner_role\": \"Data Verification Officer\",\n      \"urgency\": \"under_six_hours\",\n      \"evidence_ids\": [\n        \"cems-emsr927-snapshot\"\n      ],\n      \"status\": \"draft\",\n      \"estimate\": {\n        \"schema_version\": \"1\",\n        \"action_id\": \"action-001-verify-bharatpur-product\",\n        \"status\": \"not_estimable\",\n        \"low\": null,\n        \"central\": null,\n        \"high\": null,\n        \"parameter_set_id\": null,\n        \"population_deduplication_group\": null,\n        \"abstention_reason\": \"GRA product for Bharatpur is reported as 'waiting' / missing in the source snapshot; without the product we abstain from any numeric life-safety estimate and cannot determine affected population or built environment impacts.\"\n      }\n    },\n    {\n      \"schema_version\": \"1\",\n      \"action_id\": \"action-002-review-finished-gra-products\",\n      \"title\": \"Review finished GRA products for Syapru Besi, Timure, and Bidur to produce prioritized damage/density overlays\",\n      \"location_ref\": \"Syapru Besi (AOI 1), Timure (AOI 2), Bidur (AOI 3)\",\n      \"owner_role\": \"Geospatial Analyst\",\n      \"urgency\": \"under_twenty_four_hours\",\n      \"evidence_ids\": [\n        \"cems-emsr927-snapshot\"\n      ],\n      \"status\": \"draft\",\n      \"estimate\": {\n        \"schema_version\": \"1\",\n        \"action_id\": \"action-002-review-finished-gra-products\",\n        \"status\": \"not_estimable\",\n        \"low\": null,\n        \"central\": null,\n        \"high\": null,\n        \"parameter_set_id\": null,\n        \"population_deduplication_group\": null,\n        \"abstention_reason\": \"Activation-level statistics are preliminary and the activation is still open; until finished products are validated and cross-checked with ground reports we abstain from numeric life-safety estimates.\"\n      }\n    },\n    {\n      \"schema_version\": \"1\",\n      \"action_id\": \"action-003-request-ground-access-reports\",\n      \"title\": \"Compile and request ground-access and road-condition reports from local authorities and partners in Nepal\",\n      \"location_ref\": \"Nepal (activation-level)\",\n      \"owner_role\": \"Field Liaison\",\n      \"urgency\": \"under_six_hours\",\n      \"evidence_ids\": [\n        \"cems-emsr927-snapshot\"\n      ],\n      \"status\": \"draft\",\n      \"estimate\": {\n        \"schema_version\": \"1\",\n        \"action_id\": \"action-003-request-ground-access-reports\",\n        \"status\": \"not_estimable\",\n        \"low\": null,\n        \"central\": null,\n        \"high\": null,\n        \"parameter_set_id\": null,\n        \"population_deduplication_group\": null,\n        \"abstention_reason\": \"Road km and extent metrics are reported at activation level but lack ground confirmation of accessibility; without verified field reports we abstain from estimating life-safety implications.\"\n      }\n    },\n    {\n      \"schema_version\": \"1\",\n      \"action_id\": \"action-004-cross-validate-activation-statistics\",\n      \"title\": \"Cross-validate CEMS activation statistics (built-up area, identified buildings, population, roads) against other satellite sources and local reports\",\n      \"location_ref\": \"EMSR927 activation summary\",\n      \"owner_role\": \"Data Integration Specialist\",\n      \"urgency\": \"under_twenty_four_hours\",\n      \"evidence_ids\": [\n        \"cems-emsr927-snapshot\"\n      ],\n      \"status\": \"draft\",\n      \"estimate\": {\n        \"schema_version\": \"1\",\n        \"action_id\": \"action-004-cross-validate-activation-statistics\",\n        \"status\": \"not_estimable\",\n        \"low\": null,\n        \"central\": null,\n        \"high\": null,\n        \"parameter_set_id\": null,\n        \"population_deduplication_group\": null,\n        \"abstention_reason\": \"Activation-level impact statistics are reported as preliminary and may change; do not produce numeric life-safety estimates until corroborated with independent datasets and ground confirmation.\"\n      }\n    }\n  ],\n  \"limitations\": [\n    \"Source snapshot: cems-emsr927-snapshot (Copernicus EMS Rapid Mapping public activation metadata).\",\n    \"Activation EMSR927 is open; AOIs, products, and statistics are preliminary and subject to change.\",\n    \"One AOI product (Bharatpur) is listed as waiting for data; missing products limit damage and exposure analysis.\",\n    \"All actions are drafts for human review. This output abstains from numeric life-safety estimates per task rules and preserves observed uncertainties; do not interpret this as an operational order or confirmation of field conditions.\"\n  ]\n}",
+  "response": {
+    "actions": [
+      {
+        "action_id": "action-001-verify-bharatpur-product",
+        "estimate": {
+          "abstention_reason": "GRA product for Bharatpur is reported as 'waiting' / missing in the source snapshot; without the product we abstain from any numeric life-safety estimate and cannot determine affected population or built environment impacts.",
+          "action_id": "action-001-verify-bharatpur-product",
+          "central": null,
+          "high": null,
+          "low": null,
+          "parameter_set_id": null,
+          "population_deduplication_group": null,
+          "schema_version": "1",
+          "status": "not_estimable"
+        },
+        "evidence_ids": [
+          "cems-emsr927-snapshot"
+        ],
+        "location_ref": "Bharatpur (AOI 4)",
+        "owner_role": "Data Verification Officer",
+        "schema_version": "1",
+        "status": "draft",
+        "title": "Verify status and expected delivery details for Bharatpur GRA product (AOI 4)",
+        "urgency": "under_six_hours"
+      },
+      {
+        "action_id": "action-002-review-finished-gra-products",
+        "estimate": {
+          "abstention_reason": "Activation-level statistics are preliminary and the activation is still open; until finished products are validated and cross-checked with ground reports we abstain from numeric life-safety estimates.",
+          "action_id": "action-002-review-finished-gra-products",
+          "central": null,
+          "high": null,
+          "low": null,
+          "parameter_set_id": null,
+          "population_deduplication_group": null,
+          "schema_version": "1",
+          "status": "not_estimable"
+        },
+        "evidence_ids": [
+          "cems-emsr927-snapshot"
+        ],
+        "location_ref": "Syapru Besi (AOI 1), Timure (AOI 2), Bidur (AOI 3)",
+        "owner_role": "Geospatial Analyst",
+        "schema_version": "1",
+        "status": "draft",
+        "title": "Review finished GRA products for Syapru Besi, Timure, and Bidur to produce prioritized damage/density overlays",
+        "urgency": "under_twenty_four_hours"
+      },
+      {
+        "action_id": "action-003-request-ground-access-reports",
+        "estimate": {
+          "abstention_reason": "Road km and extent metrics are reported at activation level but lack ground confirmation of accessibility; without verified field reports we abstain from estimating life-safety implications.",
+          "action_id": "action-003-request-ground-access-reports",
+          "central": null,
+          "high": null,
+          "low": null,
+          "parameter_set_id": null,
+          "population_deduplication_group": null,
+          "schema_version": "1",
+          "status": "not_estimable"
+        },
+        "evidence_ids": [
+          "cems-emsr927-snapshot"
+        ],
+        "location_ref": "Nepal (activation-level)",
+        "owner_role": "Field Liaison",
+        "schema_version": "1",
+        "status": "draft",
+        "title": "Compile and request ground-access and road-condition reports from local authorities and partners in Nepal",
+        "urgency": "under_six_hours"
+      },
+      {
+        "action_id": "action-004-cross-validate-activation-statistics",
+        "estimate": {
+          "abstention_reason": "Activation-level impact statistics are reported as preliminary and may change; do not produce numeric life-safety estimates until corroborated with independent datasets and ground confirmation.",
+          "action_id": "action-004-cross-validate-activation-statistics",
+          "central": null,
+          "high": null,
+          "low": null,
+          "parameter_set_id": null,
+          "population_deduplication_group": null,
+          "schema_version": "1",
+          "status": "not_estimable"
+        },
+        "evidence_ids": [
+          "cems-emsr927-snapshot"
+        ],
+        "location_ref": "EMSR927 activation summary",
+        "owner_role": "Data Integration Specialist",
+        "schema_version": "1",
+        "status": "draft",
+        "title": "Cross-validate CEMS activation statistics (built-up area, identified buildings, population, roads) against other satellite sources and local reports",
+        "urgency": "under_twenty_four_hours"
+      }
+    ],
+    "case_id": "emsr927",
+    "limitations": [
+      "Source snapshot: cems-emsr927-snapshot (Copernicus EMS Rapid Mapping public activation metadata).",
+      "Activation EMSR927 is open; AOIs, products, and statistics are preliminary and subject to change.",
+      "One AOI product (Bharatpur) is listed as waiting for data; missing products limit damage and exposure analysis.",
+      "All actions are drafts for human review. This output abstains from numeric life-safety estimates per task rules and preserves observed uncertainties; do not interpret this as an operational order or confirmation of field conditions."
+    ],
+    "schema_version": "1"
+  },
+  "run_id": "run-66147235-554b-4c98-88a1-45d56b8f4014",
+  "schema_version": "1",
+  "source_package_id": "source-package-emsr927",
+  "started_at": "2026-08-31T09:56:35.461985Z",
+  "status": "completed",
+  "system_prompt": "You are the Climate Cascade Response Supervisor. Turn only verified, cited post-disaster source evidence into a small queue of unapproved draft actions for an emergency operations analyst. Preserve uncertainty and missing data. Never issue public warnings, evacuations, dispatches, or infrastructure commands. Never imply that a draft action has occurred, that exposure equals lives saved, or that a pending area is unaffected. Cite one or more supplied source evidence IDs on every action.",
+  "user_prompt": "{\"allowed_action_evidence_ids\":[\"cems-emsr927-snapshot\"],\"case_id\":\"emsr927\",\"maximum_actions\":5,\"operational_scenario\":null,\"response_rules\":[\"For every action.evidence_ids value, use an exact value from allowed_action_evidence_ids. Do not use source_id or claim_id values.\",\"Every action is a draft for a qualified human; do not issue an order, dispatch, or public warning.\",\"Keep open activations, pending products, and preliminary facts visible as uncertainty.\",\"When data are missing, request evidence or verification rather than infer no impact.\",\"Set estimate to null, or use only a not_estimable estimate with a concrete abstention reason; never provide numeric estimates.\",\"Do not claim lives saved, casualty counts, or deterministic impact analysis.\"],\"source_evidence\":{\"activation_code\":\"EMSR927\",\"case_id\":\"emsr927\",\"cems_activation\":{\"activation_code\":\"EMSR927\",\"activation_time\":\"2026-08-26T09:53:00\",\"aois\":[{\"aoi_name\":\"Syapru Besi\",\"aoi_number\":1,\"delivery_time\":\"2026-08-27T19:03:49.982313\",\"download_path\":\"https://rapidmapping.emergency.copernicus.eu/backend/EMSR927/AOI01/GRA_PRODUCT/EMSR927_AOI01_GRA_PRODUCT_v1.zip\",\"expected_delivery\":\"2026-08-27T19:41:00\",\"feasible\":true,\"product_type\":\"GRA\",\"schema_version\":\"1\",\"status_code\":\"F\",\"status_label\":\"finished\"},{\"aoi_name\":\"Timure\",\"aoi_number\":2,\"delivery_time\":\"2026-08-28T17:10:43.692032\",\"download_path\":\"https://rapidmapping.emergency.copernicus.eu/backend/EMSR927/AOI02/GRA_PRODUCT/EMSR927_AOI02_GRA_PRODUCT_v2.zip\",\"expected_delivery\":\"2026-08-27T18:55:00\",\"feasible\":true,\"product_type\":\"GRA\",\"schema_version\":\"1\",\"status_code\":\"F\",\"status_label\":\"finished\"},{\"aoi_name\":\"Bidur\",\"aoi_number\":3,\"delivery_time\":\"2026-08-31T01:07:28.157651\",\"download_path\":\"https://rapidmapping.emergency.copernicus.eu/backend/EMSR927/AOI03/GRA_MONIT01/EMSR927_AOI03_GRA_MONIT01_v1.zip\",\"expected_delivery\":\"2026-08-31T02:50:00\",\"feasible\":true,\"product_type\":\"GRA\",\"schema_version\":\"1\",\"status_code\":\"F\",\"status_label\":\"finished\"},{\"aoi_name\":\"Bidur\",\"aoi_number\":3,\"delivery_time\":\"2026-08-29T02:57:09.641898\",\"download_path\":\"https://rapidmapping.emergency.copernicus.eu/backend/EMSR927/AOI03/GRA_PRODUCT/EMSR927_AOI03_GRA_PRODUCT_v1.zip\",\"expected_delivery\":\"2026-08-28T19:30:00\",\"feasible\":true,\"product_type\":\"GRA\",\"schema_version\":\"1\",\"status_code\":\"F\",\"status_label\":\"finished\"},{\"aoi_name\":\"Bharatpur\",\"aoi_number\":4,\"delivery_time\":null,\"download_path\":null,\"expected_delivery\":\"2026-08-29T17:01:00\",\"feasible\":true,\"product_type\":\"GRA\",\"schema_version\":\"1\",\"status_code\":\"W\",\"status_label\":\"waiting for data\"}],\"category\":\"Flood\",\"charter_number\":\"1052\",\"charter_url\":\"https://disasterscharter.org/activations/flood-in-nepal-activation-1052-\",\"closed\":false,\"countries\":[\"Nepal\"],\"event_time\":\"2026-08-25T22:00:00\",\"name\":\"Flood in Nepal\",\"products_path\":\"https://rapidmapping.emergency.copernicus.eu/backend/EMSR927/EMSR927_products.zip\",\"report_link\":\"https://storymaps.arcgis.com/stories/f76baefadfa74d6d9a18265875f48870\",\"schema_version\":\"1\",\"stats\":{\"Built-up area [ha]\":11,\"Identified buildings [No.]\":3922,\"Population [No.]\":5900,\"Roads [km]\":56,\"max_extent\":940},\"sub_category\":\"Flash flood\"},\"claims\":[{\"claim_id\":\"cems-event-identity\",\"schema_version\":\"1\",\"source_ids\":[\"cems-emsr927\"],\"statement\":\"CEMS activation EMSR927 identifies Flood in Nepal as a Flood / Flash flood event.\",\"status\":\"supported\"},{\"claim_id\":\"cems-impact-stats\",\"schema_version\":\"1\",\"source_ids\":[\"cems-emsr927\"],\"statement\":\"CEMS reports activation-level impact statistics: Built-up area [ha]: 11, Identified buildings [No.]: 3922, Population [No.]: 5900, Roads [km]: 56, max_extent: 940.\",\"status\":\"supported\"},{\"claim_id\":\"cems-aoi-product-status\",\"schema_version\":\"1\",\"source_ids\":[\"cems-emsr927\"],\"statement\":\"CEMS lists 5 AOI products: 4 finished and 1 waiting or in production.\",\"status\":\"preliminary\"}],\"data_gaps\":[\"Bharatpur GRA product is waiting for data.\"],\"findings\":[{\"finding_id\":\"cems-source-reachable\",\"message\":\"CEMS activation EMSR927 was retrieved from the public Rapid Mapping API.\",\"schema_version\":\"1\",\"severity\":\"info\",\"source_ids\":[\"cems-emsr927\"],\"status\":\"supported\"},{\"finding_id\":\"cems-activation-open\",\"message\":\"CEMS activation is still open, so AOIs, products, and statistics may change.\",\"schema_version\":\"1\",\"severity\":\"warning\",\"source_ids\":[\"cems-emsr927\"],\"status\":\"preliminary\"},{\"finding_id\":\"cems-products-pending\",\"message\":\"1 AOI product(s) are waiting or still in production.\",\"schema_version\":\"1\",\"severity\":\"warning\",\"source_ids\":[\"cems-emsr927\"],\"status\":\"preliminary\"}],\"hazard_type\":\"flood_debris_flow\",\"package_id\":\"source-package-emsr927\",\"retrieved_at\":\"2026-08-31T09:56:33.403551Z\",\"schema_version\":\"1\",\"snapshots\":[{\"adapter\":\"cems-rapid-mapping\",\"content_sha256\":\"6299d668b03e724449fe92db1c3ae15895821882e9ec38852d2aaa6d6e44c4a6\",\"content_type\":\"application/json\",\"kind\":\"raw_http_json\",\"license_note\":\"Copernicus EMS Rapid Mapping activation metadata is publicly accessible and must be cited as source data.\",\"publisher\":\"Copernicus Emergency Management Service\",\"retrieved_at\":\"2026-08-31T09:56:33.403551Z\",\"schema_version\":\"1\",\"snapshot_id\":\"cems-emsr927-snapshot\",\"source_id\":\"cems-emsr927\",\"source_url\":\"https://rapidmapping.emergency.copernicus.eu/backend/dashboard-api/public-activations/?code=EMSR927\"}],\"verification_status\":\"preliminary\"},\"task\":\"Draft a small, human-reviewable response queue from verified source evidence.\"}"
+}

@@ -77,6 +77,10 @@ Nepal's package records a reachable CEMS source, an open-activation warning, and
 
 Machine-readable evidence: [summary](../../runs/iteration_1/iteration1-source-round-summary.json), [Nepal evidence](../../runs/iteration_1/nepal-emsr927-live-source.evidence.json), [Poland evidence](../../runs/iteration_1/poland-emsr756-live-source.evidence.json), and [Sri Lanka evidence](../../runs/iteration_1/sri-lanka-emsr851-live-source.evidence.json).
 
+## Subsequent artifact-retention note
+
+On 2026-08-31, the project owner requested removal of the static source-run artifacts named above. This historical execution record remains unchanged as a record of that earlier checkpoint, but those paths are no longer retained evidence. The current retained Iteration 1 bundle and final finding are documented in [record 15](2026-08-31-15-iteration-1-live-poc-finalization.md).
+
 ## Failures and corrections
 
 - The first local server attempt used port `8021`, which was already occupied. It was rerun on `8023`; the final evidence-capture rerun used `8025` after raw snapshots were added.
