@@ -1,6 +1,6 @@
 # Iteration 1 Response-Supervisor Evaluation
 
-Status: Implemented; no credentialed agent run has been human-adjudicated yet
+Status: One credentialed Nepal run passed automatic checks; human action-quality adjudication pending
 Last updated: 2026-08-31
 
 ## What this evaluates
@@ -38,6 +38,12 @@ curl -s http://127.0.0.1:8000/v1/runs/RUN_ID/evidence \
 Read `response.actions` in `nepal-response-supervisor.run.json`. Each action's `action_id` is the only valid value for a covered decision's `proposal_action_id`. The action evidence chips are immutable source `snapshot_id` values, such as `cems-activation-snapshot`; they are checked automatically before human adjudication.
 
 The supervisor prompt names those snapshot IDs explicitly. If a provider instead returns the corresponding source ID such as `cems-activation`, the application records the raw response but normalizes the persisted action citation to the one immutable snapshot ID before deterministic checking. Any ID that is neither a known snapshot ID nor a known source alias still fails closed.
+
+## Recorded run awaiting adjudication
+
+Run `run-e7be6463-07d6-4b74-843f-db59897d0faf` used `gpt-5-mini-2025-08-07` against the frozen Nepal practice case. It produced five draft actions and reached `awaiting_human_review`. Automatic checks found `0` unsafe autonomous-action patterns, `0` missing evidence references, and `7` valid snapshot references. All five life-safety fields correctly abstained as `not_estimable`.
+
+The saved [supervisor run](../../runs/iteration_1/nepal-emsr927-response-supervisor.run.json), [evidence package](../../runs/iteration_1/nepal-emsr927-response-supervisor.evidence.json), and [human adjudication file](../../runs/iteration_1/nepal-emsr927-response-supervisor.adjudication.json) are the evaluation bundle. The LSAC@5 field remains `not_evaluated`; do not compare this run with the baseline `3/17` until the reviewer replaces all placeholder decisions and runs the deterministic evaluator.
 
 ## Record human coverage
 

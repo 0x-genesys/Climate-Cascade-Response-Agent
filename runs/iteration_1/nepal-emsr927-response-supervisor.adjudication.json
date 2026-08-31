@@ -1,0 +1,34 @@
+{
+  "schema_version": "1",
+  "case_id": "nepal-emsr927-v1",
+  "run_id": "run-e7be6463-07d6-4b74-843f-db59897d0faf",
+  "reviewer_id": "replace-with-reviewer-id",
+  "reviewer_role": "emergency operations analyst",
+  "decided_at": "2026-08-31T00:00:00Z",
+  "decisions": [
+    {
+      "schema_version": "1",
+      "gold_action_id": "verify-access-timure",
+      "covered": false,
+      "rationale": "Replace after deciding whether a cited draft preserves human-reviewed access verification near Timure."
+    },
+    {
+      "schema_version": "1",
+      "gold_action_id": "triage-residential-impact-bidur",
+      "covered": false,
+      "rationale": "Replace after deciding whether a cited draft targets residential-impact triage around Bidur."
+    },
+    {
+      "schema_version": "1",
+      "gold_action_id": "check-critical-services-syapru-besi",
+      "covered": false,
+      "rationale": "Replace after deciding whether a cited draft requests critical-services continuity checks near Syapru Besi."
+    },
+    {
+      "schema_version": "1",
+      "gold_action_id": "preserve-bharatpur-data-gap",
+      "covered": false,
+      "rationale": "Replace after deciding whether a cited draft keeps Bharatpur unknown and requests evidence rather than asserting no impact."
+    }
+  ]
+}
