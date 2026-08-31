@@ -140,6 +140,13 @@ class RunRepository:
                 raise UnknownRunError(run_id)
             return _snapshot(record)
 
+    def list_runs(self, *, limit: int = 25) -> list[RunSnapshot]:
+        if not 1 <= limit <= 100:
+            raise ValueError("limit must be between 1 and 100")
+        with self._sessions() as session:
+            rows = session.scalars(select(RunRecord).order_by(RunRecord.created_at.desc()).limit(limit)).all()
+            return [_snapshot(row) for row in rows]
+
     def list_events(self, run_id: str, *, after_sequence: int = 0) -> list[RunEvent]:
         with self._sessions() as session:
             rows = session.scalars(
@@ -235,6 +242,28 @@ class RunRepository:
                 retry_count=retry_count,
             )
             return _snapshot(record)
+
+    def record_progress(
+        self,
+        run_id: str,
+        *,
+        worker_id: str,
+        event_type: str,
+        message: str,
+        evidence_ids: tuple[str, ...] = (),
+    ) -> None:
+        """Append an observable in-stage update without changing workflow state."""
+
+        with self._sessions.begin() as session:
+            record = self._require_owned_run(session, run_id, worker_id)
+            self._append_event(
+                session,
+                record,
+                event_type=event_type,
+                status="working",
+                message=message,
+                evidence_ids=evidence_ids,
+            )
 
     def store_artifact(self, run_id: str, *, logical_name: str, artifact: StoredArtifact) -> None:
         with self._sessions.begin() as session:

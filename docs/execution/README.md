@@ -4,6 +4,10 @@ This directory is the append-only operational record for implementation work. Th
 
 Create one entry before or immediately after each meaningful implementation step. Update it after verification, never by replacing a historical result.
 
+## Latest checkpoint
+
+[2026-08-31-15 Iteration 1 live Nepal POC finalization](2026-08-31-15-iteration-1-live-poc-finalization.md) retains the current live run, project-owner manual coverage review, deterministic evaluation, and the explicit non-comparable benchmark boundary.
+
 ## Required entry fields
 
 - Date and scope

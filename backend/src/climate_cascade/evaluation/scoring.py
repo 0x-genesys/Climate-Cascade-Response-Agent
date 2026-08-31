@@ -67,7 +67,7 @@ class CoverageAdjudication(StrictModel):
 
     schema_version: Literal["1"] = "1"
     case_id: Identifier
-    run_id: str = Field(pattern=r"^baseline-[a-f0-9-]{36}$")
+    run_id: str = Field(pattern=r"^(?:baseline|run)-[a-f0-9-]{36}$")
     reviewer_id: Identifier
     reviewer_role: NonEmptyText
     decided_at: datetime

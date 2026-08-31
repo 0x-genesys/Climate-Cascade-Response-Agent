@@ -117,6 +117,17 @@ def test_baseline_does_not_repair_invalid_model_json() -> None:
     assert gateway.call_count == 1
 
 
+def test_baseline_records_model_validation_errors_with_value_error_context() -> None:
+    response = valid_response()
+    response["actions"][1]["action_id"] = response["actions"][0]["action_id"]
+
+    run = run_baseline(load_frozen_case(CASE_DIRECTORY), StaticGateway(response))
+
+    assert run.status is BaselineRunStatus.FAILED
+    assert run.failure_code is BaselineFailureCode.MODEL_SCHEMA
+    assert "unique action_id" in (run.failure_detail or "")
+
+
 def test_baseline_rejects_unknown_evidence_references_after_one_call() -> None:
     response = valid_response()
     response["actions"][0]["evidence_ids"] = ["invented-source"]

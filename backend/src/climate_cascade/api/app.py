@@ -9,12 +9,13 @@ from pathlib import Path
 from uuid import uuid4
 
 from fastapi import FastAPI, Header, HTTPException, Request
-from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
+from fastapi.staticfiles import StaticFiles
 
 from climate_cascade.domain import RunMode
 from climate_cascade.persistence import LocalArtifactStore, RunRepository, RunSnapshot, create_sqlite_engine, migrate_database
 
-from .models import CreateBaselineRunRequest, CreateRunRequest, RunResponse
+from .models import CreateBaselineRunRequest, CreateRunRequest, RunListResponse, RunResponse
 
 
 @dataclass(frozen=True)
@@ -22,10 +23,17 @@ class ApiServices:
     repository: RunRepository
     artifact_store: LocalArtifactStore
     case_root: Path
+    dashboard_root: Path | None = None
 
 
 def build_services(
-    *, database_url: str, artifact_root: Path, case_root: Path, repository_root: Path, run_migrations: bool = True
+    *,
+    database_url: str,
+    artifact_root: Path,
+    case_root: Path,
+    repository_root: Path,
+    dashboard_root: Path | None = None,
+    run_migrations: bool = True,
 ) -> ApiServices:
     if run_migrations:
         migrate_database(database_url, repository_root=repository_root)
@@ -33,11 +41,18 @@ def build_services(
         repository=RunRepository(create_sqlite_engine(database_url)),
         artifact_store=LocalArtifactStore(artifact_root),
         case_root=case_root,
+        dashboard_root=dashboard_root,
     )
 
 
 def create_app(*, services: ApiServices) -> FastAPI:
     app = FastAPI(title="Climate Cascade Response API", version="0.1.0")
+    if services.dashboard_root is not None and (services.dashboard_root / "index.html").is_file():
+        app.mount("/dashboard", StaticFiles(directory=services.dashboard_root), name="dashboard")
+
+        @app.get("/", include_in_schema=False)
+        def dashboard() -> FileResponse:
+            return FileResponse(services.dashboard_root / "index.html")
 
     @app.middleware("http")
     async def correlation_id(request: Request, call_next):
@@ -67,6 +82,14 @@ def create_app(*, services: ApiServices) -> FastAPI:
             cases.append({"case_id": manifest["fixture_id"], "hazard_type": manifest["hazard_type"]})
         return {"cases": cases}
 
+    @app.get("/v1/runs", response_model=RunListResponse)
+    def list_runs(limit: int = 25) -> RunListResponse:
+        try:
+            runs = services.repository.list_runs(limit=limit)
+        except ValueError as error:
+            raise HTTPException(status_code=400, detail=str(error)) from error
+        return RunListResponse(runs=[_run_response(run) for run in runs])
+
     @app.post("/v1/runs", response_model=RunResponse, status_code=202)
     def create_run(
         request: Request,
@@ -90,6 +113,15 @@ def create_app(*, services: ApiServices) -> FastAPI:
         )
         return _create_run(request, run_request, idempotency_key=idempotency_key, services=services)
 
+    @app.post("/v1/agent/runs", response_model=RunResponse, status_code=202)
+    def create_agent_run(
+        request: Request,
+        payload: CreateRunRequest,
+        idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
+    ) -> RunResponse:
+        run_request = CreateRunRequest(**payload.model_dump(exclude={"mode"}), mode=RunMode.AGENT)
+        return _create_run(request, run_request, idempotency_key=idempotency_key, services=services)
+
     @app.get("/v1/runs/{run_id}", response_model=RunResponse)
     def get_run(run_id: str) -> RunResponse:
         return _run_response(services.repository.get_run(run_id))
@@ -99,6 +131,27 @@ def create_app(*, services: ApiServices) -> FastAPI:
         services.repository.get_run(run_id)
         payload: dict[str, object] = {"run_id": run_id}
         for logical_name in ("baseline_run", "baseline_evaluation"):
+            artifact = services.repository.get_artifact(run_id, logical_name)
+            if artifact is not None:
+                payload[logical_name] = json.loads(artifact.storage_path.read_text(encoding="utf-8"))
+        return payload
+
+    @app.get("/v1/runs/{run_id}/evidence")
+    def get_evidence_package(run_id: str) -> dict[str, object]:
+        services.repository.get_run(run_id)
+        artifact = services.repository.get_artifact(run_id, "source_evidence_package")
+        if artifact is None:
+            return {"run_id": run_id, "source_evidence_package": None}
+        return {
+            "run_id": run_id,
+            "source_evidence_package": json.loads(artifact.storage_path.read_text(encoding="utf-8")),
+        }
+
+    @app.get("/v1/runs/{run_id}/agent")
+    def get_agent_artifacts(run_id: str) -> dict[str, object]:
+        services.repository.get_run(run_id)
+        payload: dict[str, object] = {"run_id": run_id}
+        for logical_name in ("response_supervisor_run", "agent_evaluation"):
             artifact = services.repository.get_artifact(run_id, logical_name)
             if artifact is not None:
                 payload[logical_name] = json.loads(artifact.storage_path.read_text(encoding="utf-8"))
@@ -146,8 +199,13 @@ def _create_run(
 ) -> RunResponse:
     if not idempotency_key or len(idempotency_key.strip()) < 8:
         raise HTTPException(status_code=400, detail="Idempotency-Key header must contain at least eight characters")
-    if not (services.case_root / payload.case_id / "manifest.json").is_file():
+    fixture_exists = (services.case_root / payload.case_id / "manifest.json").is_file()
+    if payload.fixture_mode and not fixture_exists:
         raise HTTPException(status_code=404, detail=f"Unknown pinned case: {payload.case_id}")
+    if not payload.fixture_mode and payload.mode is not RunMode.AGENT:
+        raise HTTPException(status_code=400, detail="Only agent runs can use live source intake")
+    if not payload.fixture_mode and not payload.activation:
+        raise HTTPException(status_code=400, detail="Live agent runs require an activation code")
     config = payload.model_dump(exclude={"case_id", "mode", "fixture_mode"}, exclude_none=True)
     try:
         run, _created = services.repository.create_run(

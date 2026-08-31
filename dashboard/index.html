@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Climate Cascade Response</title>
+    <link rel="stylesheet" href="/dashboard/styles.css">
+  </head>
+  <body>
+    <main class="shell">
+      <header class="hero">
+        <div>
+          <p class="eyebrow">Flood and debris-flow decision support</p>
+          <h1>Climate Cascade<br>Response</h1>
+          <p class="hero-copy">Turn verified disaster evidence into a short set of actions a qualified emergency manager can review. The system never issues an evacuation, dispatch, or public warning.</p>
+        </div>
+        <div class="hero-status"><span class="pulse"></span><span id="connectionStatus">Checking local service</span><small>Local-first, human-controlled</small></div>
+      </header>
+
+      <section class="orientation" aria-label="How this works">
+        <div><b>1</b><span>Choose a disaster case</span></div><div><b>2</b><span>Verify official sources</span></div><div><b>3</b><span>Review draft actions</span></div><div><b>4</b><span>Score with a human</span></div>
+      </section>
+
+      <section class="workspace">
+        <aside class="control-panel" aria-label="Start or revisit a run">
+          <div class="panel-intro"><p class="eyebrow">Start a run</p><h2>What would you like to review?</h2><p>Use the Nepal fixture for a repeatable demonstration. Use a CEMS activation code to review current public mapping data.</p></div>
+          <div class="form-block"><label for="modelInput">Response model</label><input id="modelInput" value="gpt-5-mini" autocomplete="off" spellcheck="false"><p class="helper">The key stays in <code>OPENAI_API_KEY</code> on this computer. It is never shown or stored in the run.</p></div>
+          <div class="form-block"><label for="caseSelect">Pinned practice case</label><select id="caseSelect"></select><button id="startFixtureRun" type="button">Run the Nepal practice case</button><p class="helper">Best first run. It uses stable, cited inputs and can later be scored against frozen review criteria.</p></div>
+          <div class="form-block live-source"><label for="activationCode">Live CEMS activation code</label><input id="activationCode" value="EMSR927" autocomplete="off" spellcheck="false"><button id="startLiveRun" type="button" class="secondary">Review live CEMS data</button><p class="helper">CEMS codes start with <code>EMSR</code>. Choose a flood activation only. Live data can change after each run.</p></div>
+          <div class="example-block"><div class="section-label">Try an example</div><button class="example" data-activation="EMSR927" type="button"><strong>Nepal</strong><span>Open flood activation - useful for uncertainty handling</span></button><button class="example" data-activation="EMSR756" type="button"><strong>South-west Poland</strong><span>Closed flood activation - complete historical source</span></button><button class="example" data-activation="EMSR851" type="button"><strong>Sri Lanka</strong><span>Closed flood activation - complete historical source</span></button><a class="source-link" href="https://mapping.emergency.copernicus.eu/about/how-to-harvest-cems-mapping-data/emergency-response-data/" target="_blank" rel="noreferrer">What is Copernicus EMS?</a></div>
+          <div class="form-block run-picker"><div class="section-label">Recent local runs</div><select id="runSelect" aria-label="Recent runs"><option value="">No run selected</option></select><button id="inspectRun" type="button" class="tertiary">Open selected run</button></div>
+        </aside>
+
+        <section class="run-panel" aria-label="Disaster response run">
+          <section class="run-banner"><div><p class="eyebrow">Current review</p><h2 id="runTitle">Choose a practice case or live activation</h2><p id="runSubtitle">The dashboard will explain what is known, what needs verification, and which draft actions need a person.</p><p id="liveStatus" class="live-status" aria-live="polite">Waiting for a run to begin.</p></div><div class="run-state" id="runStateBox"><span id="runState">Ready to start</span><small id="runMode">No run selected</small></div></section>
+          <section class="incident-grid"><article class="surface incident-card"><div class="surface-heading"><div><p class="eyebrow">Incident briefing</p><h3 id="incidentTitle">No disaster selected</h3></div><span id="incidentBadge" class="badge">Waiting</span></div><div id="incidentPanel" class="empty-state">Start a run to see the verified public event summary, reported impacts, and what remains uncertain.</div></article><article class="surface map-card"><div class="surface-heading"><div><p class="eyebrow">Official mapping</p><h3>Area products</h3></div><span class="badge neutral">CEMS</span></div><div id="mapPanel" class="empty-state">Official CEMS map products and AOI status appear here after source verification. Geographic layers are added only after the validated geometry pipeline exists.</div></article></section>
+          <section class="content-grid"><article class="surface actions-surface"><div class="surface-heading"><div><p class="eyebrow">Human review queue</p><h3>Draft actions to consider</h3></div><span id="actionStatus" class="badge">Waiting</span></div><div id="actionPanel" class="empty-state">The response supervisor will place short, cited draft actions here. They are never automatic field commands.</div></article><article class="surface feedback-surface"><div class="surface-heading"><div><p class="eyebrow">Run feedback</p><h3>Checks and next step</h3></div><button id="refreshRun" type="button" class="icon-button">Refresh</button></div><div id="evaluationPanel" class="empty-state">After a draft is created, this panel reports deterministic evidence and safety checks and tells you whether human scoring is needed.</div></article></section>
+          <section class="content-grid lower-grid"><article class="surface evidence-surface"><div class="surface-heading"><div><p class="eyebrow">Evidence and uncertainty</p><h3>What the sources say</h3></div><span id="evidenceStatus" class="badge">Waiting</span></div><div id="evidencePanel" class="empty-state">Source snapshots, completeness warnings, and citations appear here after verification.</div></article><article class="surface progress-surface"><div class="surface-heading"><div><p class="eyebrow">Run progress</p><h3>What the system did</h3></div><span id="eventCount" class="badge neutral">0 steps</span></div><ol id="eventList" class="event-list"></ol></article></section>
+        </section>
+      </section>
+
+      <section class="glossary surface" aria-labelledby="glossaryTitle">
+        <div class="surface-heading glossary-heading"><div><p class="eyebrow">Reference</p><h2 id="glossaryTitle">Glossary: terms used in this review</h2></div><p>Each term names a source, control, or checkpoint in the response flow.</p></div>
+        <div class="glossary-grid">
+          <article><h3>CEMS</h3><p><strong>Copernicus Emergency Management Service.</strong> The primary public mapping source for this flood MVP. Used first during source intake to identify the activation, affected-area products, and reported impacts.</p></article>
+          <article><h3>USGS</h3><p><strong>U.S. Geological Survey.</strong> A technical hazard source. Used during source intake to preserve preliminary trigger findings and prevent unsupported certainty.</p></article>
+          <article><h3>International Charter</h3><p><strong>Space and Major Disasters.</strong> A disaster-response satellite-imagery coordination source. Used during source intake to corroborate activation context and data gaps.</p></article>
+          <article><h3>AOI</h3><p><strong>Area of interest.</strong> A named mapping area within a CEMS activation. Used in Official Mapping to show whether a product is delivered, pending, or unavailable.</p></article>
+          <article><h3>Evidence snapshot</h3><p><strong>A pinned copy of a source response.</strong> It stores a URL, retrieval time, checksum, and immutable ID. Used to ground every draft action and evidence-reference check.</p></article>
+          <article><h3>Response supervisor</h3><p><strong>The bounded drafting agent.</strong> After evidence is saved, it produces at most five human-reviewable actions. It cannot dispatch, warn, or approve anything.</p></article>
+          <article><h3>Draft only</h3><p><strong>A proposal, not an instruction.</strong> It appears after the response supervisor succeeds. A qualified emergency manager still owns any approval, edit, evidence request, or rejection.</p></article>
+          <article><h3>Run Feedback</h3><p><strong>Automatic pre-review checks.</strong> It verifies autonomous-action safety and evidence references after drafting. Passing it means the queue is ready for human review, not that the actions are approved.</p></article>
+          <article><h3>LSAC@5</h3><p><strong>Life-Safety Action Coverage at 5.</strong> The weighted share of frozen life-safety requirements covered by the top five drafts. Used only after a human records coverage decisions for the Nepal practice case.</p></article>
+          <article><h3>Human adjudication</h3><p><strong>The explicit coverage review.</strong> A reviewer decides whether each frozen requirement is actually covered, then the deterministic evaluator calculates LSAC@5 for comparison with the baseline.</p></article>
+          <article><h3>Not estimable</h3><p><strong>A required abstention when evidence is insufficient.</strong> It means the system will not invent a lives-saved range. Used beside an action when Iteration 1 lacks calibrated impact support.</p></article>
+          <article><h3>SSE progress feed</h3><p><strong>Server-Sent Events.</strong> The live, ordered workflow stream used by Run Progress and the current status message. It reports observable work, not private model reasoning.</p></article>
+        </div>
+      </section>
+    </main>
+    <script src="/dashboard/app.js"></script>
+  </body>
+</html>

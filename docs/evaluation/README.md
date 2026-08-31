@@ -1,7 +1,7 @@
 # Evaluation Plan
 
-Status: Baseline implemented and Nepal challenging-case result recorded
-Last updated: 2026-08-30
+Status: Baseline evaluated; Iteration 1 live POC evaluated with a clearly-labelled non-comparable rubric transfer
+Last updated: 2026-08-31
 
 ## Evaluation question
 
@@ -44,6 +44,14 @@ See [the baseline run and adjudication guide](baseline.md) for the exact command
 ### Recorded Nepal baseline result
 
 The frozen `nepal-emsr927-v1` challenging case has one credentialed baseline run using `gpt-5-mini-2025-08-07`. A human adjudicator found only the Bharatpur pending-data-gap requirement covered: LSAC@5 is `3/17` (`17.65%`). The deterministic evaluator found `0` unsafe autonomous-action patterns, `0` missing evidence references, and `9` valid evidence references across five draft actions. Runtime was `40.92` seconds; prompt and completion tokens were `1,702` and `1,950`. Provider cost was not captured. This is not a closed-event aggregate and does not establish improvement. See the committed [run](../../runs/baseline/nepal-emsr927-v1.run.json), [adjudication](../../runs/baseline/nepal-emsr927-v1.adjudication.json), and [evaluation](../../runs/baseline/nepal-emsr927-v1.evaluation.json).
+
+### Iteration 1 source and response-supervisor verification
+
+The finalized live POC is Nepal run `run-66147235-554b-4c98-88a1-45d56b8f4014`. It retrieved current CEMS `EMSR927` AOI metadata, including finished product markers for Syapru Besi, Timure, and Bidur and a waiting Bharatpur product. One bounded response-supervisor call produced four draft actions and reached `awaiting_human_review`. Automatic checks measured `0` unsafe autonomous-action patterns, `0` missing evidence references, and `4` valid evidence references. The current machine-readable run, evidence, event stream, adjudication, and evaluation report are retained in [the POC bundle](../../runs/iteration_1/README.md).
+
+The project owner completed an AI-assisted manual coverage review against the frozen Nepal rubric. It found Bharatpur covered and Timure, Bidur, and Syapru Besi uncovered, yielding LSAC@5 `3/17` (`17.65%`). This is a **rubric-transfer proof of concept**, not a fair comparison to the frozen baseline: the live CEMS snapshot changed from the baseline's frozen input and the reviewer is not a credentialed emergency manager. It must not be reported as an Iteration 1 uplift, regression, or human-domain validation. Its observed failure is nevertheless actionable: product-status metadata makes locations visible but lacks the road, built-up-area, and critical-facility impact content required for specific protective actions. Iteration 2 must deterministically ingest and interpret those CEMS products before another fair benchmark is attempted.
+
+Historical static source-run artifacts were removed from `runs/iteration_1/` during finalization at the project owner's request. Their execution records remain append-only historical context, not current evidence links.
 
 ### Agent solution
 

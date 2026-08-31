@@ -9,14 +9,17 @@ from pathlib import Path
 
 from climate_cascade.baseline import OpenAIChatCompletionsGateway, run_baseline
 from climate_cascade.baseline.runner import BaselineRunArtifact, BaselineRunStatus, write_run_artifact
-from climate_cascade.domain import load_frozen_case
-from climate_cascade.evaluation import CoverageAdjudication, evaluate_baseline
+from climate_cascade.agents import ResponseSupervisorRunArtifact
+from climate_cascade.domain import VerifiedEvidencePackage, load_frozen_case
+from climate_cascade.environment import load_project_environment
+from climate_cascade.evaluation import AgentEvaluationStatus, CoverageAdjudication, evaluate_agent_run, evaluate_baseline
 from climate_cascade.evaluation.scoring import EvaluationStatus
 
 
 def main(argv: list[str] | None = None) -> int:
     """Run one baseline call and write an evaluation report beside its artifact."""
 
+    load_project_environment()
     args = _parse_args(argv)
     case = load_frozen_case(args.case)
     gateway = _configured_gateway(args)
@@ -42,6 +45,7 @@ def main(argv: list[str] | None = None) -> int:
 def evaluate_main(argv: list[str] | None = None) -> int:
     """Evaluate an existing baseline run without issuing another model request."""
 
+    load_project_environment()
     args = _parse_evaluate_args(argv)
     case = load_frozen_case(args.case)
     run = BaselineRunArtifact.model_validate_json(args.run.read_text(encoding="utf-8"))
@@ -59,6 +63,30 @@ def evaluate_main(argv: list[str] | None = None) -> int:
         )
     )
     return 0 if report.status is EvaluationStatus.COMPLETE else 2
+
+
+def evaluate_agent_main(argv: list[str] | None = None) -> int:
+    """Evaluate a stored response-supervisor draft without making a model request."""
+
+    load_project_environment()
+    args = _parse_evaluate_agent_args(argv)
+    case = load_frozen_case(args.case)
+    run = ResponseSupervisorRunArtifact.model_validate_json(args.run.read_text(encoding="utf-8"))
+    evidence = VerifiedEvidencePackage.model_validate_json(args.evidence.read_text(encoding="utf-8"))
+    adjudication = _load_adjudication(args.adjudication) if args.adjudication is not None else None
+    report = evaluate_agent_run(run=run, evidence=evidence, case=case, adjudication=adjudication)
+    _write_json(args.evaluation_output, report.model_dump(mode="json"))
+    print(
+        json.dumps(
+            {
+                "run_id": run.run_id,
+                "evaluation_status": report.status,
+                "evaluation_artifact": str(args.evaluation_output),
+            },
+            sort_keys=True,
+        )
+    )
+    return 0 if report.status is AgentEvaluationStatus.COMPLETE else 2
 
 
 def _parse_args(argv: list[str] | None) -> argparse.Namespace:
@@ -79,6 +107,16 @@ def _parse_evaluate_args(argv: list[str] | None) -> argparse.Namespace:
     parser.add_argument("--case", type=Path, required=True, help="Frozen case directory.")
     parser.add_argument("--run", type=Path, required=True, help="Completed baseline run artifact JSON.")
     parser.add_argument("--adjudication", type=Path, required=True, help="Completed human coverage-adjudication JSON.")
+    parser.add_argument("--evaluation-output", type=Path, required=True, help="Path for the evaluation report JSON.")
+    return parser.parse_args(argv)
+
+
+def _parse_evaluate_agent_args(argv: list[str] | None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Evaluate a stored Climate Cascade response-supervisor run.")
+    parser.add_argument("--case", type=Path, required=True, help="Frozen case directory.")
+    parser.add_argument("--run", type=Path, required=True, help="Response-supervisor run artifact JSON.")
+    parser.add_argument("--evidence", type=Path, required=True, help="Stored verified evidence-package JSON.")
+    parser.add_argument("--adjudication", type=Path, help="Completed human coverage-adjudication JSON.")
     parser.add_argument("--evaluation-output", type=Path, required=True, help="Path for the evaluation report JSON.")
     return parser.parse_args(argv)
 

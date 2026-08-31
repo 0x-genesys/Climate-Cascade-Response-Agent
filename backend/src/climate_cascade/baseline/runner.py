@@ -172,4 +172,4 @@ def _validate_response_against_case(response: BaselineActionResponse, case: Froz
 
 
 def _compact_validation_error(error: ValidationError) -> str:
-    return json.dumps(error.errors(include_url=False), separators=(",", ":"))[:2000]
+    return json.dumps(error.errors(include_url=False), separators=(",", ":"), default=str)[:2000]

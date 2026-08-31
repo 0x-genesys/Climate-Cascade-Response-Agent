@@ -9,6 +9,7 @@ import socket
 import time
 
 from climate_cascade.baseline import OpenAIChatCompletionsGateway
+from climate_cascade.environment import load_project_environment
 from climate_cascade.persistence import LocalArtifactStore, RunRepository, create_sqlite_engine, migrate_database
 
 from .engine import WorkflowEngine
@@ -33,10 +34,12 @@ def build_worker_engine(
         artifact_store=LocalArtifactStore(artifact_root),
         case_root=case_root,
         gateway_factory=gateway_factory,
+        response_supervisor_config_path=repository_root / "config" / "agents" / "response_supervisor.json",
     )
 
 
 def main(argv: list[str] | None = None) -> int:
+    load_project_environment()
     parser = argparse.ArgumentParser(description="Run leased Climate Cascade workflow jobs.")
     parser.add_argument("--database-url", default=os.environ.get("CLIMATE_CASCADE_DATABASE_URL", "sqlite:///var/climate-cascade.db"))
     parser.add_argument("--artifact-root", type=Path, default=Path(os.environ.get("CLIMATE_CASCADE_ARTIFACT_ROOT", "var/artifacts")))

@@ -18,7 +18,7 @@ The hackathon MVP supports floods and debris flows. Earthquakes, tsunamis, torna
 
 Build a local-first system with:
 
-- a React and TypeScript dashboard
+- a static HTML, CSS, and JavaScript dashboard served by FastAPI for the MVP
 - a Python FastAPI control API
 - a separate Python worker running an explicit finite-state workflow
 - SQLite in WAL mode for durable workflow, audit, and review state
@@ -50,7 +50,7 @@ The deterministic workflow engine owns state transitions. Agents may propose wor
 
 ```mermaid
 flowchart TD
-  U["Emergency analyst"] --> D["React dashboard"]
+  U["Emergency analyst"] --> D["Local incident dashboard"]
   D -->|"HTTP and SSE"| A["FastAPI control API"]
   A --> DB["SQLite workflow and audit store"]
   A --> FS["Content-addressed artifact store"]
@@ -97,21 +97,22 @@ Baseline constraints:
 - one attempt only, with schema failure recorded rather than repaired
 - outputs saved exactly as produced
 
-### Iteration 1: verified event intake
+### Iteration 1: verified event intake and bounded draft response
 
-Add the response supervisor, authoritative-source adapters, source policy, claim comparison, and immutable snapshots. The supervisor can reason about source agreement, but code performs downloads, hashes, validation, and state changes.
+Implement authoritative-source adapters, a source policy, typed source findings, immutable snapshots, and one bounded response-supervisor call. Code owns downloads, canonicalization, hashing, validation, state changes, and status determination. The supervisor receives only compact verified evidence - never raw source payloads or frozen gold actions - and returns at most five cited, human-reviewable draft actions. Deterministic checks then validate action evidence references and prohibited autonomous language. Deterministic geospatial impact analysis, an independent model verifier, life-safety estimation, and approval remain later iterations.
 
 ```mermaid
 flowchart TD
   C["Frozen case or activation code"] --> O["Workflow orchestrator"]
   O --> F["Fetch source documents"]
   F --> S["Snapshot, hash, and license check"]
-  S --> R["Response supervisor"]
-  R --> Q["Compare claims and freshness"]
-  Q -->|"verified"| D["Versioned evidence dossier"]
-  Q -->|"conflict or missing"| B["Blocked with explanation"]
-  D --> P["Action draft using verified facts only"]
-  P --> E["Evaluation harness"]
+  S --> V["Deterministic source verifier"]
+  V -->|"supported or preliminary"| D["Versioned evidence dossier"]
+  V -->|"conflict or missing"| B["Blocked with explanation"]
+  D --> R["One response-supervisor call"]
+  R --> A["Cited draft actions"]
+  A --> E["Deterministic evidence and safety checks"]
+  E --> H["Awaiting human review"]
   B --> E
 ```
 
@@ -121,6 +122,7 @@ Expected measured effect:
 - fewer unsupported event claims
 - correct abstention on source conflict
 - explicit freshness and incomplete-data warnings
+- a reproducible human-adjudication path for LSAC@5, without a model judge
 
 ### Iteration 2: deterministic impact engine
 
@@ -558,6 +560,12 @@ Before invoking an agent, `ContextBuilder` supplies:
 
 Raw rasters, full source archives, unrelated run history, hidden model reasoning, and secrets never enter the prompt. Context limits and truncation decisions are recorded in the invocation.
 
+### Observable progress contract
+
+The persisted `run_events` stream is the one dashboard progress channel. A worker appends ordered non-transition `working` events before slow source retrieval, before the bounded response-supervisor call, after the structured response is saved, and before deterministic draft checks. SSE clients reconnect by sequence ID and render these exact events immediately, then refresh durable artifacts.
+
+The dashboard may say that the system is retrieving, drafting, or checking because those are observable workflow operations. It must not fabricate token-by-token streaming, hidden chain-of-thought, or a claim that a model is "thinking." The user-visible model output is the stored structured response after validation. Citation compatibility is handled at the supervisor boundary: a known `source_id` alias is normalized to its one immutable `snapshot_id`; all unknown IDs fail closed.
+
 ## FastAPI contracts
 
 All endpoints use `/v1`, JSON request and response bodies, Pydantic validation, UTC timestamps, structured error codes, and request correlation IDs.
@@ -902,7 +910,8 @@ Live-source refresh is optional and produces a new snapshot version. It never si
 | 3. SQLite migrations, repositories, artifact store, and run-event stream | Implemented | Alembic migration; SQLite WAL repository; immutable SHA-256 artifact store; monotonic persisted run events; `backend/tests/test_workflow_api.py` |
 | 4. FastAPI run creation, status, SSE, and baseline endpoints | Implemented | `/v1/runs`, `/v1/baseline/runs`, run status, reconnectable SSE, and baseline artifact endpoints; `backend/tests/test_workflow_api.py`; local startup command covered by `backend/tests/test_local_runtime.py` |
 | 5. Worker lease and explicit workflow engine | Implemented | SQLite `BEGIN IMMEDIATE` lease claims, expiry reclaim, persisted state transitions, baseline pause at human review, separate worker CLI, and combined local API-plus-worker command; [workflow record](../execution/2026-08-30-04-durable-workflow-api-and-worker.md), [local runtime record](../execution/2026-08-30-05-local-runtime-sqlite-setup.md) |
-| 6-12. Source adapters, agents, tools, dashboard, benchmark, and reproduction hardening | Planned | Must follow the test and execution-evidence protocol |
+| 6. Source adapters and Iteration 1 evidence contracts | Implemented; finalized as a live POC | Typed CEMS adapter, SHA-256 source snapshots, AOI status/data-gap findings, persisted evidence package, one configured response supervisor, deterministic action checks, human-adjudicable evaluator, `/v1/runs/{run_id}/evidence`, `/v1/runs/{run_id}/agent`, recent-run API, and static incident dashboard. The current live POC had four drafts, `0` unsafe findings, `0` missing references, and diagnostic LSAC@5 `3/17`. It is not comparable to the frozen baseline because source snapshots differ. [Finalization record](../execution/2026-08-31-15-iteration-1-live-poc-finalization.md); `backend/tests/test_response_supervisor.py`; `backend/tests/test_workflow_api.py` |
+| 7-12. Impact tools, independent evidence supervisor, review decisions, spatial layers, benchmark, and reproduction hardening | Planned | Must follow the test and execution-evidence protocol. The current dashboard shows authoritative product availability and links, not a generated geographic map; real spatial overlays await validated geometry and impact contracts. |
 
 ## Implementation order
 

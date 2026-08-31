@@ -12,6 +12,7 @@ import time
 import uvicorn
 
 from climate_cascade.api import build_services, create_app
+from climate_cascade.environment import load_project_environment
 from climate_cascade.persistence import migrate_database
 from climate_cascade.workflow.worker import build_worker_engine
 
@@ -19,9 +20,11 @@ from climate_cascade.workflow.worker import build_worker_engine
 DEFAULT_DATABASE_URL = "sqlite:///var/climate-cascade.db"
 DEFAULT_ARTIFACT_ROOT = Path("var/artifacts")
 DEFAULT_CASE_ROOT = Path("data/fixtures/cases")
+DEFAULT_DASHBOARD_ROOT = Path("dashboard")
 
 
 def main(argv: list[str] | None = None) -> int:
+    load_project_environment()
     parser = argparse.ArgumentParser(description="Prepare or run the local Climate Cascade control plane.")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
@@ -32,6 +35,7 @@ def main(argv: list[str] | None = None) -> int:
     _add_runtime_arguments(serve_parser)
     serve_parser.add_argument("--host", default="127.0.0.1")
     serve_parser.add_argument("--port", type=int, default=8000)
+    serve_parser.add_argument("--dashboard-root", type=Path, default=DEFAULT_DASHBOARD_ROOT)
     serve_parser.add_argument("--no-worker", action="store_true", help="Start only the API server.")
     serve_parser.add_argument("--worker-once", action="store_true", help="Let the worker claim at most one run, for smoke tests.")
     serve_parser.add_argument("--poll-seconds", type=float, default=0.5)
@@ -54,6 +58,7 @@ def main(argv: list[str] | None = None) -> int:
             artifact_root=args.artifact_root,
             case_root=args.case_root,
             repository_root=args.repository_root,
+            dashboard_root=args.dashboard_root,
             host=args.host,
             port=args.port,
             worker_enabled=not args.no_worker,
@@ -91,6 +96,7 @@ def serve_local(
     artifact_root: Path,
     case_root: Path,
     repository_root: Path,
+    dashboard_root: Path,
     host: str,
     port: int,
     worker_enabled: bool,
@@ -102,6 +108,7 @@ def serve_local(
         database_url=database_url,
         artifact_root=artifact_root,
         case_root=case_root,
+        dashboard_root=dashboard_root,
         repository_root=repository_root,
         run_migrations=False,
     )
@@ -131,10 +138,17 @@ def serve_local(
 
     try:
         uvicorn.run(create_app(services=services), host=host, port=port)
+    except KeyboardInterrupt:
+        # Ctrl-C is the normal interactive shutdown path for the local control plane.
+        pass
     finally:
         stop_worker.set()
         if worker_thread is not None:
-            worker_thread.join(timeout=2)
+            try:
+                worker_thread.join(timeout=2)
+            except KeyboardInterrupt:
+                # A second Ctrl-C should not turn an otherwise clean shutdown into a traceback.
+                pass
 
 
 def _worker_loop(*, engine, worker_id: str, stop_event: threading.Event, once: bool, poll_seconds: float) -> None:

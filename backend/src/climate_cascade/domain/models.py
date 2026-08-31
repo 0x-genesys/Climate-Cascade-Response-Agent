@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from enum import StrEnum
-from typing import Annotated, Literal
+from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints, field_validator, model_validator
 
@@ -47,6 +47,17 @@ class EvidenceStatus(StrEnum):
     PRELIMINARY = "preliminary"
     CONFLICTING = "conflicting"
     UNKNOWN = "unknown"
+
+
+class SourceSnapshotKind(StrEnum):
+    CURATED_FIXTURE = "curated_fixture"
+    RAW_HTTP_JSON = "raw_http_json"
+
+
+class SourceVerificationSeverity(StrEnum):
+    INFO = "info"
+    WARNING = "warning"
+    BLOCKER = "blocker"
 
 
 class RunState(StrEnum):
@@ -274,6 +285,110 @@ class FrozenCaseBundle(StrictModel):
     gold_actions: GoldActionSet
 
 
+class SourceSnapshot(StrictModel):
+    schema_version: Literal[SCHEMA_VERSION] = SCHEMA_VERSION
+    snapshot_id: Identifier
+    source_id: Identifier
+    adapter: Identifier
+    publisher: NonEmptyText
+    source_url: Annotated[str, StringConstraints(pattern=r"^https://")]
+    retrieved_at: datetime
+    kind: SourceSnapshotKind
+    content_sha256: Sha256
+    content_type: NonEmptyText
+    license_note: NonEmptyText
+    raw_content: dict[str, Any] | None = None
+
+    _retrieved_at_timezone = field_validator("retrieved_at")(_require_timezone)
+
+
+class CemsAoiProductStatus(StrictModel):
+    schema_version: Literal[SCHEMA_VERSION] = SCHEMA_VERSION
+    aoi_number: int = Field(ge=1)
+    aoi_name: NonEmptyText
+    product_type: NonEmptyText
+    feasible: bool | None = None
+    status_code: NonEmptyText
+    status_label: NonEmptyText
+    delivery_time: NonEmptyText | None = None
+    expected_delivery: NonEmptyText | None = None
+    download_path: Annotated[str, StringConstraints(pattern=r"^https://")] | None = None
+
+
+class CemsActivationSummary(StrictModel):
+    schema_version: Literal[SCHEMA_VERSION] = SCHEMA_VERSION
+    activation_code: Annotated[str, StringConstraints(strip_whitespace=True, pattern=r"^EMSR[0-9]{3}$")]
+    name: NonEmptyText
+    category: NonEmptyText
+    sub_category: NonEmptyText | None = None
+    event_time: NonEmptyText | None = None
+    activation_time: NonEmptyText | None = None
+    countries: list[NonEmptyText] = Field(default_factory=list)
+    closed: bool
+    report_link: Annotated[str, StringConstraints(pattern=r"^https://")] | None = None
+    products_path: Annotated[str, StringConstraints(pattern=r"^https://")] | None = None
+    charter_number: NonEmptyText | None = None
+    charter_url: Annotated[str, StringConstraints(pattern=r"^https://")] | None = None
+    stats: dict[str, str | int | float | bool] = Field(default_factory=dict)
+    aois: list[CemsAoiProductStatus] = Field(default_factory=list)
+
+    @property
+    def finished_product_count(self) -> int:
+        return sum(1 for aoi in self.aois if aoi.status_code.upper() == "F")
+
+    @property
+    def pending_product_count(self) -> int:
+        return sum(1 for aoi in self.aois if aoi.status_code.upper() in {"W", "I"})
+
+
+class SourceVerificationFinding(StrictModel):
+    schema_version: Literal[SCHEMA_VERSION] = SCHEMA_VERSION
+    finding_id: Identifier
+    severity: SourceVerificationSeverity
+    status: EvidenceStatus
+    message: NonEmptyText
+    source_ids: list[Identifier] = Field(min_length=1)
+
+
+class VerifiedEvidencePackage(StrictModel):
+    schema_version: Literal[SCHEMA_VERSION] = SCHEMA_VERSION
+    package_id: Identifier
+    case_id: Identifier
+    activation_code: Annotated[str, StringConstraints(strip_whitespace=True, pattern=r"^EMSR[0-9]{3}$")]
+    hazard_type: HazardType
+    verification_status: EvidenceStatus
+    retrieved_at: datetime
+    snapshots: list[SourceSnapshot] = Field(min_length=1)
+    claims: list[EvidenceClaim] = Field(min_length=1)
+    findings: list[SourceVerificationFinding] = Field(min_length=1)
+    data_gaps: list[NonEmptyText] = Field(default_factory=list)
+    cems_activation: CemsActivationSummary | None = None
+
+    _retrieved_at_timezone = field_validator("retrieved_at")(_require_timezone)
+
+    @model_validator(mode="after")
+    def source_references_are_known(self) -> "VerifiedEvidencePackage":
+        source_ids = [snapshot.source_id for snapshot in self.snapshots]
+        claim_ids = [claim.claim_id for claim in self.claims]
+        finding_ids = [finding.finding_id for finding in self.findings]
+        if len(source_ids) != len(set(source_ids)):
+            raise ValueError("snapshots must use unique source_id values")
+        if len(claim_ids) != len(set(claim_ids)):
+            raise ValueError("claims must use unique claim_id values")
+        if len(finding_ids) != len(set(finding_ids)):
+            raise ValueError("findings must use unique finding_id values")
+        known_sources = set(source_ids)
+        for claim in self.claims:
+            unknown = set(claim.source_ids) - known_sources
+            if unknown:
+                raise ValueError(f"claim {claim.claim_id} references unknown sources: {sorted(unknown)}")
+        for finding in self.findings:
+            unknown = set(finding.source_ids) - known_sources
+            if unknown:
+                raise ValueError(f"finding {finding.finding_id} references unknown sources: {sorted(unknown)}")
+        return self
+
+
 class LifeSafetyEstimate(StrictModel):
     schema_version: Literal[SCHEMA_VERSION] = SCHEMA_VERSION
     action_id: Identifier
@@ -305,6 +420,12 @@ class LifeSafetyEstimate(StrictModel):
         return self
 
 
+class NotEstimableLifeSafetyEstimate(LifeSafetyEstimate):
+    """Iteration 1 may explain an abstention but cannot produce numeric estimates."""
+
+    status: Literal[LifeSafetyStatus.NOT_ESTIMABLE] = LifeSafetyStatus.NOT_ESTIMABLE
+
+
 class ActionCandidate(StrictModel):
     schema_version: Literal[SCHEMA_VERSION] = SCHEMA_VERSION
     action_id: Identifier
@@ -320,6 +441,28 @@ class ActionCandidate(StrictModel):
     def estimate_belongs_to_action(self) -> "ActionCandidate":
         if self.estimate and self.estimate.action_id != self.action_id:
             raise ValueError("estimate.action_id must match action_id")
+        return self
+
+
+class ResponseSupervisorActionCandidate(StrictModel):
+    """Draft action shape for the response supervisor before the estimator is implemented."""
+
+    schema_version: Literal[SCHEMA_VERSION] = SCHEMA_VERSION
+    action_id: Identifier
+    title: NonEmptyText
+    location_ref: NonEmptyText
+    owner_role: NonEmptyText
+    urgency: ActionUrgency
+    evidence_ids: list[Identifier] = Field(min_length=1)
+    status: ActionStatus = ActionStatus.DRAFT
+    estimate: NotEstimableLifeSafetyEstimate | None = None
+
+    @model_validator(mode="after")
+    def estimate_belongs_to_action(self) -> "ResponseSupervisorActionCandidate":
+        if self.estimate and self.estimate.action_id != self.action_id:
+            raise ValueError("estimate.action_id must match action_id")
+        if self.status is not ActionStatus.DRAFT:
+            raise ValueError("response supervisor actions must remain drafts")
         return self
 
 
@@ -340,6 +483,22 @@ class BaselineActionResponse(StrictModel):
             raise ValueError("baseline actions must remain drafts")
         if any(action.estimate is not None for action in self.actions):
             raise ValueError("baseline cannot produce life-safety estimates")
+        return self
+
+
+class ResponseSupervisorActionResponse(StrictModel):
+    """One bounded supervisor response with safe life-safety abstentions only."""
+
+    schema_version: Literal[SCHEMA_VERSION] = SCHEMA_VERSION
+    case_id: Identifier
+    actions: list[ResponseSupervisorActionCandidate] = Field(min_length=1, max_length=5)
+    limitations: list[NonEmptyText] = Field(min_length=1)
+
+    @model_validator(mode="after")
+    def action_ids_are_unique(self) -> "ResponseSupervisorActionResponse":
+        action_ids = [action.action_id for action in self.actions]
+        if len(action_ids) != len(set(action_ids)):
+            raise ValueError("response supervisor actions must use unique action_id values")
         return self
 
 
