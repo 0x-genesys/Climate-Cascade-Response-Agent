@@ -291,3 +291,4 @@ def test_api_serves_dashboard_static_files(tmp_path: Path) -> None:
     assert script.status_code == 200
     assert "/v1/runs?limit=25" in script.text
     assert "/v1/runs/${state.runId}/evidence" in script.text
+    assert "Life-safety estimate:" in script.text

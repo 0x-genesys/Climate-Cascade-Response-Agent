@@ -13,8 +13,15 @@ from pydantic import Field, ValidationError
 
 from climate_cascade.baseline import ModelGateway
 from climate_cascade.baseline.gateway import ModelGatewayError
-from climate_cascade.baseline.schema import baseline_response_schema
-from climate_cascade.domain import BaselineActionResponse, FrozenCaseBundle, Identifier, NonEmptyText, StrictModel, VerifiedEvidencePackage
+from climate_cascade.baseline.schema import response_supervisor_response_schema
+from climate_cascade.domain import (
+    FrozenCaseBundle,
+    Identifier,
+    NonEmptyText,
+    ResponseSupervisorActionResponse,
+    StrictModel,
+    VerifiedEvidencePackage,
+)
 
 
 class ResponseSupervisorRunStatus(StrEnum):
@@ -58,7 +65,7 @@ class ResponseSupervisorRunArtifact(StrictModel):
     prompt_tokens: int | None = Field(default=None, ge=0)
     completion_tokens: int | None = Field(default=None, ge=0)
     raw_response: str | None = None
-    response: BaselineActionResponse | None = None
+    response: ResponseSupervisorActionResponse | None = None
     failure_code: ResponseSupervisorFailureCode | None = None
     failure_detail: str | None = None
 
@@ -108,7 +115,7 @@ def run_response_supervisor(
         completion = gateway.complete_json(
             system_prompt=config.system_prompt,
             user_prompt=user_prompt,
-            schema=baseline_response_schema(),
+            schema=response_supervisor_response_schema(),
             schema_name="response_supervisor_action_response",
         )
     except ModelGatewayError as error:
@@ -122,7 +129,7 @@ def run_response_supervisor(
         )
 
     try:
-        response = BaselineActionResponse.model_validate_json(completion.raw_response)
+        response = ResponseSupervisorActionResponse.model_validate_json(completion.raw_response)
     except ValidationError as error:
         return ResponseSupervisorRunArtifact(
             **common,
@@ -190,6 +197,7 @@ def _render_user_prompt(
             "Every action is a draft for a qualified human; do not issue an order, dispatch, or public warning.",
             "Keep open activations, pending products, and preliminary facts visible as uncertainty.",
             "When data are missing, request evidence or verification rather than infer no impact.",
+            "Set estimate to null, or use only a not_estimable estimate with a concrete abstention reason; never provide numeric estimates.",
             "Do not claim lives saved, casualty counts, or deterministic impact analysis.",
         ],
     }
@@ -197,7 +205,7 @@ def _render_user_prompt(
 
 
 def _validate_response(
-    response: BaselineActionResponse, *, case_id: str, evidence: VerifiedEvidencePackage, max_actions: int
+    response: ResponseSupervisorActionResponse, *, case_id: str, evidence: VerifiedEvidencePackage, max_actions: int
 ) -> str | None:
     if response.case_id != case_id:
         return "response.case_id does not match the run case"

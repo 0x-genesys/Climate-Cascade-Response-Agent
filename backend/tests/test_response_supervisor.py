@@ -55,6 +55,62 @@ def test_response_supervisor_stores_draft_actions_against_verified_evidence() ->
     assert "raw_content" not in artifact.user_prompt
 
 
+def test_response_supervisor_accepts_not_estimable_abstentions_but_not_numeric_estimates() -> None:
+    abstaining_response = _response()
+    abstaining_response["actions"][0]["estimate"] = {
+        "schema_version": "1",
+        "action_id": "verify-timure-access",
+        "status": "not_estimable",
+        "low": None,
+        "central": None,
+        "high": None,
+        "parameter_set_id": None,
+        "population_deduplication_group": None,
+        "abstention_reason": "No approved flood fatality-risk parameter set is available in Iteration 1.",
+    }
+
+    accepted = run_response_supervisor(
+        run_id="run-12121212-1212-4121-8121-121212121212",
+        case_id=CASE.manifest.fixture_id,
+        evidence=build_fixture_evidence_package(CASE),
+        config=CONFIG,
+        gateway=StaticGateway(abstaining_response),
+        case=CASE,
+        now=lambda: FROZEN_NOW,
+    )
+
+    assert accepted.status is ResponseSupervisorRunStatus.COMPLETED
+    assert accepted.response is not None
+    assert accepted.response.actions[0].estimate is not None
+    assert accepted.response.actions[0].estimate.status == "not_estimable"
+
+    numeric_response = _response()
+    numeric_response["actions"][0]["estimate"] = {
+        "schema_version": "1",
+        "action_id": "verify-timure-access",
+        "status": "estimated",
+        "low": 1,
+        "central": 2,
+        "high": 3,
+        "parameter_set_id": "synthetic-flood-v1",
+        "population_deduplication_group": "timure-v1",
+        "abstention_reason": None,
+    }
+    rejected = run_response_supervisor(
+        run_id="run-13131313-1313-4131-8131-131313131313",
+        case_id=CASE.manifest.fixture_id,
+        evidence=build_fixture_evidence_package(CASE),
+        config=CONFIG,
+        gateway=StaticGateway(numeric_response),
+        case=CASE,
+        now=lambda: FROZEN_NOW,
+    )
+
+    assert rejected.status is ResponseSupervisorRunStatus.FAILED
+    assert rejected.failure_code == "model_schema"
+    assert "not_estimable" in (rejected.failure_detail or "")
+
+
 def test_response_supervisor_fails_closed_on_unknown_evidence_reference() -> None:
     response = _response()
     response["actions"][0]["evidence_ids"] = ["unknown-source"]

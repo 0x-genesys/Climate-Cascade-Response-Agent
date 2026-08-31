@@ -420,6 +420,12 @@ class LifeSafetyEstimate(StrictModel):
         return self
 
 
+class NotEstimableLifeSafetyEstimate(LifeSafetyEstimate):
+    """Iteration 1 may explain an abstention but cannot produce numeric estimates."""
+
+    status: Literal[LifeSafetyStatus.NOT_ESTIMABLE] = LifeSafetyStatus.NOT_ESTIMABLE
+
+
 class ActionCandidate(StrictModel):
     schema_version: Literal[SCHEMA_VERSION] = SCHEMA_VERSION
     action_id: Identifier
@@ -435,6 +441,28 @@ class ActionCandidate(StrictModel):
     def estimate_belongs_to_action(self) -> "ActionCandidate":
         if self.estimate and self.estimate.action_id != self.action_id:
             raise ValueError("estimate.action_id must match action_id")
+        return self
+
+
+class ResponseSupervisorActionCandidate(StrictModel):
+    """Draft action shape for the response supervisor before the estimator is implemented."""
+
+    schema_version: Literal[SCHEMA_VERSION] = SCHEMA_VERSION
+    action_id: Identifier
+    title: NonEmptyText
+    location_ref: NonEmptyText
+    owner_role: NonEmptyText
+    urgency: ActionUrgency
+    evidence_ids: list[Identifier] = Field(min_length=1)
+    status: ActionStatus = ActionStatus.DRAFT
+    estimate: NotEstimableLifeSafetyEstimate | None = None
+
+    @model_validator(mode="after")
+    def estimate_belongs_to_action(self) -> "ResponseSupervisorActionCandidate":
+        if self.estimate and self.estimate.action_id != self.action_id:
+            raise ValueError("estimate.action_id must match action_id")
+        if self.status is not ActionStatus.DRAFT:
+            raise ValueError("response supervisor actions must remain drafts")
         return self
 
 
@@ -455,6 +483,22 @@ class BaselineActionResponse(StrictModel):
             raise ValueError("baseline actions must remain drafts")
         if any(action.estimate is not None for action in self.actions):
             raise ValueError("baseline cannot produce life-safety estimates")
+        return self
+
+
+class ResponseSupervisorActionResponse(StrictModel):
+    """One bounded supervisor response with safe life-safety abstentions only."""
+
+    schema_version: Literal[SCHEMA_VERSION] = SCHEMA_VERSION
+    case_id: Identifier
+    actions: list[ResponseSupervisorActionCandidate] = Field(min_length=1, max_length=5)
+    limitations: list[NonEmptyText] = Field(min_length=1)
+
+    @model_validator(mode="after")
+    def action_ids_are_unique(self) -> "ResponseSupervisorActionResponse":
+        action_ids = [action.action_id for action in self.actions]
+        if len(action_ids) != len(set(action_ids)):
+            raise ValueError("response supervisor actions must use unique action_id values")
         return self
 
 

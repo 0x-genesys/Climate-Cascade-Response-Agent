@@ -58,4 +58,4 @@ Exit `0` means the report is complete. The report includes LSAC@5, deterministic
 - A static gateway passing contract tests proves the implementation, not model quality.
 - Live CEMS runs receive deterministic draft checks but have `LSAC@5: not_evaluated`.
 - An open source package remains preliminary even if the draft checks pass.
-- All actions remain drafts. This iteration has no approval API, dispatch capability, impact calculation, spatial overlay, or lives-saved estimate.
+- All actions remain drafts. This iteration has no approval API, dispatch capability, impact calculation, spatial overlay, or numeric lives-saved estimate. It accepts only `not_estimable` abstentions with a reason, which the dashboard shows beside the action.
