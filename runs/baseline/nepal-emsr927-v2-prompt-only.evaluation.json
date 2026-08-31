@@ -1,15 +1,15 @@
 {
   "schema_version": "1",
   "evaluator_version": "baseline-evaluator-v1",
-  "run_id": "baseline-0cc0c424-df31-4897-8248-a81f3890c3a3",
+  "run_id": "baseline-6f97a217-d44a-4aac-a478-0e14d253057f",
   "case_id": "nepal-emsr927-v1",
-  "evaluated_at": "2026-08-30T11:33:31.406291Z",
+  "evaluated_at": "2026-08-31T15:01:37.433494Z",
   "status": "complete",
   "lsac_at_5": {
     "schema_version": "1",
     "status": "measured",
-    "value": 0.17647058823529413,
-    "numerator": 3.0,
+    "value": 0.0,
+    "numerator": 0.0,
     "denominator": 17.0,
     "note": "Severity-weighted gold actions covered by the top five baseline proposals."
   },
@@ -24,7 +24,7 @@
   "valid_evidence_reference_count": {
     "schema_version": "1",
     "status": "measured",
-    "value": 9.0,
+    "value": 5.0,
     "numerator": null,
     "denominator": null,
     "note": "All action evidence IDs were validated against frozen dossier sources before evaluation."

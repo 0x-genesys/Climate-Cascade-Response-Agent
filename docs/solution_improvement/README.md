@@ -32,6 +32,15 @@ Do not backfill successful-looking results. Record the hypothesis before impleme
 | Iteration 3, planned | Add typed action templates, ranking, ownership, dependencies, and an evidence verifier. | Not run. | Test LSAC@5 and unsupported-action rate. |
 | Iteration 4, planned | Add potential-lives-saved ranges, editable assumptions, and approve/edit/reject/request-evidence feedback. | Not run. | Test interval coverage, abstention, safety, and review time. |
 
+## Prompt-Only Baseline Findings
+
+- **Run:** `baseline-6f97a217-d44a-4aac-a478-0e14d253057f`, `gpt-5-mini-2025-08-07`.
+- **Method:** one deep prompt only. The model had no incident dossier, AOI facts, source retrieval, RAG, maps, tools, retries, verifier, or deterministic analysis.
+- **Result:** LSAC@5 `0/17` (`0%`). All four requirements were uncovered because the proposals were generic and location-unspecified.
+- **Safety:** `0` unsafe autonomous-action findings, `0` missing evidence references, and `5` valid prompt-context citations.
+- **Evidence:** `runs/baseline/nepal-emsr927-v2-prompt-only.run.json`, `.adjudication.json`, and `.evaluation.json`.
+- **Decision:** use this as the intended simple-prompt baseline. Retain the old curated-dossier baseline only as historical work, not the comparison headline.
+
 ## Baseline Final Findings
 
 This is the final measured direct-prompt baseline record for the current Nepal challenging case. It is the comparison point for later iterations, not evidence that the future agent improves the outcome.

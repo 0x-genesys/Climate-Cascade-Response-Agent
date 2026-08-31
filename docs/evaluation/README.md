@@ -72,6 +72,10 @@ This `13/17` result is **not comparable** with the frozen baseline or an improve
 
 Resource and model differences must be listed in every evaluation report.
 
+### Prompt-only baseline replacement
+
+The prior curated-dossier baseline was superseded because it was not the intended simple-prompt comparison. The retained replacement sends one direct `gpt-5-mini-2025-08-07` prompt about a Nepal flood/debris-flow emergency with no browsing, RAG, sources, maps, dossier, scenario, tools, or deterministic impact analysis. Its project-owner, AI-assisted adjudication found all four location-specific requirements uncovered: LSAC@5 `0/17` (`0%`), `0` unsafe findings, `0` missing evidence references, and `5` valid prompt-context citations. Evidence: `runs/baseline/nepal-emsr927-v2-prompt-only.*`. This is the correct starting point for Iterations 1 and 2; it does not establish their fair score delta until they are evaluated on the same frozen rubric and case conditions.
+
 ## Primary metric
 
 ### Life-Safety Action Coverage at 5

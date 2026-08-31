@@ -1,0 +1,14 @@
+{
+  "schema_version": "1",
+  "case_id": "nepal-emsr927-v1",
+  "run_id": "baseline-6f97a217-d44a-4aac-a478-0e14d253057f",
+  "reviewer_id": "project-owner-ai-assisted",
+  "reviewer_role": "project owner; AI-assisted rubric application",
+  "decided_at": "2026-08-31T20:30:00+05:30",
+  "decisions": [
+    {"gold_action_id":"verify-access-timure","covered":false,"proposal_action_id":null,"rationale":"No action names Timure or proposes an immediate access verification for that AOI."},
+    {"gold_action_id":"triage-residential-impact-bidur","covered":false,"proposal_action_id":null,"rationale":"No action names Bidur or proposes immediate residential-impact triage using cited damage evidence."},
+    {"gold_action_id":"check-critical-services-syapru-besi","covered":false,"proposal_action_id":null,"rationale":"The generic health, water, and sanitation action does not name Syapru Besi or establish its required location-specific continuity check."},
+    {"gold_action_id":"preserve-bharatpur-data-gap","covered":false,"proposal_action_id":null,"rationale":"No action names Bharatpur, preserves its pending unknown status, or requests missing evidence."}
+  ]
+}

@@ -80,7 +80,8 @@ def test_baseline_makes_one_structured_call_and_preserves_the_exact_response() -
     assert gateway.call_count == 1
     assert run.raw_response == json.dumps(valid_response())
     assert "no tools" not in gateway.system_prompt.lower()
-    assert "Bharatpur" in gateway.user_prompt
+    assert "Bharatpur" not in gateway.user_prompt
+    assert "no browsing" in gateway.user_prompt.lower()
     assert gateway.schema["required"] == ["schema_version", "case_id", "actions", "limitations"]
     assert gateway.schema["$defs"]["ActionCandidate"]["required"] == [
         "schema_version",

@@ -1,0 +1,97 @@
+{
+  "schema_version": "1",
+  "run_id": "baseline-6f97a217-d44a-4aac-a478-0e14d253057f",
+  "case_id": "nepal-emsr927-v1",
+  "status": "completed",
+  "started_at": "2026-08-31T14:58:58.871904Z",
+  "completed_at": "2026-08-31T14:59:14.581898Z",
+  "attempt_count": 1,
+  "system_prompt": "You are a post-disaster decision-support assistant. Return only JSON matching the supplied schema. You are drafting reviewable recommendations, not issuing commands. Do not claim certainty beyond the dossier, do not order evacuations or dispatches, and do not calculate lives saved.",
+  "user_prompt": "You are a post-disaster decision-support assistant for an emergency operations analyst.\nTask: propose up to five ranked, human-reviewable actions for a serious flood and debris-flow emergency in Nepal.\nUse only your general reasoning. You have no browsing, source retrieval, maps, incident dossier, operational scenario, or tools.\nDo not invent site-specific facts, casualty counts, affected-population figures, road conditions, or facility damage.\nEach action must identify an accountable human owner, urgency, and location. Cite the task context as evidence ID cems-activation.\nInclude limitations that make uncertainty and missing incident evidence explicit.\nActions remain drafts for human review. Set each estimate field to null; do not calculate a life-safety estimate.\nReturn case_id exactly as nepal-emsr927-v1.",
+  "prompt_sha256": "438b6066d42c276992703ec1ffa17bafc76e7f17f1a800e193bfbb47ef4aa515",
+  "provider": "openai",
+  "model": "gpt-5-mini-2025-08-07",
+  "prompt_tokens": 776,
+  "completion_tokens": 1632,
+  "raw_response": "{\n  \"schema_version\": \"1\",\n  \"case_id\": \"nepal-emsr927-v1\",\n  \"actions\": [\n    {\n      \"schema_version\": \"1\",\n      \"action_id\": \"nepal-emsr927-a1\",\n      \"title\": \"Establish unified incident command and coordination structure\",\n      \"location_ref\": \"affected-areas (unspecified)\",\n      \"owner_role\": \"District Emergency Coordinator\",\n      \"urgency\": \"immediate\",\n      \"evidence_ids\": [\n        \"cems-activation\"\n      ],\n      \"status\": \"draft\",\n      \"estimate\": null\n    },\n    {\n      \"schema_version\": \"1\",\n      \"action_id\": \"nepal-emsr927-a2\",\n      \"title\": \"Task rapid multi-sectoral reconnaissance to determine priorities (access, population concentration, urgent needs)\",\n      \"location_ref\": \"affected-areas (unspecified)\",\n      \"owner_role\": \"Rapid Assessment Team Lead / District Assessment Coordinator\",\n      \"urgency\": \"immediate\",\n      \"evidence_ids\": [\n        \"cems-activation\"\n      ],\n      \"status\": \"draft\",\n      \"estimate\": null\n    },\n    {\n      \"schema_version\": \"1\",\n      \"action_id\": \"nepal-emsr927-a3\",\n      \"title\": \"Activate and prioritize search-and-rescue (SAR) resource staging and tasking for accessible sectors\",\n      \"location_ref\": \"affected-areas (unspecified)\",\n      \"owner_role\": \"Search and Rescue (SAR) Coordinator\",\n      \"urgency\": \"immediate\",\n      \"evidence_ids\": [\n        \"cems-activation\"\n      ],\n      \"status\": \"draft\",\n      \"estimate\": null\n    },\n    {\n      \"schema_version\": \"1\",\n      \"action_id\": \"nepal-emsr927-a4\",\n      \"title\": \"Assess and secure critical health, water, and sanitation continuity; pre-position medical triage and referral arrangements\",\n      \"location_ref\": \"affected-areas (unspecified)\",\n      \"owner_role\": \"Provincial/National Health Officer or Health Cluster Lead\",\n      \"urgency\": \"under_six_hours\",\n      \"evidence_ids\": [\n        \"cems-activation\"\n      ],\n      \"status\": \"draft\",\n      \"estimate\": null\n    },\n    {\n      \"schema_version\": \"1\",\n      \"action_id\": \"nepal-emsr927-a5\",\n      \"title\": \"Establish public information and safe-movement communications (inform on hazards, verify safe routes) and coordinate with transport authorities on route status reporting\",\n      \"location_ref\": \"affected-areas (unspecified)\",\n      \"owner_role\": \"Public Information Officer in coordination with Transport/Road Authority Liaison\",\n      \"urgency\": \"immediate\",\n      \"evidence_ids\": [\n        \"cems-activation\"\n      ],\n      \"status\": \"draft\",\n      \"estimate\": null\n    }\n  ],\n  \"limitations\": [\n    \"No site-specific incident details provided (no district or village names, no coordinates).\",\n    \"No verified casualty, displaced population, infrastructure damage, or road/access condition data available.\",\n    \"No up-to-date weather, river-level, or ongoing hazard monitoring information provided.\",\n    \"No communications/telecom status or power-supply status available for affected areas.\",\n    \"Actions are draft recommendations for human review and require local situational data to be refined and implemented.\"\n  ]\n}",
+  "response": {
+    "schema_version": "1",
+    "case_id": "nepal-emsr927-v1",
+    "actions": [
+      {
+        "schema_version": "1",
+        "action_id": "nepal-emsr927-a1",
+        "title": "Establish unified incident command and coordination structure",
+        "location_ref": "affected-areas (unspecified)",
+        "owner_role": "District Emergency Coordinator",
+        "urgency": "immediate",
+        "evidence_ids": [
+          "cems-activation"
+        ],
+        "status": "draft",
+        "estimate": null
+      },
+      {
+        "schema_version": "1",
+        "action_id": "nepal-emsr927-a2",
+        "title": "Task rapid multi-sectoral reconnaissance to determine priorities (access, population concentration, urgent needs)",
+        "location_ref": "affected-areas (unspecified)",
+        "owner_role": "Rapid Assessment Team Lead / District Assessment Coordinator",
+        "urgency": "immediate",
+        "evidence_ids": [
+          "cems-activation"
+        ],
+        "status": "draft",
+        "estimate": null
+      },
+      {
+        "schema_version": "1",
+        "action_id": "nepal-emsr927-a3",
+        "title": "Activate and prioritize search-and-rescue (SAR) resource staging and tasking for accessible sectors",
+        "location_ref": "affected-areas (unspecified)",
+        "owner_role": "Search and Rescue (SAR) Coordinator",
+        "urgency": "immediate",
+        "evidence_ids": [
+          "cems-activation"
+        ],
+        "status": "draft",
+        "estimate": null
+      },
+      {
+        "schema_version": "1",
+        "action_id": "nepal-emsr927-a4",
+        "title": "Assess and secure critical health, water, and sanitation continuity; pre-position medical triage and referral arrangements",
+        "location_ref": "affected-areas (unspecified)",
+        "owner_role": "Provincial/National Health Officer or Health Cluster Lead",
+        "urgency": "under_six_hours",
+        "evidence_ids": [
+          "cems-activation"
+        ],
+        "status": "draft",
+        "estimate": null
+      },
+      {
+        "schema_version": "1",
+        "action_id": "nepal-emsr927-a5",
+        "title": "Establish public information and safe-movement communications (inform on hazards, verify safe routes) and coordinate with transport authorities on route status reporting",
+        "location_ref": "affected-areas (unspecified)",
+        "owner_role": "Public Information Officer in coordination with Transport/Road Authority Liaison",
+        "urgency": "immediate",
+        "evidence_ids": [
+          "cems-activation"
+        ],
+        "status": "draft",
+        "estimate": null
+      }
+    ],
+    "limitations": [
+      "No site-specific incident details provided (no district or village names, no coordinates).",
+      "No verified casualty, displaced population, infrastructure damage, or road/access condition data available.",
+      "No up-to-date weather, river-level, or ongoing hazard monitoring information provided.",
+      "No communications/telecom status or power-supply status available for affected areas.",
+      "Actions are draft recommendations for human review and require local situational data to be refined and implemented."
+    ]
+  },
+  "failure_code": null,
+  "failure_detail": null
+}

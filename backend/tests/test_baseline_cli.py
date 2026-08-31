@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 from climate_cascade.baseline.runner import run_baseline, write_run_artifact
+import climate_cascade.cli as cli_module
 from climate_cascade.cli import evaluate_main, main
 from climate_cascade.evaluation import CoverageAdjudication
 from climate_cascade.domain import load_frozen_case
@@ -17,6 +18,7 @@ CASE_DIRECTORY = (
 
 def test_cli_writes_a_fail_closed_artifact_when_no_api_key_is_available(tmp_path: Path, monkeypatch) -> None:
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    monkeypatch.setattr(cli_module, "load_project_environment", lambda: Path(".env"))
     run_path = tmp_path / "run.json"
     evaluation_path = tmp_path / "evaluation.json"
 

@@ -2,27 +2,22 @@
 
 from __future__ import annotations
 
-import json
-
 from climate_cascade.domain import FrozenCaseBundle
 
 SYSTEM_PROMPT = """You are a post-disaster decision-support assistant. Return only JSON matching the supplied schema. You are drafting reviewable recommendations, not issuing commands. Do not claim certainty beyond the dossier, do not order evacuations or dispatches, and do not calculate lives saved."""
 
 
 def render_user_prompt(case: FrozenCaseBundle) -> str:
-    """Flatten only frozen case facts and constraints into one model request."""
-
-    dossier = case.dossier.model_dump(mode="json")
-    scenario = case.scenario.model_dump(mode="json")
+    """Render the deliberately context-free, one-call baseline prompt."""
     return "\n".join(
         [
-            "Create up to five ranked draft actions for the incident below.",
-            "Each action must identify an accountable human owner, urgency, location, and source IDs from the dossier.",
-            "Include limitations that preserve every data gap and uncertainty relevant to the recommendations.",
+            "You are a post-disaster decision-support assistant for an emergency operations analyst.",
+            "Task: propose up to five ranked, human-reviewable actions for a serious flood and debris-flow emergency in Nepal.",
+            "Use only your general reasoning. You have no browsing, source retrieval, maps, incident dossier, operational scenario, or tools.",
+            "Do not invent site-specific facts, casualty counts, affected-population figures, road conditions, or facility damage.",
+            "Each action must identify an accountable human owner, urgency, and location. Cite the task context as evidence ID cems-activation.",
+            "Include limitations that make uncertainty and missing incident evidence explicit.",
             "Actions remain drafts for human review. Set each estimate field to null; do not calculate a life-safety estimate.",
-            "Incident dossier:",
-            json.dumps(dossier, sort_keys=True, separators=(",", ":")),
-            "Operational scenario:",
-            json.dumps(scenario, sort_keys=True, separators=(",", ":")),
+            f"Return case_id exactly as {case.manifest.fixture_id}.",
         ]
     )
