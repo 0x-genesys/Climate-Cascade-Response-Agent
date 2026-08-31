@@ -73,7 +73,7 @@ Use the glossary at the bottom of the dashboard if the reviewer needs to disting
 
 ### Beat 3: The useful failure is visible
 
-Show that current CEMS metadata identifies Syapru Besi, Timure, Bidur, and Bharatpur, but that the live POC covers only the Bharatpur missing-product request. Explain that an AOI product status is not the same as road, built-up-area, or facility impact evidence. The missing three actions become the testable Iteration 2 requirement rather than a hidden failure.
+Show the deterministic impact panel: completed CEMS products now provide source-reported roads, bridges, residential buildings, population, and facility facts for Syapru Besi, Timure, and Bidur, while Bharatpur remains visibly unknown. The retained live POC covers Timure access, Bidur residential triage, and Bharatpur evidence handling. It still misses Syapru Besi facility continuity, which is the honest next failure rather than a hidden one.
 
 ### Beat 4: A human remains accountable
 
@@ -89,7 +89,7 @@ Show the most valuable retained change and one experiment that was removed. Clea
 
 ## Current candidate insight
 
-> Disaster maps describe damage. Lives are protected when verified evidence becomes an owned, time-bound action with assumptions and uncertainty visible.
+> Product availability tells you where to look. Deterministic product facts are what let a response agent name the right human-reviewed action - but a five-action budget still needs an explicit, testable selection policy.
 
 This is a candidate, not the final hot take. Replace or revise it when a measured failure reveals a stronger practical lesson.
 
@@ -108,6 +108,8 @@ This is a candidate, not the final hot take. Replace or revise it when a measure
 | The single-call baseline records exact output and produces a human-adjudicated score without retrying or fabricating a result | `runs/baseline/nepal-emsr927-v1.run.json`; `runs/baseline/nepal-emsr927-v1.adjudication.json`; `runs/baseline/nepal-emsr927-v1.evaluation.json` | Verified on one Nepal challenging-case run; closed-event aggregate remains unmeasured |
 | The Iteration 1 workflow preserves live CEMS AOI freshness, uncertainty, and evidence references | `runs/iteration_1/nepal-emsr927-live-poc.evidence.json`; `docs/execution/2026-08-31-15-iteration-1-live-poc-finalization.md` | Verified on one live Nepal POC: automatic checks found `0` unsafe patterns, `0` missing references, and `4` valid references. |
 | Live product-status metadata alone does not improve location-specific action coverage | `runs/iteration_1/nepal-emsr927-live-poc.adjudication.json`; `runs/iteration_1/nepal-emsr927-live-poc.evaluation.json`; `docs/evaluation/agent.md` | Qualified finding, not a benchmark: project-owner rubric transfer scored `3/17`, covering Bharatpur but not Timure, Bidur, or Syapru Besi. Snapshot mismatch and reviewer role make this non-comparable with the frozen baseline. |
+| Deterministic CEMS product statistics improve location-specific draft coverage | `runs/iteration_2/nepal-emsr927-live-v4.impacts.json`; `runs/iteration_2/nepal-emsr927-live-v4.evaluation.json`; `docs/execution/2026-08-31-16-iteration-2-live-poc-finalization.md` | Qualified live POC, not benchmark: project-owner rubric transfer scored `13/17`, covering Timure, Bidur, and Bharatpur. Syapru continuity remained missed. |
+| Over-constraining prompt policy can reduce coverage under a five-action budget | `runs/iteration_2/removed/nepal-emsr927-live-v5-overcoverage.run.json` | Observed removed experiment: forcing facility drafts for all affected AOIs displaced Timure access and Bharatpur data handling. |
 
 ## Iteration update protocol
 

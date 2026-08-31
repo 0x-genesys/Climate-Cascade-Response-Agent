@@ -1,0 +1,297 @@
+{
+  "analysis_version": "cems-product-stats-v1",
+  "analyzed_at": "2026-08-31T12:42:29.951806Z",
+  "aoi_impacts": [
+    {
+      "access": {
+        "affected_bridge_features": 5,
+        "affected_road_km": 7.6000000000000005,
+        "evidence_ids": [
+          "cems-emsr927-snapshot"
+        ],
+        "schema_version": "1",
+        "status": "needs_human_verification"
+      },
+      "affected_residential_buildings": 429,
+      "aoi_name": "Syapru Besi",
+      "aoi_number": 1,
+      "assets": [
+        {
+          "affected_value": 2.0,
+          "asset_class": "Built-up: Buildings used as places of worship and for religious activities",
+          "evidence_ids": [
+            "cems-emsr927-snapshot"
+          ],
+          "schema_version": "1",
+          "unit": "count_or_area"
+        },
+        {
+          "affected_value": 1.0,
+          "asset_class": "Built-up: Institutional",
+          "evidence_ids": [
+            "cems-emsr927-snapshot"
+          ],
+          "schema_version": "1",
+          "unit": "count_or_area"
+        },
+        {
+          "affected_value": 37.0,
+          "asset_class": "Built-up: Other non-residential buildings",
+          "evidence_ids": [
+            "cems-emsr927-snapshot"
+          ],
+          "schema_version": "1",
+          "unit": "count_or_area"
+        },
+        {
+          "affected_value": 392.0,
+          "asset_class": "Built-up: Residential Buildings",
+          "evidence_ids": [
+            "cems-emsr927-snapshot"
+          ],
+          "schema_version": "1",
+          "unit": "count_or_area"
+        },
+        {
+          "affected_value": 1.0,
+          "asset_class": "Built-up: School, university and research buildings",
+          "evidence_ids": [
+            "cems-emsr927-snapshot"
+          ],
+          "schema_version": "1",
+          "unit": "count_or_area"
+        },
+        {
+          "affected_value": 0.8,
+          "asset_class": "Facilities: Power plant constructions",
+          "evidence_ids": [
+            "cems-emsr927-snapshot"
+          ],
+          "schema_version": "1",
+          "unit": "ha"
+        }
+      ],
+      "evidence_ids": [
+        "cems-emsr927-snapshot"
+      ],
+      "population": {
+        "affected_population": 450,
+        "deduplication_group": "aoi-1-selected-product",
+        "evidence_ids": [
+          "cems-emsr927-snapshot"
+        ],
+        "schema_version": "1",
+        "source_label": "CEMS product Estimated population affected"
+      },
+      "product_delivery_time": "2026-08-27T19:03:49.982313",
+      "product_type": "GRA",
+      "schema_version": "1"
+    },
+    {
+      "access": {
+        "affected_bridge_features": 1,
+        "affected_road_km": 9.7,
+        "evidence_ids": [
+          "cems-emsr927-snapshot"
+        ],
+        "schema_version": "1",
+        "status": "needs_human_verification"
+      },
+      "affected_residential_buildings": 289,
+      "aoi_name": "Timure",
+      "aoi_number": 2,
+      "assets": [
+        {
+          "affected_value": 2.0,
+          "asset_class": "Built-up: Buildings used as places of worship and for religious activities",
+          "evidence_ids": [
+            "cems-emsr927-snapshot"
+          ],
+          "schema_version": "1",
+          "unit": "count_or_area"
+        },
+        {
+          "affected_value": 1.0,
+          "asset_class": "Built-up: Institutional",
+          "evidence_ids": [
+            "cems-emsr927-snapshot"
+          ],
+          "schema_version": "1",
+          "unit": "count_or_area"
+        },
+        {
+          "affected_value": 64.0,
+          "asset_class": "Built-up: Other non-residential buildings",
+          "evidence_ids": [
+            "cems-emsr927-snapshot"
+          ],
+          "schema_version": "1",
+          "unit": "count_or_area"
+        },
+        {
+          "affected_value": 225.0,
+          "asset_class": "Built-up: Residential Buildings",
+          "evidence_ids": [
+            "cems-emsr927-snapshot"
+          ],
+          "schema_version": "1",
+          "unit": "count_or_area"
+        },
+        {
+          "affected_value": 133.0,
+          "asset_class": "Built-up: Unclassified",
+          "evidence_ids": [
+            "cems-emsr927-snapshot"
+          ],
+          "schema_version": "1",
+          "unit": "count_or_area"
+        },
+        {
+          "affected_value": 6.0,
+          "asset_class": "Built-up: Wholesale and retail trade buildings",
+          "evidence_ids": [
+            "cems-emsr927-snapshot"
+          ],
+          "schema_version": "1",
+          "unit": "count_or_area"
+        },
+        {
+          "affected_value": 0.2,
+          "asset_class": "Facilities: Dams",
+          "evidence_ids": [
+            "cems-emsr927-snapshot"
+          ],
+          "schema_version": "1",
+          "unit": "ha"
+        }
+      ],
+      "evidence_ids": [
+        "cems-emsr927-snapshot"
+      ],
+      "population": {
+        "affected_population": 450,
+        "deduplication_group": "aoi-2-selected-product",
+        "evidence_ids": [
+          "cems-emsr927-snapshot"
+        ],
+        "schema_version": "1",
+        "source_label": "CEMS product Estimated population affected"
+      },
+      "product_delivery_time": "2026-08-28T17:10:43.692032",
+      "product_type": "GRA",
+      "schema_version": "1"
+    },
+    {
+      "access": {
+        "affected_bridge_features": 26,
+        "affected_road_km": 49.800000000000004,
+        "evidence_ids": [
+          "cems-emsr927-snapshot"
+        ],
+        "schema_version": "1",
+        "status": "needs_human_verification"
+      },
+      "affected_residential_buildings": 3029,
+      "aoi_name": "Bidur",
+      "aoi_number": 3,
+      "assets": [
+        {
+          "affected_value": 29.0,
+          "asset_class": "Built-up: Correctional",
+          "evidence_ids": [
+            "cems-emsr927-snapshot"
+          ],
+          "schema_version": "1",
+          "unit": "count_or_area"
+        },
+        {
+          "affected_value": 28.0,
+          "asset_class": "Built-up: Other non-residential buildings",
+          "evidence_ids": [
+            "cems-emsr927-snapshot"
+          ],
+          "schema_version": "1",
+          "unit": "count_or_area"
+        },
+        {
+          "affected_value": 3001.0,
+          "asset_class": "Built-up: Residential Buildings",
+          "evidence_ids": [
+            "cems-emsr927-snapshot"
+          ],
+          "schema_version": "1",
+          "unit": "count_or_area"
+        },
+        {
+          "affected_value": 0.2,
+          "asset_class": "Facilities: Aqueducts, irrigation and cultivation waterworks",
+          "evidence_ids": [
+            "cems-emsr927-snapshot"
+          ],
+          "schema_version": "1",
+          "unit": "km"
+        },
+        {
+          "affected_value": 0.3,
+          "asset_class": "Facilities: Dams",
+          "evidence_ids": [
+            "cems-emsr927-snapshot"
+          ],
+          "schema_version": "1",
+          "unit": "km"
+        },
+        {
+          "affected_value": 0.5,
+          "asset_class": "Facilities: Heavy industrial plants, not elsewhere classified",
+          "evidence_ids": [
+            "cems-emsr927-snapshot"
+          ],
+          "schema_version": "1",
+          "unit": "ha"
+        },
+        {
+          "affected_value": 5.9,
+          "asset_class": "Facilities: Other civil engineering works not elsewhere classified",
+          "evidence_ids": [
+            "cems-emsr927-snapshot"
+          ],
+          "schema_version": "1",
+          "unit": "ha"
+        },
+        {
+          "affected_value": 27.0,
+          "asset_class": "Facilities: Power plant constructions",
+          "evidence_ids": [
+            "cems-emsr927-snapshot"
+          ],
+          "schema_version": "1",
+          "unit": "ha"
+        }
+      ],
+      "evidence_ids": [
+        "cems-emsr927-snapshot"
+      ],
+      "population": {
+        "affected_population": 5000,
+        "deduplication_group": "aoi-3-selected-product",
+        "evidence_ids": [
+          "cems-emsr927-snapshot"
+        ],
+        "schema_version": "1",
+        "source_label": "CEMS product Estimated population affected"
+      },
+      "product_delivery_time": "2026-08-31T01:07:28.157651",
+      "product_type": "GRA",
+      "schema_version": "1"
+    }
+  ],
+  "data_gaps": [
+    "Bharatpur has no finished CEMS product with parseable impact statistics."
+  ],
+  "deduplication_note": "One newest finished CEMS product is selected per AOI by delivery time and version number; no duplicate product versions are summed. AOI population values remain source-reported aggregates.",
+  "package_id": "impact-source-package-emsr927",
+  "run_id": "run-f7fd675d-6370-4470-ac51-cc1356b7f581",
+  "schema_version": "1",
+  "source_package_id": "source-package-emsr927",
+  "status": "completed"
+}

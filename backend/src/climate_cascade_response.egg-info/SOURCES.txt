@@ -21,6 +21,8 @@ backend/src/climate_cascade/domain/models.py
 backend/src/climate_cascade/evaluation/__init__.py
 backend/src/climate_cascade/evaluation/agent.py
 backend/src/climate_cascade/evaluation/scoring.py
+backend/src/climate_cascade/impacts/__init__.py
+backend/src/climate_cascade/impacts/cems.py
 backend/src/climate_cascade/persistence/__init__.py
 backend/src/climate_cascade/persistence/artifacts.py
 backend/src/climate_cascade/persistence/database.py

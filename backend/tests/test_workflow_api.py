@@ -225,6 +225,8 @@ def test_worker_runs_agent_source_intake_to_impact_block(tmp_path: Path) -> None
     assert "source_verified" in event_types
     assert "source_snapshot_pinned" in event_types
     assert "source_intake_started" in event_types
+    assert "impact_analysis_started" in event_types
+    assert "impact_analysis_completed" in event_types
     assert "response_supervisor_started" in event_types
     assert "response_supervisor_response_received" in event_types
     assert "response_supervisor_completed" in event_types
@@ -232,6 +234,7 @@ def test_worker_runs_agent_source_intake_to_impact_block(tmp_path: Path) -> None
     assert "agent_evaluation_completed" in event_types
     assert repository.get_artifact(run.run_id, "response_supervisor_run") is not None
     assert repository.get_artifact(run.run_id, "agent_evaluation") is not None
+    assert repository.get_artifact(run.run_id, "impact_package") is not None
 
 
 def test_api_agent_run_allows_live_activation_and_exposes_evidence(tmp_path: Path) -> None:
@@ -278,6 +281,37 @@ def test_api_agent_run_allows_live_activation_and_exposes_evidence(tmp_path: Pat
     assert agent.json()["response_supervisor_run"]["status"] == "failed"
 
 
+def test_api_exposes_saved_impact_package(tmp_path: Path) -> None:
+    database_url = sqlite_url(tmp_path / "workflow.db")
+    artifact_root = tmp_path / "artifacts"
+    services = build_services(
+        database_url=database_url,
+        artifact_root=artifact_root,
+        case_root=CASE_ROOT,
+        repository_root=REPOSITORY_ROOT,
+    )
+    client = TestClient(create_app(services=services))
+    created = client.post(
+        "/v1/agent/runs",
+        headers={"Idempotency-Key": "api-agent-impact-key"},
+        json={"case_id": "nepal-emsr927-v1", "mode": "agent", "fixture_mode": True, "model": "static-test-model"},
+    )
+    engine = WorkflowEngine(
+        repository=services.repository,
+        artifact_store=LocalArtifactStore(artifact_root),
+        case_root=CASE_ROOT,
+        gateway_factory=lambda _config: StaticGateway(),
+        response_supervisor_config_path=REPOSITORY_ROOT / "config" / "agents" / "response_supervisor.json",
+    )
+
+    engine.process_next(worker_id="api-agent-impact-worker")
+
+    payload = client.get(f"/v1/runs/{created.json()['run_id']}/impacts")
+    assert payload.status_code == 200
+    assert payload.json()["impact_package"]["status"] == "incomplete"
+    assert "No raw CEMS activation snapshot" in payload.json()["impact_package"]["data_gaps"][0]
+
+
 def test_api_serves_dashboard_static_files(tmp_path: Path) -> None:
     services = build_services(
         database_url=sqlite_url(tmp_path / "workflow.db"),
@@ -296,6 +330,7 @@ def test_api_serves_dashboard_static_files(tmp_path: Path) -> None:
     assert script.status_code == 200
     assert "/v1/runs?limit=25" in script.text
     assert "/v1/runs/${state.runId}/evidence" in script.text
+    assert "/v1/runs/${state.runId}/impacts" in script.text
     assert "Life-safety estimate:" in script.text
     assert "Drafts rejected" in script.text
     assert "Draft checks did not run:" in script.text
@@ -303,3 +338,4 @@ def test_api_serves_dashboard_static_files(tmp_path: Path) -> None:
     assert "response_supervisor_started" in script.text
     assert "Glossary: terms used in this review" in index.text
     assert "Life-Safety Action Coverage at 5" in index.text
+    assert "What finished CEMS products show" in index.text

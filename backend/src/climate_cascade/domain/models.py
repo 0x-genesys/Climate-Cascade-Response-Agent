@@ -389,6 +389,65 @@ class VerifiedEvidencePackage(StrictModel):
         return self
 
 
+class ImpactAnalysisStatus(StrEnum):
+    COMPLETED = "completed"
+    INCOMPLETE = "incomplete"
+
+
+class PopulationImpact(StrictModel):
+    schema_version: Literal[SCHEMA_VERSION] = SCHEMA_VERSION
+    affected_population: int | None = Field(default=None, ge=0)
+    source_label: NonEmptyText
+    deduplication_group: Identifier
+    evidence_ids: list[Identifier] = Field(min_length=1)
+
+
+class AssetImpact(StrictModel):
+    schema_version: Literal[SCHEMA_VERSION] = SCHEMA_VERSION
+    asset_class: NonEmptyText
+    affected_value: float = Field(ge=0)
+    unit: NonEmptyText
+    evidence_ids: list[Identifier] = Field(min_length=1)
+
+
+class AccessImpact(StrictModel):
+    schema_version: Literal[SCHEMA_VERSION] = SCHEMA_VERSION
+    affected_road_km: float = Field(ge=0)
+    affected_bridge_features: int = Field(ge=0)
+    status: Literal["needs_human_verification", "not_indicated", "unknown"]
+    evidence_ids: list[Identifier] = Field(min_length=1)
+
+
+class AoiImpact(StrictModel):
+    schema_version: Literal[SCHEMA_VERSION] = SCHEMA_VERSION
+    aoi_number: int = Field(ge=1)
+    aoi_name: NonEmptyText
+    product_type: NonEmptyText
+    product_delivery_time: NonEmptyText | None = None
+    population: PopulationImpact | None = None
+    affected_residential_buildings: int | None = Field(default=None, ge=0)
+    assets: list[AssetImpact] = Field(default_factory=list)
+    access: AccessImpact
+    evidence_ids: list[Identifier] = Field(min_length=1)
+
+
+class ImpactPackage(StrictModel):
+    """Deterministic, compact CEMS product-statistics analysis for one run."""
+
+    schema_version: Literal[SCHEMA_VERSION] = SCHEMA_VERSION
+    package_id: Identifier
+    run_id: str = Field(pattern=r"^run-[a-f0-9-]{36}$")
+    source_package_id: Identifier
+    analysis_version: Literal["cems-product-stats-v1"]
+    status: ImpactAnalysisStatus
+    analyzed_at: datetime
+    aoi_impacts: list[AoiImpact] = Field(default_factory=list)
+    data_gaps: list[NonEmptyText] = Field(default_factory=list)
+    deduplication_note: NonEmptyText
+
+    _analyzed_at_timezone = field_validator("analyzed_at")(_require_timezone)
+
+
 class LifeSafetyEstimate(StrictModel):
     schema_version: Literal[SCHEMA_VERSION] = SCHEMA_VERSION
     action_id: Identifier

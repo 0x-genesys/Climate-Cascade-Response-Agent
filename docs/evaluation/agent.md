@@ -1,15 +1,16 @@
-# Iteration 1 Response-Supervisor Evaluation
+# Response-Supervisor Evaluation
 
-Status: Live Nepal POC evaluated; result is a non-comparable rubric transfer, not an improvement benchmark
+Status: Iteration 2 live Nepal POC evaluated; both live results are non-comparable rubric transfers
 Last updated: 2026-08-31
 
 ## What this evaluates
 
-An Iteration 1 run performs three separate checks:
+An Iteration 2 run performs four separate checks:
 
 1. The response supervisor makes one structured model call from a saved, verified evidence package.
-2. The application deterministically checks draft-action evidence IDs and unsafe autonomous-action language.
-3. A human reviewer decides whether each frozen Nepal gold action is covered. Only then can the deterministic CLI calculate LSAC@5.
+2. The worker deterministically selects one newest finished CEMS product per AOI and derives compact population, asset, access, and data-gap facts without summing duplicate product versions.
+3. The application deterministically checks draft-action evidence IDs and unsafe autonomous-action language.
+4. A human reviewer decides whether each frozen Nepal gold action is covered. Only then can the deterministic CLI calculate LSAC@5.
 
 The CLI never calls an LLM. A formal score for a live CEMS activation is unavailable because it has no frozen gold-action set. The retained Nepal POC below deliberately transfers the frozen Nepal rubric to live evidence for diagnosis only; it is not a benchmark.
 
@@ -28,11 +29,13 @@ Set `OPENAI_API_KEY`, start the local service, then select **Nepal flood practic
 Save the two durable artifacts from the local API. Replace `RUN_ID` with the dashboard run ID.
 
 ```bash
-mkdir -p var/runs/iteration_1
+mkdir -p var/runs/iteration_1 var/runs/iteration_2
 curl -s http://127.0.0.1:8000/v1/runs/RUN_ID/agent \
   | jq '.response_supervisor_run' > var/runs/iteration_1/nepal-response-supervisor.run.json
 curl -s http://127.0.0.1:8000/v1/runs/RUN_ID/evidence \
   | jq '.source_evidence_package' > var/runs/iteration_1/nepal-response-supervisor.evidence.json
+curl -s http://127.0.0.1:8000/v1/runs/RUN_ID/impacts \
+  | jq '.impact_package' > var/runs/iteration_2/nepal-impact-package.json
 ```
 
 Read `response.actions` in `nepal-response-supervisor.run.json`. Each action's `action_id` is the only valid value for a covered decision's `proposal_action_id`. The action evidence chips are immutable source `snapshot_id` values, such as `cems-activation-snapshot`; they are checked automatically before human adjudication.
@@ -46,6 +49,14 @@ Run `run-66147235-554b-4c98-88a1-45d56b8f4014` used `gpt-5-mini-2025-08-07` with
 The project owner completed a manual, AI-assisted rubric-transfer review. Bharatpur was covered by `action-001-verify-bharatpur-product`; Timure, Bidur, and Syapru Besi were not. The deterministic evaluator recorded LSAC@5 `3/17` (`17.65%`). The full [run](../../runs/iteration_1/nepal-emsr927-live-poc.run.json), [evidence](../../runs/iteration_1/nepal-emsr927-live-poc.evidence.json), [event stream](../../runs/iteration_1/nepal-emsr927-live-poc.events.sse), [adjudication](../../runs/iteration_1/nepal-emsr927-live-poc.adjudication.json), and [evaluation](../../runs/iteration_1/nepal-emsr927-live-poc.evaluation.json) are retained.
 
 Do not compare this `3/17` to the baseline `3/17` as an outcome claim. The baseline used a frozen older CEMS snapshot; this POC retrieved a later live snapshot with different activation statistics. The reviewer was the project owner rather than a credentialed emergency manager. The result is evidence of workflow behavior and a diagnostic for Iteration 2, not a measured quality delta.
+
+## Retained Iteration 2 live Nepal POC
+
+Run `run-f7fd675d-6370-4470-ac51-cc1356b7f581` used response-supervisor configuration version `4` and `gpt-5-mini-2025-08-07`. Its impact package selected one newest finished CEMS product per AOI, exposing source-reported road and bridge impacts near Timure, residential impact in Bidur, facilities in Syapru Besi, and Bharatpur's waiting-product gap. The worker saved fifteen ordered events, five draft actions, and an immutable impact package before automatic checks.
+
+The authorized project-owner, AI-assisted review found the immediate Timure access action, immediate Bidur residential-triage action, and monitor-only Bharatpur evidence request covered. It did not find a Syapru Besi facility-continuity action within six hours. The deterministic evaluator recorded LSAC@5 `13/17` (`76.47%`), `0` unsafe autonomous-action findings, `0` missing evidence references, and `5` valid evidence references. The [run](../../runs/iteration_2/nepal-emsr927-live-v4.run.json), [evidence](../../runs/iteration_2/nepal-emsr927-live-v4.evidence.json), [impacts](../../runs/iteration_2/nepal-emsr927-live-v4.impacts.json), [event stream](../../runs/iteration_2/nepal-emsr927-live-v4.events.sse), [adjudication](../../runs/iteration_2/nepal-emsr927-live-v4.adjudication.json), and [evaluation](../../runs/iteration_2/nepal-emsr927-live-v4.evaluation.json) are retained.
+
+This is not a fair score delta versus the frozen baseline or Iteration 1. The live source is mutable, the prompt and resources changed, and the reviewer is not credentialed. The v5 capacity policy was removed after it over-selected facility-continuity actions and reduced transferred coverage; its [run trajectory](../../runs/iteration_2/removed/nepal-emsr927-live-v5-overcoverage.run.json) is retained as a removed experiment.
 
 ## Record human coverage
 
@@ -76,4 +87,4 @@ Exit `0` means the report is complete. The report includes LSAC@5, deterministic
 - A static gateway passing contract tests proves the implementation, not model quality.
 - A live CEMS score requires a newly frozen case and qualified human adjudication. A rubric transfer may be used only as an explicitly non-comparable diagnostic.
 - An open source package remains preliminary even if the draft checks pass.
-- All actions remain drafts. This iteration has no approval API, dispatch capability, impact calculation, spatial overlay, or numeric lives-saved estimate. It accepts only `not_estimable` abstentions with a reason, which the dashboard shows beside the action.
+- All actions remain drafts. This iteration has no approval API, dispatch capability, local raster/vector overlay, or numeric lives-saved estimate. It extracts CEMS product-level source statistics deterministically and still accepts only `not_estimable` abstentions with a reason.
