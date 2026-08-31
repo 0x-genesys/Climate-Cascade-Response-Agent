@@ -38,6 +38,24 @@
           <section class="content-grid lower-grid"><article class="surface evidence-surface"><div class="surface-heading"><div><p class="eyebrow">Evidence and uncertainty</p><h3>What the sources say</h3></div><span id="evidenceStatus" class="badge">Waiting</span></div><div id="evidencePanel" class="empty-state">Source snapshots, completeness warnings, and citations appear here after verification.</div></article><article class="surface progress-surface"><div class="surface-heading"><div><p class="eyebrow">Run progress</p><h3>What the system did</h3></div><span id="eventCount" class="badge neutral">0 steps</span></div><ol id="eventList" class="event-list"></ol></article></section>
         </section>
       </section>
+
+      <section class="glossary surface" aria-labelledby="glossaryTitle">
+        <div class="surface-heading glossary-heading"><div><p class="eyebrow">Reference</p><h2 id="glossaryTitle">Glossary: terms used in this review</h2></div><p>Each term names a source, control, or checkpoint in the response flow.</p></div>
+        <div class="glossary-grid">
+          <article><h3>CEMS</h3><p><strong>Copernicus Emergency Management Service.</strong> The primary public mapping source for this flood MVP. Used first during source intake to identify the activation, affected-area products, and reported impacts.</p></article>
+          <article><h3>USGS</h3><p><strong>U.S. Geological Survey.</strong> A technical hazard source. Used during source intake to preserve preliminary trigger findings and prevent unsupported certainty.</p></article>
+          <article><h3>International Charter</h3><p><strong>Space and Major Disasters.</strong> A disaster-response satellite-imagery coordination source. Used during source intake to corroborate activation context and data gaps.</p></article>
+          <article><h3>AOI</h3><p><strong>Area of interest.</strong> A named mapping area within a CEMS activation. Used in Official Mapping to show whether a product is delivered, pending, or unavailable.</p></article>
+          <article><h3>Evidence snapshot</h3><p><strong>A pinned copy of a source response.</strong> It stores a URL, retrieval time, checksum, and immutable ID. Used to ground every draft action and evidence-reference check.</p></article>
+          <article><h3>Response supervisor</h3><p><strong>The bounded drafting agent.</strong> After evidence is saved, it produces at most five human-reviewable actions. It cannot dispatch, warn, or approve anything.</p></article>
+          <article><h3>Draft only</h3><p><strong>A proposal, not an instruction.</strong> It appears after the response supervisor succeeds. A qualified emergency manager still owns any approval, edit, evidence request, or rejection.</p></article>
+          <article><h3>Run Feedback</h3><p><strong>Automatic pre-review checks.</strong> It verifies autonomous-action safety and evidence references after drafting. Passing it means the queue is ready for human review, not that the actions are approved.</p></article>
+          <article><h3>LSAC@5</h3><p><strong>Life-Safety Action Coverage at 5.</strong> The weighted share of frozen life-safety requirements covered by the top five drafts. Used only after a human records coverage decisions for the Nepal practice case.</p></article>
+          <article><h3>Human adjudication</h3><p><strong>The explicit coverage review.</strong> A reviewer decides whether each frozen requirement is actually covered, then the deterministic evaluator calculates LSAC@5 for comparison with the baseline.</p></article>
+          <article><h3>Not estimable</h3><p><strong>A required abstention when evidence is insufficient.</strong> It means the system will not invent a lives-saved range. Used beside an action when Iteration 1 lacks calibrated impact support.</p></article>
+          <article><h3>SSE progress feed</h3><p><strong>Server-Sent Events.</strong> The live, ordered workflow stream used by Run Progress and the current status message. It reports observable work, not private model reasoning.</p></article>
+        </div>
+      </section>
     </main>
     <script src="/dashboard/app.js"></script>
   </body>

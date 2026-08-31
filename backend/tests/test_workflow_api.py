@@ -301,3 +301,5 @@ def test_api_serves_dashboard_static_files(tmp_path: Path) -> None:
     assert "Draft checks did not run:" in script.text
     assert "liveStatus" in index.text
     assert "response_supervisor_started" in script.text
+    assert "Glossary: terms used in this review" in index.text
+    assert "Life-Safety Action Coverage at 5" in index.text

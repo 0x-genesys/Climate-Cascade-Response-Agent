@@ -69,6 +69,8 @@ Load the pinned `EMSR927` Nepal fixture. Show USGS, CEMS, and International Char
 
 Show the live dashboard run feed moving through source retrieval, source verification, source snapshot, constrained response-supervisor drafting, receipt of the stored structured response, and deterministic draft checks. The dashboard exposes these persisted milestones, not token streaming or private model reasoning. Surface the stored warning that `EMSR927` is open and that Bidur and Bharatpur contain pending products. The dashboard reaches `Ready for human review` only when the draft has cited saved evidence and passed deterministic policy checks. It does not claim deterministic impact analysis, a geographic overlay, lives saved, or human approval.
 
+Use the glossary at the bottom of the dashboard if the reviewer needs to distinguish CEMS, USGS, the International Charter, AOIs, evidence snapshots, automatic Run Feedback, human adjudication, or LSAC@5. Each entry explains where it appears in the flow.
+
 ### Beat 3: Damage becomes an action
 
 Open an affected bridge or residential cluster on the map. Show the connected population, affected infrastructure, proposed owner, urgency, evidence, dependencies, and life-safety estimate or abstention.
