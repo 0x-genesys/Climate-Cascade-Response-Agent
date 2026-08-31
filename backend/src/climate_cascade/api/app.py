@@ -13,9 +13,10 @@ from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 
 from climate_cascade.domain import RunMode
+from climate_cascade.estimates import abstention_for_action
 from climate_cascade.persistence import LocalArtifactStore, RunRepository, RunSnapshot, create_sqlite_engine, migrate_database
 
-from .models import CreateBaselineRunRequest, CreateRunRequest, RunListResponse, RunResponse
+from .models import CreateActionReviewRequest, CreateBaselineRunRequest, CreateRunRequest, RunListResponse, RunResponse
 
 
 @dataclass(frozen=True)
@@ -164,6 +165,25 @@ def create_app(*, services: ApiServices) -> FastAPI:
         if artifact is None:
             return {"run_id": run_id, "impact_package": None}
         return {"run_id": run_id, "impact_package": json.loads(artifact.storage_path.read_text(encoding="utf-8"))}
+
+    @app.get("/v1/runs/{run_id}/actions")
+    def get_actions(run_id: str) -> dict[str, object]:
+        services.repository.get_run(run_id)
+        artifact = services.repository.get_artifact(run_id, "response_supervisor_run")
+        response = json.loads(artifact.storage_path.read_text(encoding="utf-8")).get("response") if artifact else None
+        actions = (response or {}).get("actions", [])
+        return {"run_id": run_id, "actions": actions, "estimates": [abstention_for_action(action["action_id"]) for action in actions], "reviews": [review.__dict__ for review in services.repository.list_action_reviews(run_id)]}
+
+    @app.post("/v1/runs/{run_id}/actions/{action_id}/reviews")
+    def record_action_review(run_id: str, action_id: str, payload: CreateActionReviewRequest) -> dict[str, object]:
+        actions = get_actions(run_id)["actions"]
+        if action_id not in {action["action_id"] for action in actions}:
+            raise HTTPException(status_code=404, detail=f"Unknown action: {action_id}")
+        try:
+            review = services.repository.record_action_review(run_id=run_id, action_id=action_id, **payload.model_dump())
+        except ValueError as error:
+            raise HTTPException(status_code=409, detail=str(error)) from error
+        return review.__dict__
 
     @app.get("/v1/runs/{run_id}/events")
     async def stream_events(

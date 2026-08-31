@@ -7,6 +7,10 @@ Last updated: 2026-08-31
 
 Given the same disaster case and source package, does the Climate Cascade Response Agent identify more of the highest-value life-safety actions than a reasonable direct-prompt baseline, while keeping unsafe and unsupported actions at zero?
 
+## Iteration 4 Final Result
+
+The retained live Nepal Iteration 4 POC scored LSAC@5 `13/17` (`76.47%`) under project-owner, AI-assisted rubric transfer. This is not a measured uplift: Iteration 4 adds deterministic abstention and qualified human-review capture after draft planning, so LSAC remains governed by the upstream action queue. See `runs/iteration_4/nepal-live-v1.*` and `docs/execution/2026-08-31-18-iteration-4-final.md`.
+
 ## Scope of the evidence
 
 The Micro1 evaluation covers only flood and debris-flow response. Earthquakes, tsunamis, tornadoes, and volcanic eruptions are beyond-MVP roadmap hazards.

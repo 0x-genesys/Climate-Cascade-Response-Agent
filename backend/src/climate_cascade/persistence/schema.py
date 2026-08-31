@@ -67,3 +67,19 @@ class RunArtifactRecord(Base):
     logical_name: Mapped[str] = mapped_column(String(96), nullable=False)
     artifact_sha256: Mapped[str] = mapped_column(ForeignKey("artifacts.sha256"), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
+class ActionReviewRecord(Base):
+    __tablename__ = "action_reviews"
+    __table_args__ = (UniqueConstraint("run_id", "action_id", "version", name="uq_action_review_version"),)
+
+    review_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    run_id: Mapped[str] = mapped_column(ForeignKey("runs.run_id", ondelete="CASCADE"), nullable=False, index=True)
+    action_id: Mapped[str] = mapped_column(String(128), nullable=False)
+    version: Mapped[int] = mapped_column(Integer, nullable=False)
+    decision: Mapped[str] = mapped_column(String(32), nullable=False)
+    reviewer_id: Mapped[str] = mapped_column(String(96), nullable=False)
+    reviewer_role: Mapped[str] = mapped_column(String(160), nullable=False)
+    rationale: Mapped[str] = mapped_column(Text, nullable=False)
+    assumptions_json: Mapped[str] = mapped_column(Text, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)

@@ -42,6 +42,7 @@ The frozen Nepal rubric awards `5` points for Timure access verification, `5` fo
 | Iteration 1 live POC | `3/17` | Timure access `0/5`; Bidur residential `0/5`; Syapru continuity `0/4`; Bharatpur evidence request `3/3`. |
 | Iteration 2 live POC | `13/17` | Timure access `5/5`; Bidur residential `5/5`; Syapru continuity `0/4`; Bharatpur evidence request `3/3`. |
 | Iteration 3 live POC, restored prompt | `14/17` | Timure access `5/5`; Bidur residential `5/5`; Syapru continuity `4/4`; Bharatpur evidence request `0/3`. |
+| Iteration 4 Final live POC | `13/17` | Timure access `5/5`; Bidur residential `5/5`; Syapru continuity `0/4`; Bharatpur evidence request `3/3`. |
 
 ## Prompt-Only Baseline Findings
 

@@ -6,7 +6,7 @@ Create one entry before or immediately after each meaningful implementation step
 
 ## Latest checkpoint
 
-[2026-08-31-17 Iteration 3 verifier rerun](2026-08-31-17-iteration-3-verifier-rerun.md) records the restored initial prompt, live Nepal run, independent verifier result, project-owner adjudication, and retained `14/17` evidence bundle.
+[2026-08-31-18 Iteration 4 Final](2026-08-31-18-iteration-4-final.md) records deterministic abstention, qualified-review persistence, dashboard controls, live Nepal evaluation, and the retained `13/17` LSAC result.
 
 ## Required entry fields
 
