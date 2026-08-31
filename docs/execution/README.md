@@ -6,7 +6,7 @@ Create one entry before or immediately after each meaningful implementation step
 
 ## Latest checkpoint
 
-[2026-08-31-16 Iteration 2 live Nepal POC finalization](2026-08-31-16-iteration-2-live-poc-finalization.md) retains the deterministic CEMS product-statistics implementation, live run, project-owner manual coverage review, removed policy experiment, and explicit non-comparable benchmark boundary.
+[2026-08-31-17 Iteration 3 verifier rerun](2026-08-31-17-iteration-3-verifier-rerun.md) records the restored initial prompt, live Nepal run, independent verifier result, project-owner adjudication, and retained `14/17` evidence bundle.
 
 ## Required entry fields
 
