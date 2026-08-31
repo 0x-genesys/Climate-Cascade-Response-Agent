@@ -203,6 +203,19 @@ def _render_user_prompt(
             "scenario_id": case.scenario.scenario_id,
             "constraints": [constraint.model_dump(mode="json") for constraint in case.scenario.constraints],
         }
+    response_rules = [
+        "For every action.evidence_ids value, use an exact value from allowed_action_evidence_ids. Do not use source_id or claim_id values.",
+        "Every action is a draft for a qualified human; do not issue an order, dispatch, or public warning.",
+        "Keep open activations, pending products, and preliminary facts visible as uncertainty.",
+        "Use deterministic AOI impact facts when present. Do not replace a cited affected population, building, facility, road, or bridge value with an invented value.",
+        "Where cited access impact is present, draft a human-reviewed access verification; where residential impact is present, draft location-specific triage; where critical facilities are affected, draft a continuity check.",
+        "Use immediate urgency for cited access verification and residential-impact triage, under_six_hours for cited critical-services continuity checks, and monitor for a pending product or unanalysed area that only needs evidence requested.",
+        "Maximize distinct AOI coverage before drafting a second action for the same AOI. When several AOIs have different cited access, residential, facility, or pending-data needs, surface the most time-sensitive relevant need for each AOI first.",
+        "When a completed AOI contains a cited facility impact, include an explicit continuity-check draft for that named AOI and facility type rather than folding it into a generic access or residential action.",
+        "When data are missing, request evidence or verification rather than infer no impact.",
+        "Set estimate to null, or use only a not_estimable estimate with a concrete abstention reason; never provide numeric estimates.",
+        "Do not claim lives saved, casualty counts, or deterministic impact analysis.",
+    ]
     payload = {
         "task": "Draft a small, human-reviewable response queue from verified source evidence.",
         "case_id": case_id,
@@ -211,22 +224,13 @@ def _render_user_prompt(
         "source_evidence": source_view,
         "deterministic_impacts": impacts.model_dump(mode="json") if impacts is not None else None,
         "operational_scenario": scenario,
-        "verifier_feedback": revision_feedback or [],
-        "response_rules": [
-            "For every action.evidence_ids value, use an exact value from allowed_action_evidence_ids. Do not use source_id or claim_id values.",
-            "Every action is a draft for a qualified human; do not issue an order, dispatch, or public warning.",
-            "Keep open activations, pending products, and preliminary facts visible as uncertainty.",
-            "Use deterministic AOI impact facts when present. Do not replace a cited affected population, building, facility, road, or bridge value with an invented value.",
-            "Where cited access impact is present, draft a human-reviewed access verification; where residential impact is present, draft location-specific triage; where critical facilities are affected, draft a continuity check.",
-            "Use immediate urgency for cited access verification and residential-impact triage, under_six_hours for cited critical-services continuity checks, and monitor for a pending product or unanalysed area that only needs evidence requested.",
-            "Maximize distinct AOI coverage before drafting a second action for the same AOI. When several AOIs have different cited access, residential, facility, or pending-data needs, surface the most time-sensitive relevant need for each AOI first.",
-            "When a completed AOI contains a cited facility impact, include an explicit continuity-check draft for that named AOI and facility type rather than folding it into a generic access or residential action.",
-            "When data are missing, request evidence or verification rather than infer no impact.",
-            "Set estimate to null, or use only a not_estimable estimate with a concrete abstention reason; never provide numeric estimates.",
-            "Do not claim lives saved, casualty counts, or deterministic impact analysis.",
-            "If verifier_feedback is provided, revise only the identified draft defects while retaining valid evidence-backed actions.",
-        ],
+        "response_rules": response_rules,
     }
+    if revision_feedback:
+        payload["verifier_feedback"] = revision_feedback
+        response_rules.append(
+            "Revise only the defects identified in verifier_feedback while retaining valid evidence-backed actions."
+        )
     return json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
 
 

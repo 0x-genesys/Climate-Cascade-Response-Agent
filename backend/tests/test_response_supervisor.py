@@ -78,6 +78,7 @@ def test_response_supervisor_receives_compact_impact_package_not_raw_source_payl
     assert "Use immediate urgency for cited access verification" in artifact.user_prompt
     assert "Maximize distinct AOI coverage" in artifact.user_prompt
     assert "include an explicit continuity-check draft" in artifact.user_prompt
+    assert "verifier_feedback" not in artifact.user_prompt
     assert "raw_content" not in artifact.user_prompt
 
 
