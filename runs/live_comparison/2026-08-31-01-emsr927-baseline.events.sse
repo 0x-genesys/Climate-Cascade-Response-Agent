@@ -1,0 +1,39 @@
+id: 1
+event: run_event
+data: {"sequence":1,"event_type":"run_created","stage":"received","status":"queued","message":"Run was accepted and queued for a worker lease.","evidence_ids":[],"retry_count":0,"created_at":"2026-08-31T14:34:57.751543+00:00"}
+
+id: 2
+event: run_event
+data: {"sequence":2,"event_type":"lease_acquired","stage":"received","status":"leased","message":"Run leased by worker local-Karans-MacBook-Pro-6.local-67167 until 2026-08-31T14:36:58.184899+00:00.","evidence_ids":[],"retry_count":0,"created_at":"2026-08-31T14:34:58.191117+00:00"}
+
+id: 3
+event: run_event
+data: {"sequence":3,"event_type":"state_transition","stage":"source_check","status":"completed","message":"Live comparison baseline queued to reuse an immutable source snapshot from the selected agent run.","evidence_ids":[],"retry_count":0,"created_at":"2026-08-31T14:34:58.197992+00:00"}
+
+id: 4
+event: run_event
+data: {"sequence":4,"event_type":"baseline_source_reused","stage":"verified","status":"completed","message":"Baseline reused the exact source package from run-a50179a3-b497-41db-82df-92acfa0c8fa7; deterministic impact analysis remains unavailable.","evidence_ids":[],"retry_count":0,"created_at":"2026-08-31T14:34:58.203940+00:00"}
+
+id: 5
+event: run_event
+data: {"sequence":5,"event_type":"state_transition","stage":"data_snapshot","status":"completed","message":"Shared live source snapshot is pinned for the direct-prompt baseline.","evidence_ids":[],"retry_count":0,"created_at":"2026-08-31T14:34:58.205724+00:00"}
+
+id: 6
+event: run_event
+data: {"sequence":6,"event_type":"state_transition","stage":"impact_analysis","status":"completed","message":"Baseline intentionally skips deterministic impact analysis.","evidence_ids":[],"retry_count":0,"created_at":"2026-08-31T14:34:58.207429+00:00"}
+
+id: 7
+event: run_event
+data: {"sequence":7,"event_type":"state_transition","stage":"action_drafting","status":"completed","message":"Baseline action drafting is ready for its one structured model call.","evidence_ids":[],"retry_count":0,"created_at":"2026-08-31T14:34:58.208962+00:00"}
+
+id: 8
+event: run_event
+data: {"sequence":8,"event_type":"baseline_completed","stage":"evidence_verification","status":"completed","message":"One baseline model response was stored; deterministic validation is running.","evidence_ids":[],"retry_count":0,"created_at":"2026-08-31T14:35:34.139210+00:00"}
+
+id: 9
+event: run_event
+data: {"sequence":9,"event_type":"baseline_evaluated","stage":"awaiting_human_review","status":"completed","message":"Deterministic baseline checks completed; human coverage adjudication is required for LSAC@5.","evidence_ids":[],"retry_count":0,"created_at":"2026-08-31T14:35:34.144263+00:00"}
+
+id: 10
+event: run_event
+data: {"sequence":10,"event_type":"lease_released","stage":"awaiting_human_review","status":"released","message":"Worker local-Karans-MacBook-Pro-6.local-67167 released the run lease.","evidence_ids":[],"retry_count":0,"created_at":"2026-08-31T14:35:34.145413+00:00"}

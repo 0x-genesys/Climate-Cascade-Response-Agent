@@ -6,7 +6,7 @@ Create one entry before or immediately after each meaningful implementation step
 
 ## Latest checkpoint
 
-[2026-08-31-16 Iteration 2 live Nepal POC finalization](2026-08-31-16-iteration-2-live-poc-finalization.md) retains the deterministic CEMS product-statistics implementation, live run, project-owner manual coverage review, removed policy experiment, and explicit non-comparable benchmark boundary.
+[2026-08-31-17 Live baseline comparison](2026-08-31-17-live-baseline-comparison.md) adds a shared immutable-source path for an apples-to-apples live baseline and Iteration 2 comparison, and preserves the first paired EMSR927 artifacts.
 
 ## Required entry fields
 

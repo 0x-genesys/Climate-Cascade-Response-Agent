@@ -1,0 +1,59 @@
+id: 1
+event: run_event
+data: {"sequence":1,"event_type":"run_created","stage":"received","status":"queued","message":"Run was accepted and queued for a worker lease.","evidence_ids":[],"retry_count":0,"created_at":"2026-08-31T14:31:18.829323+00:00"}
+
+id: 2
+event: run_event
+data: {"sequence":2,"event_type":"lease_acquired","stage":"received","status":"leased","message":"Run leased by worker local-Karans-MacBook-Pro-6.local-66437 until 2026-08-31T14:33:19.061429+00:00.","evidence_ids":[],"retry_count":0,"created_at":"2026-08-31T14:31:19.063587+00:00"}
+
+id: 3
+event: run_event
+data: {"sequence":3,"event_type":"state_transition","stage":"source_check","status":"completed","message":"Agent run accepted; authoritative source intake is starting.","evidence_ids":[],"retry_count":0,"created_at":"2026-08-31T14:31:19.066150+00:00"}
+
+id: 4
+event: run_event
+data: {"sequence":4,"event_type":"source_intake_started","stage":"source_check","status":"working","message":"Working: retrieving and checking authoritative source snapshots before drafting any response.","evidence_ids":[],"retry_count":0,"created_at":"2026-08-31T14:31:19.067352+00:00"}
+
+id: 5
+event: run_event
+data: {"sequence":5,"event_type":"source_verified","stage":"verified","status":"completed","message":"Source verification produced a preliminary evidence package with 1 snapshot(s), 3 claim(s), and 1 data gap(s).","evidence_ids":["cems-event-identity","cems-impact-stats","cems-aoi-product-status"],"retry_count":0,"created_at":"2026-08-31T14:31:21.046794+00:00"}
+
+id: 6
+event: run_event
+data: {"sequence":6,"event_type":"source_snapshot_pinned","stage":"data_snapshot","status":"completed","message":"Verified source evidence package pinned as artifact 6efa86acad92806eb867b2a52f8f5cb1eb85d07430da060ee490fab40c2d2a58.","evidence_ids":[],"retry_count":0,"created_at":"2026-08-31T14:31:21.050232+00:00"}
+
+id: 7
+event: run_event
+data: {"sequence":7,"event_type":"source_evidence_ready","stage":"impact_analysis","status":"completed","message":"Source evidence is pinned. Deterministic CEMS product-statistics impact analysis is starting.","evidence_ids":[],"retry_count":0,"created_at":"2026-08-31T14:31:21.052394+00:00"}
+
+id: 8
+event: run_event
+data: {"sequence":8,"event_type":"impact_analysis_started","stage":"impact_analysis","status":"working","message":"Analyzing: extracting affected population, assets, roads, bridges, and data gaps from saved CEMS products.","evidence_ids":[],"retry_count":0,"created_at":"2026-08-31T14:31:21.055678+00:00"}
+
+id: 9
+event: run_event
+data: {"sequence":9,"event_type":"impact_analysis_completed","stage":"action_drafting","status":"completed","message":"Deterministic impact analysis saved 3 AOI result(s) and 1 explicit data gap(s); response drafting can now use cited impact facts.","evidence_ids":["cems-emsr927-snapshot"],"retry_count":0,"created_at":"2026-08-31T14:31:21.058907+00:00"}
+
+id: 10
+event: run_event
+data: {"sequence":10,"event_type":"response_supervisor_started","stage":"action_drafting","status":"working","message":"Working: the response supervisor is generating a constrained structured draft from saved evidence. Private model reasoning is not displayed.","evidence_ids":[],"retry_count":0,"created_at":"2026-08-31T14:31:21.061715+00:00"}
+
+id: 11
+event: run_event
+data: {"sequence":11,"event_type":"response_supervisor_response_received","stage":"action_drafting","status":"working","message":"Structured response received and saved. The workflow is applying the output contract before showing any draft to a reviewer.","evidence_ids":[],"retry_count":0,"created_at":"2026-08-31T14:32:14.018174+00:00"}
+
+id: 12
+event: run_event
+data: {"sequence":12,"event_type":"response_supervisor_completed","stage":"evidence_verification","status":"completed","message":"Response supervisor stored 5 draft action(s); deterministic evidence and safety checks are running.","evidence_ids":["cems-emsr927-snapshot"],"retry_count":0,"created_at":"2026-08-31T14:32:14.019770+00:00"}
+
+id: 13
+event: run_event
+data: {"sequence":13,"event_type":"draft_checks_started","stage":"evidence_verification","status":"working","message":"Analyzing: deterministic safety and evidence-reference checks are running on the saved draft.","evidence_ids":[],"retry_count":0,"created_at":"2026-08-31T14:32:14.023856+00:00"}
+
+id: 14
+event: run_event
+data: {"sequence":14,"event_type":"agent_evaluation_completed","stage":"awaiting_human_review","status":"completed","message":"Draft actions passed deterministic evidence and safety checks; a qualified human must adjudicate coverage before LSAC@5 is reported.","evidence_ids":[],"retry_count":0,"created_at":"2026-08-31T14:32:14.026862+00:00"}
+
+id: 15
+event: run_event
+data: {"sequence":15,"event_type":"lease_released","stage":"awaiting_human_review","status":"released","message":"Worker local-Karans-MacBook-Pro-6.local-66437 released the run lease.","evidence_ids":[],"retry_count":0,"created_at":"2026-08-31T14:32:14.028375+00:00"}

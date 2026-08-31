@@ -63,7 +63,7 @@ Earthquake is the first proposed post-MVP adapter. It closely matches the produc
 
 ### Beat 1: The event arrives
 
-Load the pinned `EMSR927` Nepal fixture. Show USGS, CEMS, and International Charter verification. Highlight that the exact trigger is still under investigation.
+Select live `EMSR927` Nepal from the CEMS example dropdown. Show the source retrieval time and immutable snapshot checksum. Highlight that the exact trigger is still under investigation.
 
 ### Beat 2: The agent works in public
 
@@ -81,7 +81,7 @@ Request more evidence for one action, edit an assumption, approve another action
 
 ### Beat 5: Prove improvement
 
-Compare the direct-prompt baseline with the final workflow on the same cases. Show Life-Safety Action Coverage at 5, unsafe actions, evidence precision, population error, review time, runtime, and cost.
+Use **Compare one-call baseline with this saved source** after the live workflow saves evidence. Explain that both methods receive the same immutable CEMS snapshot, while only Iteration 2 receives the deterministic impact package. Show the two action queues, safety and citation checks, then state that LSAC awaits a rubric frozen before the pair and human adjudication.
 
 ### Beat 6: Share the learning
 

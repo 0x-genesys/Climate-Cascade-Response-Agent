@@ -61,6 +61,10 @@ A project-owner, AI-assisted manual rubric transfer measured LSAC@5 `13/17` (`76
 
 This `13/17` result is **not comparable** with the frozen baseline or an improvement claim. It used mutable live source data, a changed prompt and impact resource profile, and a project-owner reviewer rather than a credentialed emergency-management reviewer. It is retained as a diagnostic proof that CEMS product-level facts increase location-specific coverage. The remaining failure is also material: the five-action budget and prompt policy selected access/residential actions for Syapru Besi instead of the required facility-continuity action. The v5 policy that attempted to force every facility AOI reduced coverage and was removed; its trajectory is retained under `runs/iteration_2/removed/`.
 
+### Captured-live comparison path
+
+The dashboard can now run a one-call baseline against the exact immutable source package saved by a completed live response run. The baseline receives raw CEMS evidence only; Iteration 2 receives that same evidence plus its deterministic impact package. The first EMSR927 pair shared checksum `1d0595d2121d9744de739ee6b41e77596ca9bf32ffb794a0cb7eddf448d9c8ca`; both produced five drafts with zero unsafe findings and zero missing references. See [the paired artifacts](../../runs/live_comparison/README.md). This controls source freshness but remains unscored until a comparison rubric is frozen before execution and both outputs receive human adjudication.
+
 ### Agent solution
 
 - source verification and pinned evidence
