@@ -1,0 +1,37 @@
+{
+  "schema_version": "1",
+  "case_id": "nepal-emsr927-v1",
+  "run_id": "run-04c58215-d4ec-4dda-aba9-eb87b62ad6ec",
+  "reviewer_id": "project-owner-ai-assisted",
+  "reviewer_role": "Project owner manual rubric review, AI-assisted",
+  "decided_at": "2026-08-31T15:23:00Z",
+  "decisions": [
+    {
+      "schema_version": "1",
+      "gold_action_id": "verify-access-timure",
+      "covered": true,
+      "proposal_action_id": "emsr927-aoi2-access-res-triage-001",
+      "rationale": "The cited Timure draft explicitly requests immediate human access verification before any routing or clearance decision."
+    },
+    {
+      "schema_version": "1",
+      "gold_action_id": "triage-residential-impact-bidur",
+      "covered": true,
+      "proposal_action_id": "emsr927-aoi3-access-res-triage-001",
+      "rationale": "The cited Bidur draft explicitly requests immediate location-specific residential-impact triage using the saved CEMS impact facts."
+    },
+    {
+      "schema_version": "1",
+      "gold_action_id": "check-critical-services-syapru-besi",
+      "covered": true,
+      "proposal_action_id": "emsr927-aoi1-facility-continuity-001",
+      "rationale": "The cited Syapru Besi draft requests a power-plant and school continuity check within six hours and remains a human-reviewable draft."
+    },
+    {
+      "schema_version": "1",
+      "gold_action_id": "preserve-bharatpur-data-gap",
+      "covered": false,
+      "rationale": "The limitation preserves Bharatpur as waiting for data, but no proposed action requests product delivery. The evaluation contract requires a concrete proposal action for coverage."
+    }
+  ]
+}

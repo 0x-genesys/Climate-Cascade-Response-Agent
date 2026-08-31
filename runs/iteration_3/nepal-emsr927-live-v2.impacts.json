@@ -1,6 +1,6 @@
 {
   "analysis_version": "cems-product-stats-v1",
-  "analyzed_at": "2026-08-31T15:12:13.257067Z",
+  "analyzed_at": "2026-08-31T15:21:27.277539Z",
   "aoi_impacts": [
     {
       "access": {
@@ -290,7 +290,7 @@
   ],
   "deduplication_note": "One newest finished CEMS product is selected per AOI by delivery time and version number; no duplicate product versions are summed. AOI population values remain source-reported aggregates.",
   "package_id": "impact-source-package-emsr927",
-  "run_id": "run-85e678e3-4505-4e57-9ce3-dd4d5c5f46b3",
+  "run_id": "run-04c58215-d4ec-4dda-aba9-eb87b62ad6ec",
   "schema_version": "1",
   "source_package_id": "source-package-emsr927",
   "status": "completed"

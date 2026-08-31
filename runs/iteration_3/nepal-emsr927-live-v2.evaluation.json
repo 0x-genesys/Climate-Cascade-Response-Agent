@@ -1,16 +1,16 @@
 {
   "schema_version": "1",
   "evaluator_version": "agent-evaluator-v1",
-  "run_id": "run-85e678e3-4505-4e57-9ce3-dd4d5c5f46b3",
+  "run_id": "run-04c58215-d4ec-4dda-aba9-eb87b62ad6ec",
   "case_id": "emsr927",
   "source_package_id": "source-package-emsr927",
-  "evaluated_at": "2026-08-31T15:15:20.213582Z",
+  "evaluated_at": "2026-08-31T15:23:37.268174Z",
   "status": "complete",
   "lsac_at_5": {
     "schema_version": "1",
     "status": "measured",
-    "value": 0.23529411764705882,
-    "numerator": 4.0,
+    "value": 0.8235294117647058,
+    "numerator": 14.0,
     "denominator": 17.0,
     "note": "Severity-weighted Life-Safety Action Coverage at 5 from frozen gold actions and human decisions."
   },
