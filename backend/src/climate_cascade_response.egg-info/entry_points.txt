@@ -1,6 +1,7 @@
 [console_scripts]
 climate-cascade-api = climate_cascade.api.server:main
 climate-cascade-baseline = climate_cascade.cli:main
+climate-cascade-evaluate-agent = climate_cascade.cli:evaluate_agent_main
 climate-cascade-evaluate-baseline = climate_cascade.cli:evaluate_main
 climate-cascade-local = climate_cascade.local:main
 climate-cascade-worker = climate_cascade.workflow.worker:main

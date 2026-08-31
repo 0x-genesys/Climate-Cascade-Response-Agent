@@ -12,6 +12,7 @@ import time
 import uvicorn
 
 from climate_cascade.api import build_services, create_app
+from climate_cascade.environment import load_project_environment
 from climate_cascade.persistence import migrate_database
 from climate_cascade.workflow.worker import build_worker_engine
 
@@ -23,6 +24,7 @@ DEFAULT_DASHBOARD_ROOT = Path("dashboard")
 
 
 def main(argv: list[str] | None = None) -> int:
+    load_project_environment()
     parser = argparse.ArgumentParser(description="Prepare or run the local Climate Cascade control plane.")
     subparsers = parser.add_subparsers(dest="command", required=True)
 

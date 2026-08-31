@@ -8,10 +8,13 @@ from pathlib import Path
 
 import uvicorn
 
+from climate_cascade.environment import load_project_environment
+
 from .app import build_services, create_app
 
 
 def main(argv: list[str] | None = None) -> int:
+    load_project_environment()
     parser = argparse.ArgumentParser(description="Serve the Climate Cascade control API.")
     parser.add_argument("--database-url", default=os.environ.get("CLIMATE_CASCADE_DATABASE_URL", "sqlite:///var/climate-cascade.db"))
     parser.add_argument("--artifact-root", type=Path, default=Path(os.environ.get("CLIMATE_CASCADE_ARTIFACT_ROOT", "var/artifacts")))

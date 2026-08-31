@@ -11,6 +11,7 @@ from climate_cascade.baseline import OpenAIChatCompletionsGateway, run_baseline
 from climate_cascade.baseline.runner import BaselineRunArtifact, BaselineRunStatus, write_run_artifact
 from climate_cascade.agents import ResponseSupervisorRunArtifact
 from climate_cascade.domain import VerifiedEvidencePackage, load_frozen_case
+from climate_cascade.environment import load_project_environment
 from climate_cascade.evaluation import AgentEvaluationStatus, CoverageAdjudication, evaluate_agent_run, evaluate_baseline
 from climate_cascade.evaluation.scoring import EvaluationStatus
 
@@ -18,6 +19,7 @@ from climate_cascade.evaluation.scoring import EvaluationStatus
 def main(argv: list[str] | None = None) -> int:
     """Run one baseline call and write an evaluation report beside its artifact."""
 
+    load_project_environment()
     args = _parse_args(argv)
     case = load_frozen_case(args.case)
     gateway = _configured_gateway(args)
@@ -43,6 +45,7 @@ def main(argv: list[str] | None = None) -> int:
 def evaluate_main(argv: list[str] | None = None) -> int:
     """Evaluate an existing baseline run without issuing another model request."""
 
+    load_project_environment()
     args = _parse_evaluate_args(argv)
     case = load_frozen_case(args.case)
     run = BaselineRunArtifact.model_validate_json(args.run.read_text(encoding="utf-8"))
@@ -65,6 +68,7 @@ def evaluate_main(argv: list[str] | None = None) -> int:
 def evaluate_agent_main(argv: list[str] | None = None) -> int:
     """Evaluate a stored response-supervisor draft without making a model request."""
 
+    load_project_environment()
     args = _parse_evaluate_agent_args(argv)
     case = load_frozen_case(args.case)
     run = ResponseSupervisorRunArtifact.model_validate_json(args.run.read_text(encoding="utf-8"))

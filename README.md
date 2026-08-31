@@ -41,13 +41,19 @@ Expected result: the command creates `var/climate-cascade.db`, applies the check
 
 ## Configure an OpenAI API key
 
-The live baseline reads `OPENAI_API_KEY` from the process environment. Do not commit a key, put it in fixtures, or include it in an execution artifact.
+The live baseline and dashboard worker read `OPENAI_API_KEY` from a local `.env` file or the process environment. Do not commit a key, put it in fixtures, or include it in an execution artifact.
 
 ```bash
-export OPENAI_API_KEY="your-key"
+cp .env.example .env
 ```
 
-Use `.env.example` only as a reminder of the variable name. If you keep a local `.env` file, load it through your shell or secret manager before running the command. The application does not read `.env` automatically.
+Edit `.env` and replace the empty value with your real key:
+
+```dotenv
+OPENAI_API_KEY=sk-your-real-key
+```
+
+Every project CLI command loads `.env` from the current project directory automatically. A value explicitly exported by your shell or CI takes precedence over `.env`. The dashboard never receives or displays the key.
 
 You can use a different environment-variable name with `--api-key-env YOUR_VARIABLE_NAME`.
 

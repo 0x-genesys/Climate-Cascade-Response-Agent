@@ -7,13 +7,14 @@ Description-Content-Type: text/markdown
 Requires-Dist: alembic<2,>=1.17
 Requires-Dist: fastapi<1,>=0.128
 Requires-Dist: pydantic<3,>=2.13
+Requires-Dist: python-dotenv<2,>=1.2
 Requires-Dist: sqlalchemy<3,>=2.0
 Requires-Dist: uvicorn<1,>=0.39
 
 # Climate Cascade Response Agent
 
-Status: Product plan, pre-implementation  
-Last updated: 2026-08-29  
+Status: Iteration 1 response-review path implemented; quality result pending human adjudication
+Last updated: 2026-08-31
 Pilot event: 2026 Nepal debris avalanche and flash flood, Copernicus activation `EMSR927`
 
 ## Product decision
@@ -252,10 +253,11 @@ The detailed implementation decisions, iteration flows, contracts, persistence m
 
 ### Dashboard
 
-- React and TypeScript
-- MapLibre GL JS for the interactive map
-- server-sent events for live agent-run feedback
-- accessible table and map alternatives so important actions are not map-only
+- static HTML, CSS, and JavaScript served by FastAPI for a portable local demo
+- server-sent events for visible worker feedback, with a recent-run selector for reconnecting to prior work
+- pinned Nepal practice case plus described CEMS examples (`EMSR927`, `EMSR756`, and `EMSR851`) and a link to the official CEMS activation guide
+- plain-language incident brief, uncertainty panel, authoritative product-availability view, cited draft-action queue, and deterministic check results
+- CEMS report and product links are authoritative. The current availability schematic is not a geographic map; validated CEMS geometry and MapLibre overlays are an Iteration 2 capability.
 
 ### API and workflow
 
@@ -406,13 +408,13 @@ The baseline has:
 
 This is intentionally simple but realistic. It represents an analyst copying available information into a general-purpose assistant.
 
-Implementation status: the single-call structured baseline, deterministic evaluator, SQLite persistence, content-addressed artifact store, FastAPI run control plane, ordered SSE progress stream, leased worker workflow, and local `uv run climate-cascade-local` setup/startup path are implemented. The recorded Nepal baseline result is LSAC@5 `3/17` (`17.65%`) after human adjudication. The agent workflow remains intentionally blocked until Iteration 1 source verification is implemented, so this is not a final-agent result. See [baseline evaluation](evaluation/baseline.md), [workflow execution record](execution/2026-08-30-04-durable-workflow-api-and-worker.md), and [local runtime record](execution/2026-08-30-05-local-runtime-sqlite-setup.md).
+Implementation status: the single-call structured baseline, deterministic evaluator, SQLite persistence, content-addressed artifact store, FastAPI run control plane, ordered SSE progress stream, leased worker workflow, local `uv run climate-cascade-local` setup/startup path, CEMS source adapter, versioned source-evidence package, configured response supervisor, deterministic draft checks, and response-review dashboard are implemented. The recorded Nepal baseline result is LSAC@5 `3/17` (`17.65%`) after human adjudication. Iteration 1 can now draft cited actions from verified evidence and stop at `awaiting_human_review`; it does not calculate deterministic impact, life-safety estimates, or human approval decisions. The agent has no measured quality result until a credentialed response-supervisor run receives human adjudication. See [baseline evaluation](evaluation/baseline.md), [agent evaluation guide](evaluation/agent.md), and [the Iteration 1 continuation record](execution/2026-08-31-07-iteration-1-response-supervisor-dashboard.md).
 
 ### Iteration 1: verified event intake
 
-Add source adapters, an authoritative-source policy, claim agreement checks, timestamps, hashes, licenses, and abstention on unresolved facts.
+Implemented for CEMS Rapid Mapping activations: a typed adapter retrieves and canonicalizes the public activation response, records a SHA-256 snapshot, publisher, URL, retrieval time, and license note, then produces typed claims, findings, AOI product status, and data gaps. When source verification succeeds, the worker calls the configured response supervisor once with compact evidence and scenario constraints, stores its exact response, validates cited evidence IDs and action limits, performs deterministic action checks, and pauses at human review. The dashboard exposes every stage through persisted SSE, describes the selected disaster in plain language, and renders stored evidence, official product links, draft actions, and evaluation state for a pinned fixture or a live activation.
 
-Hypothesis: source verification will improve evidence precision and reduce unsupported event claims.
+Observed source-intake result: live `EMSR927` was correctly marked `preliminary` because the activation is open and two products were waiting for data. Historical flood activations `EMSR756` and `EMSR851` were marked `supported` with no source-level data gaps. Those runs were captured before the response supervisor existed. The new supervisor and deterministic evaluation contracts pass with a static test gateway, but no credentialed agent output has been adjudicated, so evidence precision and action coverage remain unmeasured. See [Iteration 1 evidence](../runs/iteration_1/) and [the continuation record](execution/2026-08-31-07-iteration-1-response-supervisor-dashboard.md).
 
 ### Iteration 2: deterministic impact engine
 
