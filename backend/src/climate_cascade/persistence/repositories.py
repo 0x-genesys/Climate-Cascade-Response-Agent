@@ -14,7 +14,7 @@ from sqlalchemy.orm import Session, sessionmaker
 from climate_cascade.domain import RunMode, RunState
 
 from .artifacts import StoredArtifact
-from .schema import ArtifactRecord, RunArtifactRecord, RunEventRecord, RunRecord
+from .schema import ActionReviewRecord, ArtifactRecord, RunArtifactRecord, RunEventRecord, RunRecord
 
 
 ACTIVE_STATES = {
@@ -84,6 +84,18 @@ class RunEvent:
     message: str
     evidence_ids: tuple[str, ...]
     retry_count: int
+    created_at: datetime
+
+
+@dataclass(frozen=True)
+class ActionReview:
+    action_id: str
+    version: int
+    decision: str
+    reviewer_id: str
+    reviewer_role: str
+    rationale: str
+    assumptions: dict[str, object]
     created_at: datetime
 
 
@@ -313,6 +325,25 @@ class RunRepository:
             from pathlib import Path
 
             return StoredArtifact(artifact.sha256, artifact.content_type, artifact.byte_size, Path(artifact.storage_path))
+
+    def list_action_reviews(self, run_id: str) -> list[ActionReview]:
+        with self._sessions() as session:
+            rows = session.scalars(select(ActionReviewRecord).where(ActionReviewRecord.run_id == run_id).order_by(ActionReviewRecord.review_id)).all()
+            return [ActionReview(row.action_id, row.version, row.decision, row.reviewer_id, row.reviewer_role, row.rationale, json.loads(row.assumptions_json), _as_utc(row.created_at)) for row in rows]
+
+    def record_action_review(self, *, run_id: str, action_id: str, decision: str, reviewer_id: str, reviewer_role: str, rationale: str, assumptions: dict[str, object]) -> ActionReview:
+        with self._sessions.begin() as session:
+            run = session.get(RunRecord, run_id)
+            if run is None:
+                raise UnknownRunError(run_id)
+            if run.state != RunState.AWAITING_HUMAN_REVIEW.value:
+                raise InvalidTransitionError("reviews require a run awaiting human review")
+            version = (session.scalar(select(func.max(ActionReviewRecord.version)).where(ActionReviewRecord.run_id == run_id, ActionReviewRecord.action_id == action_id)) or 0) + 1
+            now = _now()
+            row = ActionReviewRecord(run_id=run_id, action_id=action_id, version=version, decision=decision, reviewer_id=reviewer_id, reviewer_role=reviewer_role, rationale=rationale, assumptions_json=_canonical_json(assumptions), created_at=now)
+            session.add(row)
+            self._append_event(session, run, event_type="human_review_recorded", status="completed", message=f"Qualified reviewer recorded {decision} for draft action {action_id}.")
+            return ActionReview(action_id, version, decision, reviewer_id, reviewer_role, rationale, assumptions, now)
 
     def _require_owned_run(self, session: Session, run_id: str, worker_id: str) -> RunRecord:
         record = session.get(RunRecord, run_id)

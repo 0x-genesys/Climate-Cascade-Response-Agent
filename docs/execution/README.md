@@ -6,7 +6,7 @@ Create one entry before or immediately after each meaningful implementation step
 
 ## Latest checkpoint
 
-[2026-08-31-17 Iteration 3 verifier rerun](2026-08-31-17-iteration-3-verifier-rerun.md) records the restored initial prompt, live Nepal run, independent verifier result, project-owner adjudication, and retained `14/17` evidence bundle.
+[2026-08-31-19 Dashboard Review Flow](2026-08-31-19-dashboard-review-flow.md) records the live-example selector, clearer CEMS coverage presentation, durable decision labels in the review queue, and responsive dashboard verification.
 
 ## Required entry fields
 

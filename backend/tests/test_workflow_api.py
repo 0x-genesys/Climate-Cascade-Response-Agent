@@ -316,6 +316,66 @@ def test_api_exposes_saved_impact_package(tmp_path: Path) -> None:
     assert agent.json()["evidence_safety_review"]["verdict"] == "pass"
 
 
+def test_api_records_human_review_and_returns_latest_action_decision(tmp_path: Path) -> None:
+    database_url = sqlite_url(tmp_path / "workflow.db")
+    artifact_root = tmp_path / "artifacts"
+    services = build_services(
+        database_url=database_url,
+        artifact_root=artifact_root,
+        case_root=CASE_ROOT,
+        repository_root=REPOSITORY_ROOT,
+    )
+    client = TestClient(create_app(services=services))
+    created = client.post(
+        "/v1/agent/runs",
+        headers={"Idempotency-Key": "api-human-review-key"},
+        json={"case_id": "nepal-emsr927-v1", "mode": "agent", "fixture_mode": True, "model": "static-test-model"},
+    )
+    run_id = created.json()["run_id"]
+    engine = WorkflowEngine(
+        repository=services.repository,
+        artifact_store=LocalArtifactStore(artifact_root),
+        case_root=CASE_ROOT,
+        gateway_factory=lambda _config: StaticGateway(),
+        response_supervisor_config_path=REPOSITORY_ROOT / "config" / "agents" / "response_supervisor.json",
+    )
+    engine.process_next(worker_id="api-human-review-worker")
+
+    actions = client.get(f"/v1/runs/{run_id}/actions")
+    assert actions.status_code == 200
+    action_id = actions.json()["actions"][0]["action_id"]
+    assert actions.json()["reviews"] == []
+    assert actions.json()["estimates"][0]["status"] == "not_estimable"
+
+    recorded = client.post(
+        f"/v1/runs/{run_id}/actions/{action_id}/reviews",
+        json={
+            "decision": "request_evidence",
+            "reviewer_id": "local-reviewer",
+            "reviewer_role": "emergency operations analyst",
+            "rationale": "The supporting map product is still needed before follow-up.",
+            "assumptions": {},
+        },
+    )
+
+    assert recorded.status_code == 200
+    assert recorded.json()["decision"] == "request_evidence"
+    refreshed = client.get(f"/v1/runs/{run_id}/actions")
+    assert refreshed.json()["reviews"] == [
+        {
+            "action_id": action_id,
+            "version": 1,
+            "decision": "request_evidence",
+            "reviewer_id": "local-reviewer",
+            "reviewer_role": "emergency operations analyst",
+            "rationale": "The supporting map product is still needed before follow-up.",
+            "assumptions": {},
+            "created_at": recorded.json()["created_at"],
+        }
+    ]
+    assert services.repository.list_events(run_id)[-1].event_type == "human_review_recorded"
+
+
 def test_api_serves_dashboard_static_files(tmp_path: Path) -> None:
     services = build_services(
         database_url=sqlite_url(tmp_path / "workflow.db"),
@@ -342,4 +402,7 @@ def test_api_serves_dashboard_static_files(tmp_path: Path) -> None:
     assert "response_supervisor_started" in script.text
     assert "Glossary: terms used in this review" in index.text
     assert "Life-Safety Action Coverage at 5" in index.text
-    assert "What finished CEMS products show" in index.text
+    assert "Flood examples" in index.text
+    assert "What CEMS has mapped" in index.text
+    assert "Record a decision for one draft" in script.text
+    assert "human_review_recorded" in script.text

@@ -1,39 +1,344 @@
-const state = {runId: "", eventSource: null, runs: [], latestEvent: null};
-const elements = Object.fromEntries(["connectionStatus","modelInput","caseSelect","activationCode","runSelect","startFixtureRun","startLiveRun","inspectRun","refreshRun","runTitle","runSubtitle","liveStatus","runState","runStateBox","runMode","incidentTitle","incidentBadge","incidentPanel","mapPanel","impactStatus","impactPanel","actionStatus","actionPanel","evaluationPanel","evidencePanel","evidenceStatus","eventList","eventCount"].map((id) => [id, document.querySelector(`#${id}`)]));
+const state = {runId: "", eventSource: null, runs: [], latestEvent: null, actions: [], estimates: [], reviews: []};
+const elements = Object.fromEntries([
+  "connectionStatus", "modelInput", "exampleSelect", "activationSelect", "runSelect",
+  "startExampleRun", "startLiveRun", "inspectRun", "refreshRun", "runTitle", "runSubtitle",
+  "liveStatus", "runState", "runStateBox", "runMode", "incidentTitle", "incidentBadge",
+  "incidentPanel", "mapPanel", "impactStatus", "impactPanel", "actionStatus", "actionPanel",
+  "evaluationPanel", "evidencePanel", "evidenceStatus", "eventList", "eventCount",
+].map((id) => [id, document.querySelector(`#${id}`)]));
 
-async function api(path, options = {}) { const response = await fetch(path, {...options, headers:{"Content-Type":"application/json", ...(options.headers || {})}}); if (!response.ok) throw new Error(`${response.status} ${await response.text()}`); return response.json(); }
-async function boot() { bindEvents(); await checkApi(); await Promise.all([loadCases(), loadRuns()]); }
-function bindEvents() { elements.startFixtureRun.addEventListener("click", () => startFixtureRun().catch(showError)); elements.startLiveRun.addEventListener("click", () => startLiveRun().catch(showError)); elements.inspectRun.addEventListener("click", () => inspectRun(elements.runSelect.value).catch(showError)); elements.refreshRun.addEventListener("click", () => refreshActiveRun().catch(showError)); document.querySelectorAll(".example").forEach((button) => button.addEventListener("click", () => { elements.activationCode.value = button.dataset.activation; startLiveRun().catch(showError); })); }
-async function checkApi() { try { await api("/v1/health"); elements.connectionStatus.textContent = "Local service ready"; } catch { elements.connectionStatus.textContent = "Local service unavailable"; } }
-async function loadCases() { const payload = await api("/v1/cases"); elements.caseSelect.innerHTML = ""; payload.cases.forEach((item) => { const option = document.createElement("option"); option.value = item.case_id; option.textContent = `${item.case_id} - ${friendlyHazard(item.hazard_type)}`; elements.caseSelect.append(option); }); }
-async function loadRuns() { const payload = await api("/v1/runs?limit=25"); state.runs = payload.runs; elements.runSelect.innerHTML = `<option value="">Choose a previous run</option>`; state.runs.forEach((run) => { const option = document.createElement("option"); option.value = run.run_id; option.textContent = `${friendlyRunState(run.state)} - ${run.case_id} - ${shortTime(run.created_at)}`; elements.runSelect.append(option); }); if (state.runId) elements.runSelect.value = state.runId; }
-function model() { const value = elements.modelInput.value.trim(); if (!value) throw new Error("Enter a structured-output model name before starting a response review."); return value; }
-async function startFixtureRun() { const caseId = elements.caseSelect.value || "nepal-emsr927-v1"; const run = await createAgentRun({case_id:caseId, mode:"agent", fixture_mode:true, model:model()}, `dashboard-fixture-${caseId}-${newId()}`); await inspectRun(run.run_id); }
-async function startLiveRun() { const activation = elements.activationCode.value.trim().toUpperCase(); if (!/^EMSR\d{3}$/.test(activation)) throw new Error("Use a CEMS code such as EMSR927."); const run = await createAgentRun({case_id:activation.toLowerCase(), mode:"agent", fixture_mode:false, activation, model:model()}, `dashboard-live-${activation.toLowerCase()}-${newId()}`); await inspectRun(run.run_id); }
-function createAgentRun(payload, idempotencyKey) { return api("/v1/agent/runs", {method:"POST", headers:{"Idempotency-Key":idempotencyKey}, body:JSON.stringify(payload)}); }
-async function inspectRun(runId) { if (!runId) return; state.runId = runId; state.latestEvent = null; closeEventSource(); await refreshActiveRun(); connectEvents(runId); }
-async function refreshActiveRun() { if (!state.runId) return; const [run, evidencePayload, impactPayload, agentPayload] = await Promise.all([api(`/v1/runs/${state.runId}`), api(`/v1/runs/${state.runId}/evidence`), api(`/v1/runs/${state.runId}/impacts`), api(`/v1/runs/${state.runId}/agent`)]); renderRun(run); renderIncident(evidencePayload.source_evidence_package); renderMap(evidencePayload.source_evidence_package); renderImpacts(impactPayload.impact_package); renderActions(agentPayload.response_supervisor_run); renderEvaluation(agentPayload.agent_evaluation, run, agentPayload.response_supervisor_run); renderEvidence(evidencePayload.source_evidence_package); await renderEvents(state.runId, run); await loadRuns(); }
-function connectEvents(runId) { state.eventSource = new EventSource(`/v1/runs/${runId}/events?follow=true`); state.eventSource.addEventListener("run_event", (message) => { state.latestEvent = JSON.parse(message.data); renderLiveStatus(state.latestEvent); refreshActiveRun().catch(showError); }); state.eventSource.onerror = closeEventSource; }
-function closeEventSource() { if (state.eventSource) state.eventSource.close(); state.eventSource = null; }
-function showError(error) { elements.connectionStatus.textContent = "Dashboard needs attention"; elements.runSubtitle.textContent = error.message; }
-function renderRun(run) { elements.runTitle.textContent = `${friendlyCase(run.case_id)} review`; elements.runSubtitle.textContent = stateDescription(run.state); elements.runState.textContent = friendlyRunState(run.state); elements.runMode.textContent = `${run.fixture_mode ? "Pinned practice case" : "Live CEMS source"} - ${run.run_id}`; elements.runStateBox.dataset.state = run.state; renderLiveStatus(state.latestEvent, run); }
-function renderIncident(evidence) { if (!evidence) return resetIncident(); const cems = evidence.cems_activation; elements.incidentTitle.textContent = cems?.name || evidence.activation_code; elements.incidentBadge.className = `badge ${badgeClass(evidence.verification_status)}`; elements.incidentBadge.textContent = friendlyEvidenceStatus(evidence.verification_status); const stats = cems?.stats || {}; const cards = [["People reported affected",stats["Population [No.]"],"Source-reported, not a life-saved estimate"],["Buildings identified",stats["Identified buildings [No.]"],"Source-reported"],["Roads reported affected",stats["Roads [km]"],"Source-reported kilometres"]].filter(([,value]) => value !== undefined); elements.incidentPanel.className = "incident-content"; elements.incidentPanel.innerHTML = `<p class="incident-summary">${escapeHtml(incidentDescription(cems, evidence))}</p><div class="metric-row">${cards.map(([label,value,note]) => `<div class="metric"><strong>${escapeHtml(number(value))}</strong><span>${escapeHtml(label)}</span><small>${escapeHtml(note)}</small></div>`).join("")}</div><div class="uncertainty-callout"><strong>What still needs care:</strong> ${escapeHtml(evidence.data_gaps.length ? evidence.data_gaps.join(" ") : "No source-level data gaps were reported in this package.")}</div>`; }
-function resetIncident() { elements.incidentTitle.textContent = "No disaster selected"; elements.incidentBadge.className = "badge"; elements.incidentBadge.textContent = "Waiting"; elements.incidentPanel.className = "empty-state"; elements.incidentPanel.textContent = "Start a run to see the verified public event summary, reported impacts, and what remains uncertain."; }
-function renderMap(evidence) { if (!evidence?.cems_activation) return; const cems = evidence.cems_activation; const links = [[cems.report_link,"Open official event report"],[cems.products_path,"Open CEMS product package"],[cems.charter_url,"Open International Charter context"]].filter(([url]) => url).map(([url,label]) => `<a href="${escapeAttribute(url)}" target="_blank" rel="noreferrer">${label}</a>`).join(""); elements.mapPanel.className = "map-content"; elements.mapPanel.innerHTML = `<div class="map-schematic" aria-label="AOI product availability schematic"><span class="river-line"></span>${(cems.aois || []).map((aoi) => `<div class="aoi-node ${aoi.status_code === "F" ? "ready" : "pending"}"><strong>${escapeHtml(aoi.aoi_name)}</strong><small>${escapeHtml(aoi.status_label)}</small></div>`).join("") || `<p>No AOI product detail is available in this source package.</p>`}</div><p class="map-note">These are official product-availability markers. The impact panel shows deterministic statistics extracted from finished CEMS products; geographic overlays remain future work.</p><div class="external-links">${links || `<span class="muted">No external map link was supplied by this package.</span>`}</div>`; }
-function renderImpacts(impacts) { if (!impacts) { elements.impactStatus.textContent = "Waiting"; elements.impactStatus.className = "badge"; elements.impactPanel.className = "empty-state"; elements.impactPanel.textContent = "The worker will extract cited product statistics for completed AOIs before the response supervisor drafts actions."; return; } const complete = impacts.status === "completed"; elements.impactStatus.textContent = complete ? `${impacts.aoi_impacts.length} AOIs analyzed` : "Incomplete"; elements.impactStatus.className = `badge ${complete ? "good" : "warning"}`; const cards = impacts.aoi_impacts.map((aoi) => { const population = aoi.population?.affected_population; const facilities = aoi.assets.filter((asset) => asset.asset_class.startsWith("Facilities:")).map((asset) => `${asset.asset_class.replace("Facilities: ", "")}: ${number(asset.affected_value)} ${asset.unit}`).join("; "); return `<article class="impact-card"><h4>${escapeHtml(aoi.aoi_name)}</h4><p>${population !== undefined ? `${escapeHtml(number(population))} people affected` : "Population not reported"} · ${aoi.affected_residential_buildings !== null ? `${escapeHtml(number(aoi.affected_residential_buildings))} residential buildings affected` : "Residential impact not reported"}</p><p><strong>Access:</strong> ${escapeHtml(number(aoi.access.affected_road_km))} km roads, ${escapeHtml(number(aoi.access.affected_bridge_features))} bridge features - ${escapeHtml(aoi.access.status.replaceAll("_", " "))}</p>${facilities ? `<p><strong>Facilities:</strong> ${escapeHtml(facilities)}</p>` : ""}<div class="evidence-chips">${aoi.evidence_ids.map((id) => `<span>${escapeHtml(id)}</span>`).join("")}</div></article>`; }).join(""); const gaps = impacts.data_gaps.length ? `<p class="limitations"><strong>Coverage gaps:</strong> ${escapeHtml(impacts.data_gaps.join(" "))}</p>` : ""; elements.impactPanel.className = "impact-list"; elements.impactPanel.innerHTML = `${cards || `<p class="empty-state">No finished CEMS product statistics were available for deterministic analysis.</p>`}${gaps}<p class="impact-note">${escapeHtml(impacts.deduplication_note)}</p>`; }
-function renderActions(supervisorRun) { const response = supervisorRun?.response; if (!response) { elements.actionStatus.textContent = supervisorRun?.status === "failed" ? "Needs attention" : "Waiting"; elements.actionStatus.className = `badge ${supervisorRun?.status === "failed" ? "danger" : ""}`; elements.actionPanel.className = "empty-state"; elements.actionPanel.textContent = supervisorRun?.failure_detail || "The response supervisor will place short, cited draft actions here. They are never automatic field commands."; return; } const accepted = supervisorRun.status === "completed"; elements.actionStatus.textContent = accepted ? `${response.actions.length} draft${response.actions.length === 1 ? "" : "s"}` : "Drafts rejected"; elements.actionStatus.className = `badge ${accepted ? "good" : "danger"}`; elements.actionPanel.className = "action-list"; elements.actionPanel.innerHTML = `${accepted ? "" : `<p class="action-failure"><strong>These proposals are not ready for review:</strong> ${escapeHtml(supervisorRun.failure_detail || "The supervisor contract rejected the draft.")}</p>`}${response.actions.map((action,index) => `<article class="action-card"><div class="action-number">${index + 1}</div><div><p class="action-meta">${escapeHtml(friendlyUrgency(action.urgency))} - ${escapeHtml(action.owner_role.replaceAll("_", " "))}</p><h4>${escapeHtml(action.title)}</h4><p>${escapeHtml(action.location_ref.replace("aoi:", "Area: "))}</p><div class="evidence-chips">${action.evidence_ids.map((id) => `<span>${escapeHtml(id)}</span>`).join("")}</div>${action.estimate ? `<p class="abstention"><strong>Life-safety estimate:</strong> Not estimable. ${escapeHtml(action.estimate.abstention_reason)}</p>` : ""}</div><span class="draft-label">${accepted ? "Draft only" : "Rejected"}</span></article>`).join("")}<p class="limitations"><strong>Limitations:</strong> ${escapeHtml(response.limitations.join(" "))}</p>`; }
-function renderEvaluation(report, run, supervisorRun) { if (!report) { elements.evaluationPanel.className = "empty-state"; elements.evaluationPanel.textContent = supervisorRun?.failure_detail ? `Draft checks did not run: ${supervisorRun.failure_detail}` : run.state === "blocked" ? "The run stopped safely. Read the progress panel for the failure reason." : "Deterministic evidence and safety feedback will appear after the response supervisor returns a draft."; return; } const coverage = report.lsac_at_5; const safety = report.unsafe_autonomous_action_count; const evidence = report.missing_evidence_reference_count; elements.evaluationPanel.className = "evaluation-content"; elements.evaluationPanel.innerHTML = `<div class="check-row"><span class="check ${safety.value === 0 ? "pass" : "fail"}">${safety.value === 0 ? "Pass" : "Review"}</span><div><strong>Autonomous-action safety check</strong><p>${escapeHtml(safety.note)}</p></div></div><div class="check-row"><span class="check ${evidence.value === 0 ? "pass" : "fail"}">${evidence.value === 0 ? "Pass" : "Review"}</span><div><strong>Evidence-reference check</strong><p>${escapeHtml(evidence.note)}</p></div></div><div class="review-next"><strong>${coverage.status === "measured" ? `LSAC@5: ${percent(coverage.value)}` : "Next: human coverage review"}</strong><p>${escapeHtml(coverage.note)}</p>${report.coverage_adjudication_required ? `<code>climate-cascade-evaluate-agent</code> can score the saved draft after a reviewer records decisions.` : ""}</div>`; }
-function renderEvidence(evidence) { if (!evidence) return; elements.evidenceStatus.textContent = friendlyEvidenceStatus(evidence.verification_status); elements.evidenceStatus.className = `badge ${badgeClass(evidence.verification_status)}`; elements.evidencePanel.className = "evidence-content"; elements.evidencePanel.innerHTML = `<div class="finding-list">${evidence.findings.map((finding) => `<div class="finding ${escapeHtml(finding.severity)}"><strong>${escapeHtml(friendlyFinding(finding.finding_id))}</strong><p>${escapeHtml(finding.message)}</p></div>`).join("")}</div><div class="source-list"><h4>Saved sources</h4>${evidence.snapshots.map((snapshot) => `<a href="${escapeAttribute(snapshot.source_url)}" target="_blank" rel="noreferrer"><span>${escapeHtml(snapshot.publisher)}</span><small>${escapeHtml(snapshot.kind.replaceAll("_", " "))} - ${escapeHtml(snapshot.content_sha256.slice(0,12))}...</small></a>`).join("")}</div>`; }
-async function renderEvents(runId, run) { const response = await fetch(`/v1/runs/${runId}/events?follow=false`); const events = parseSse(await response.text()); state.latestEvent = events.at(-1) || null; renderLiveStatus(state.latestEvent, run); elements.eventCount.textContent = `${events.length} step${events.length === 1 ? "" : "s"}`; elements.eventList.innerHTML = events.map((event) => `<li class="event"><span class="event-dot ${event.status}"></span><div><strong>${escapeHtml(friendlyEvent(event.event_type))}</strong><p>${escapeHtml(event.message)}</p><small>${escapeHtml(shortTime(event.created_at))}</small></div></li>`).join(""); }
-function renderLiveStatus(event, run) { const terminal = run?.state === "awaiting_human_review" ? "Completed: draft actions passed automatic checks and are ready for qualified human review." : run?.state === "blocked" ? "Stopped safely: no draft can proceed until the displayed failure is resolved." : null; const message = terminal || event?.message || "Waiting for a run to begin."; elements.liveStatus.textContent = message; elements.liveStatus.dataset.status = terminal ? run.state : event?.status || "queued"; }
-function incidentDescription(cems,evidence) { if (!cems) return `Verified source package ${evidence.activation_code}.`; return `${cems.name} is listed by Copernicus EMS as ${cems.category}${cems.sub_category ? ` / ${cems.sub_category}` : ""}. The activation is ${cems.closed ? "closed, so the mapped source is historical evidence" : "still open, so new products and statistics may still arrive"}.`; }
-function friendlyRunState(value) { return ({received:"Waiting for worker",source_check:"Checking official sources",verified:"Sources verified",data_snapshot:"Evidence saved",impact_analysis:"Preparing response",action_drafting:"Drafting recommendations",evidence_verification:"Checking the draft",awaiting_human_review:"Ready for human review",blocked:"Needs attention",rejected:"Rejected",exported:"Exported"})[value] || value; }
-function stateDescription(value) { return ({awaiting_human_review:"The draft is ready for a qualified human to assess. No action has been taken.",blocked:"The run stopped safely. Read the feedback and progress panels before starting another run.",action_drafting:"The response supervisor is turning verified facts into draft recommendations.",evidence_verification:"The system is checking every draft against its saved sources and safety rules."})[value] || "The worker is recording each step so the review remains auditable."; }
-function friendlyEvidenceStatus(value) { return ({supported:"Source checked",preliminary:"Useful, but incomplete",conflicting:"Source conflict",unknown:"Unknown"})[value] || value; }
-function badgeClass(value) { return ({supported:"good",preliminary:"warning",conflicting:"danger"})[value] || ""; }
-function friendlyEvent(value) { return ({run_created:"Run started",lease_acquired:"Worker started",source_intake_started:"Source intake working",source_verified:"Source check complete",source_snapshot_pinned:"Evidence saved",source_evidence_ready:"Evidence ready",impact_analysis_started:"Impact analysis working",impact_analysis_completed:"Impact analysis complete",response_supervisor_queued:"Response review started",response_supervisor_started:"Drafting in progress",response_supervisor_response_received:"Structured response received",response_supervisor_completed:"Draft actions created",draft_checks_started:"Draft checks in progress",agent_evaluation_completed:"Draft checks complete",response_supervisor_failed:"Drafting needs attention",lease_released:"Worker finished"})[value] || value.replaceAll("_"," "); }
-function friendlyFinding(value) { return ({"cems-source-reachable":"Official source reached","cems-activation-open":"Event is still evolving","cems-products-pending":"Map coverage is incomplete","fixture-integrity-verified":"Practice-case integrity checked","fixture-preliminary-claims":"Some facts remain preliminary"})[value] || value.replaceAll("-"," "); }
-function friendlyUrgency(value) { return ({immediate:"Immediate review",under_six_hours:"Review within 6 hours",under_twenty_four_hours:"Review within 24 hours",monitor:"Monitor"})[value] || value; }
-function friendlyCase(value) { return value === "nepal-emsr927-v1" ? "Nepal flood practice case" : value.toUpperCase(); } function friendlyHazard(value) { return value.replaceAll("_"," "); } function number(value) { return new Intl.NumberFormat().format(value); } function percent(value) { return new Intl.NumberFormat(undefined,{style:"percent",maximumFractionDigits:1}).format(value); } function shortTime(value) { return new Date(value).toLocaleString([],{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"}); }
-function parseSse(text) { return text.split("\n\n").map((chunk) => chunk.split("\n").find((line) => line.startsWith("data:"))).filter(Boolean).map((line) => JSON.parse(line.slice(5).trim())); } function escapeHtml(value) { return String(value).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;"); } function escapeAttribute(value) { return escapeHtml(value); } function newId() { return crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`; }
+async function api(path, options = {}) {
+  const response = await fetch(path, {
+    ...options,
+    headers: {"Content-Type": "application/json", ...(options.headers || {})},
+  });
+  if (!response.ok) throw new Error(`${response.status} ${await response.text()}`);
+  return response.json();
+}
+
+async function boot() {
+  bindEvents();
+  await checkApi();
+  await loadRuns();
+}
+
+function bindEvents() {
+  elements.startExampleRun.addEventListener("click", () => startExampleRun().catch(showError));
+  elements.startLiveRun.addEventListener("click", () => startLiveRun().catch(showError));
+  elements.inspectRun.addEventListener("click", () => inspectRun(elements.runSelect.value).catch(showError));
+  elements.refreshRun.addEventListener("click", () => refreshActiveRun().catch(showError));
+  elements.evaluationPanel.addEventListener("submit", (event) => submitReview(event).catch(showError));
+}
+
+async function checkApi() {
+  try {
+    await api("/v1/health");
+    elements.connectionStatus.textContent = "Local service ready";
+  } catch {
+    elements.connectionStatus.textContent = "Local service unavailable";
+  }
+}
+
+async function loadRuns() {
+  const payload = await api("/v1/runs?limit=25");
+  state.runs = payload.runs;
+  elements.runSelect.innerHTML = `<option value="">Choose a previous run</option>`;
+  state.runs.forEach((run) => {
+    const option = document.createElement("option");
+    option.value = run.run_id;
+    option.textContent = `${friendlyRunState(run.state)} - ${friendlyCase(run.case_id)} - ${shortTime(run.created_at)}`;
+    elements.runSelect.append(option);
+  });
+  if (state.runId) elements.runSelect.value = state.runId;
+}
+
+function model() {
+  const value = elements.modelInput.value.trim();
+  if (!value) throw new Error("Enter a structured-output model name before starting a response review.");
+  return value;
+}
+
+async function startExampleRun() {
+  await startLiveCemsRun(elements.exampleSelect.value, "example");
+}
+
+async function startLiveRun() {
+  await startLiveCemsRun(elements.activationSelect.value, "activation");
+}
+
+async function startLiveCemsRun(activation, source) {
+  const code = activation.trim().toUpperCase();
+  if (!/^EMSR\d{3}$/.test(code)) throw new Error("Choose a listed CEMS activation code.");
+  const run = await createAgentRun(
+    {case_id: code.toLowerCase(), mode: "agent", fixture_mode: false, activation: code, model: model()},
+    `dashboard-${source}-${code.toLowerCase()}-${newId()}`,
+  );
+  await inspectRun(run.run_id);
+}
+
+function createAgentRun(payload, idempotencyKey) {
+  return api("/v1/agent/runs", {
+    method: "POST",
+    headers: {"Idempotency-Key": idempotencyKey},
+    body: JSON.stringify(payload),
+  });
+}
+
+async function inspectRun(runId) {
+  if (!runId) return;
+  state.runId = runId;
+  state.latestEvent = null;
+  closeEventSource();
+  await refreshActiveRun();
+  connectEvents(runId);
+}
+
+async function refreshActiveRun() {
+  if (!state.runId) return;
+  const [run, evidencePayload, impactPayload, agentPayload, actionPayload] = await Promise.all([
+    api(`/v1/runs/${state.runId}`),
+    api(`/v1/runs/${state.runId}/evidence`),
+    api(`/v1/runs/${state.runId}/impacts`),
+    api(`/v1/runs/${state.runId}/agent`),
+    api(`/v1/runs/${state.runId}/actions`),
+  ]);
+  state.actions = actionPayload.actions;
+  state.estimates = actionPayload.estimates;
+  state.reviews = actionPayload.reviews;
+  renderRun(run);
+  renderIncident(evidencePayload.source_evidence_package);
+  renderMap(evidencePayload.source_evidence_package);
+  renderActions(agentPayload.response_supervisor_run, actionPayload);
+  renderEvaluation(agentPayload.agent_evaluation, run, agentPayload.response_supervisor_run, actionPayload);
+  renderImpacts(impactPayload.impact_package);
+  renderEvidence(evidencePayload.source_evidence_package);
+  await renderEvents(state.runId, run);
+  await loadRuns();
+}
+
+function connectEvents(runId) {
+  state.eventSource = new EventSource(`/v1/runs/${runId}/events?follow=true`);
+  state.eventSource.addEventListener("run_event", (message) => {
+    state.latestEvent = JSON.parse(message.data);
+    renderLiveStatus(state.latestEvent);
+    refreshActiveRun().catch(showError);
+  });
+  state.eventSource.onerror = closeEventSource;
+}
+
+function closeEventSource() {
+  if (state.eventSource) state.eventSource.close();
+  state.eventSource = null;
+}
+
+function showError(error) {
+  elements.connectionStatus.textContent = "Dashboard needs attention";
+  elements.runSubtitle.textContent = error.message;
+}
+
+function renderRun(run) {
+  elements.runTitle.textContent = `${friendlyCase(run.case_id)} review`;
+  elements.runSubtitle.textContent = stateDescription(run.state);
+  elements.runState.textContent = friendlyRunState(run.state);
+  elements.runMode.textContent = `Live CEMS source - ${run.run_id}`;
+  elements.runStateBox.dataset.state = run.state;
+  renderLiveStatus(state.latestEvent, run);
+}
+
+function renderIncident(evidence) {
+  if (!evidence) return resetIncident();
+  const cems = evidence.cems_activation;
+  const stats = cems?.stats || {};
+  const cards = [
+    ["People reported affected", stats["Population [No.]"], "Source-reported, not a life-saved estimate"],
+    ["Buildings identified", stats["Identified buildings [No.]"], "Source-reported"],
+    ["Roads reported affected", stats["Roads [km]"], "Source-reported kilometres"],
+  ].filter(([, value]) => value !== undefined);
+  elements.incidentTitle.textContent = cems?.name || evidence.activation_code;
+  elements.incidentBadge.className = `badge ${badgeClass(evidence.verification_status)}`;
+  elements.incidentBadge.textContent = friendlyEvidenceStatus(evidence.verification_status);
+  elements.incidentPanel.className = "incident-content";
+  elements.incidentPanel.innerHTML = `<p class="incident-summary">${escapeHtml(incidentDescription(cems, evidence))}</p><div class="metric-row">${cards.map(([label, value, note]) => `<div class="metric"><strong>${escapeHtml(number(value))}</strong><span>${escapeHtml(label)}</span><small>${escapeHtml(note)}</small></div>`).join("")}</div><div class="uncertainty-callout"><strong>What still needs care:</strong> ${escapeHtml(evidence.data_gaps.length ? evidence.data_gaps.join(" ") : "No source-level data gaps were reported in this package.")}</div>`;
+}
+
+function resetIncident() {
+  elements.incidentTitle.textContent = "No disaster selected";
+  elements.incidentBadge.className = "badge";
+  elements.incidentBadge.textContent = "Waiting";
+  elements.incidentPanel.className = "empty-state";
+  elements.incidentPanel.textContent = "Start a run to see the verified public event summary, reported impacts, and what remains uncertain.";
+}
+
+function renderMap(evidence) {
+  if (!evidence?.cems_activation) return;
+  const cems = evidence.cems_activation;
+  const links = [
+    [cems.report_link, "Open official event report"],
+    [cems.products_path, "Open CEMS product package"],
+    [cems.charter_url, "Open International Charter context"],
+  ].filter(([url]) => url).map(([url, label]) => `<a href="${escapeAttribute(url)}" target="_blank" rel="noreferrer">${label}</a>`).join("");
+  const aoiCards = (cems.aois || []).map((aoi) => {
+    const ready = aoi.status_code === "F";
+    const stateLabel = ready ? "Product ready" : "Waiting for product";
+    const stateDetail = ready ? "Included in the supporting-facts analysis below." : "Excluded from analysis until CEMS publishes the product.";
+    return `<div class="aoi-node ${ready ? "ready" : "pending"}"><strong>${escapeHtml(aoi.aoi_name)}</strong><small>${stateLabel}</small><p>${escapeHtml(stateDetail)}</p></div>`;
+  }).join("");
+  elements.mapPanel.className = "map-content";
+  elements.mapPanel.innerHTML = `<div class="coverage-legend"><span><i class="legend-dot ready"></i> Product ready: CEMS delivered a map product that can support facts.</span><span><i class="legend-dot pending"></i> Waiting for product: keep the area visible, but do not infer impacts.</span></div><div class="map-schematic" aria-label="CEMS area-product coverage">${aoiCards || `<p>No area-product detail is available in this source package.</p>`}</div><p class="map-note">This is a coverage summary from CEMS, not a geographic map. The actions and supporting facts use only the saved sources shown in this run.</p><div class="external-links">${links || `<span class="muted">No external CEMS link was supplied by this package.</span>`}</div>`;
+}
+
+function renderActions(supervisorRun, actionPayload) {
+  const response = supervisorRun?.response;
+  if (!response) {
+    elements.actionStatus.textContent = supervisorRun?.status === "failed" ? "Needs attention" : "Waiting";
+    elements.actionStatus.className = `badge ${supervisorRun?.status === "failed" ? "danger" : ""}`;
+    elements.actionPanel.className = "empty-state";
+    elements.actionPanel.textContent = supervisorRun?.failure_detail || "The response supervisor will place short, cited draft actions here. They are never automatic field commands.";
+    return;
+  }
+  const accepted = supervisorRun.status === "completed";
+  const reviews = latestReviewsByAction(actionPayload?.reviews || []);
+  const estimates = new Map((actionPayload?.estimates || []).map((estimate) => [estimate.action_id, estimate]));
+  const reviewedCount = [...reviews.keys()].length;
+  elements.actionStatus.textContent = accepted ? `${response.actions.length} drafts, ${reviewedCount} reviewed` : "Drafts rejected";
+  elements.actionStatus.className = `badge ${accepted ? "good" : "danger"}`;
+  elements.actionPanel.className = "action-list";
+  elements.actionPanel.innerHTML = `${accepted ? "" : `<p class="action-failure"><strong>These proposals are not ready for review:</strong> ${escapeHtml(supervisorRun.failure_detail || "The supervisor contract rejected the draft.")}</p>`}${response.actions.map((action, index) => renderAction(action, index, reviews.get(action.action_id), estimates.get(action.action_id))).join("")}<p class="limitations"><strong>Limitations:</strong> ${escapeHtml(response.limitations.join(" "))}</p>`;
+}
+
+function renderAction(action, index, review, estimate) {
+  const label = review ? humanDecisionLabel(review.decision) : "Draft only";
+  const reviewDetail = review ? `<p class="review-record"><strong>Qualified review recorded:</strong> ${escapeHtml(label)} by ${escapeHtml(review.reviewer_role)}. ${escapeHtml(review.rationale)}</p>` : "";
+  const estimateDetail = estimate?.status === "not_estimable" ? `<p class="abstention"><strong>Life-safety estimate:</strong> Not estimable. ${escapeHtml(estimate.abstention_reason)}</p>` : "";
+  return `<article class="action-card ${review ? `has-review decision-${escapeAttribute(review.decision)}` : ""}"><div class="action-number">${index + 1}</div><div><p class="action-meta">${escapeHtml(friendlyUrgency(action.urgency))} - ${escapeHtml(action.owner_role.replaceAll("_", " "))}</p><h4>${escapeHtml(action.title)}</h4><p>${escapeHtml(action.location_ref.replace("aoi:", "Area: "))}</p><div class="evidence-chips">${action.evidence_ids.map((id) => `<span>${escapeHtml(id)}</span>`).join("")}</div>${estimateDetail}${reviewDetail}</div><span class="draft-label ${review ? `decision-${escapeAttribute(review.decision)}` : ""}">${escapeHtml(label)}</span></article>`;
+}
+
+function renderEvaluation(report, run, supervisorRun, actionPayload) {
+  if (!report) {
+    elements.evaluationPanel.className = "empty-state";
+    elements.evaluationPanel.textContent = supervisorRun?.failure_detail ? `Draft checks did not run: ${supervisorRun.failure_detail}` : run.state === "blocked" ? "The run stopped safely. Read the progress panel for the failure reason." : "Deterministic evidence and safety feedback will appear after the response supervisor returns a draft.";
+    return;
+  }
+  const coverage = report.lsac_at_5;
+  const safety = report.unsafe_autonomous_action_count;
+  const evidence = report.missing_evidence_reference_count;
+  elements.evaluationPanel.className = "evaluation-content";
+  elements.evaluationPanel.innerHTML = `<div class="check-row"><span class="check ${safety.value === 0 ? "pass" : "fail"}">${safety.value === 0 ? "Pass" : "Review"}</span><div><strong>Autonomous-action safety check</strong><p>${escapeHtml(safety.note)}</p></div></div><div class="check-row"><span class="check ${evidence.value === 0 ? "pass" : "fail"}">${evidence.value === 0 ? "Pass" : "Review"}</span><div><strong>Evidence-reference check</strong><p>${escapeHtml(evidence.note)}</p></div></div><div class="review-next"><strong>${coverage.status === "measured" ? `LSAC@5: ${percent(coverage.value)}` : "Next: qualified human review"}</strong><p>${escapeHtml(coverage.note)}</p><p>Passing these automatic checks makes the draft eligible for human review. It does not approve, dispatch, or execute any action.</p></div>${reviewForm(run, actionPayload)}`;
+}
+
+function reviewForm(run, actionPayload) {
+  if (run.state !== "awaiting_human_review" || !actionPayload?.actions?.length) return "";
+  const reviews = latestReviewsByAction(actionPayload.reviews || []);
+  const recorded = reviews.size;
+  const options = actionPayload.actions.map((action) => {
+    const review = reviews.get(action.action_id);
+    const suffix = review ? ` - ${humanDecisionLabel(review.decision)}` : " - awaiting decision";
+    return `<option value="${escapeAttribute(action.action_id)}">${escapeHtml(action.title)}${escapeHtml(suffix)}</option>`;
+  }).join("");
+  return `<form class="review-form"><div class="review-form-heading"><div><p class="eyebrow">Qualified human review</p><strong>Record a decision for one draft</strong></div><span>${recorded}/${actionPayload.actions.length} recorded</span></div><p class="review-form-intro">This creates a durable audit record. It does not send a field instruction. Submit a new decision to correct or replace an earlier one.</p><label for="reviewAction">Draft action</label><select id="reviewAction" name="action_id">${options}</select><div class="review-grid"><div><label for="reviewDecision">Decision</label><select id="reviewDecision" name="decision"><option value="approve">Approve for human-led follow-up</option><option value="edit">Edit assumptions or wording</option><option value="request_evidence">Request more evidence</option><option value="reject">Reject this draft</option></select></div><div><label for="reviewerId">Reviewer ID</label><input id="reviewerId" name="reviewer_id" value="demo-reviewer" required></div></div><label for="reviewerRole">Reviewer role</label><input id="reviewerRole" name="reviewer_role" value="emergency operations analyst" required><label for="reviewRationale">Decision rationale</label><textarea id="reviewRationale" name="rationale" required minlength="10" placeholder="Explain why this action is approved, edited, needs evidence, or is rejected."></textarea><p class="review-form-note">All current actions are marked not estimable for life-safety impact, so there are no numeric assumptions to edit in this run.</p><button type="submit">Record decision</button></form>`;
+}
+
+async function submitReview(event) {
+  if (!event.target.matches(".review-form")) return;
+  event.preventDefault();
+  const form = new FormData(event.target);
+  const button = event.target.querySelector("button[type=submit]");
+  button.disabled = true;
+  button.textContent = "Saving decision...";
+  try {
+    await api(`/v1/runs/${state.runId}/actions/${form.get("action_id")}/reviews`, {
+      method: "POST",
+      body: JSON.stringify({
+        decision: form.get("decision"),
+        reviewer_id: form.get("reviewer_id"),
+        reviewer_role: form.get("reviewer_role"),
+        rationale: form.get("rationale"),
+        assumptions: {},
+      }),
+    });
+    await refreshActiveRun();
+  } finally {
+    button.disabled = false;
+    button.textContent = "Record decision";
+  }
+}
+
+function renderImpacts(impacts) {
+  if (!impacts) {
+    elements.impactStatus.textContent = "Waiting";
+    elements.impactStatus.className = "badge";
+    elements.impactPanel.className = "empty-state";
+    elements.impactPanel.textContent = "The worker will extract cited product statistics for completed CEMS areas. Areas still waiting for products remain unknown.";
+    return;
+  }
+  const complete = impacts.status === "completed";
+  elements.impactStatus.textContent = complete ? `${impacts.aoi_impacts.length} areas analyzed` : "Incomplete";
+  elements.impactStatus.className = `badge ${complete ? "good" : "warning"}`;
+  const cards = impacts.aoi_impacts.map((aoi) => {
+    const population = aoi.population?.affected_population;
+    const facilities = aoi.assets.filter((asset) => asset.asset_class.startsWith("Facilities:")).map((asset) => `${asset.asset_class.replace("Facilities: ", "")}: ${number(asset.affected_value)} ${asset.unit}`).join("; ");
+    return `<article class="impact-card"><h4>${escapeHtml(aoi.aoi_name)}</h4><p>${population !== undefined ? `${escapeHtml(number(population))} people affected` : "Population not reported"} · ${aoi.affected_residential_buildings !== null ? `${escapeHtml(number(aoi.affected_residential_buildings))} residential buildings affected` : "Residential impact not reported"}</p><p><strong>Access:</strong> ${escapeHtml(number(aoi.access.affected_road_km))} km roads, ${escapeHtml(number(aoi.access.affected_bridge_features))} bridge features - ${escapeHtml(aoi.access.status.replaceAll("_", " "))}</p>${facilities ? `<p><strong>Facilities:</strong> ${escapeHtml(facilities)}</p>` : ""}<div class="evidence-chips">${aoi.evidence_ids.map((id) => `<span>${escapeHtml(id)}</span>`).join("")}</div></article>`;
+  }).join("");
+  const gaps = impacts.data_gaps.length ? `<p class="limitations"><strong>Coverage gaps:</strong> ${escapeHtml(impacts.data_gaps.join(" "))}</p>` : "";
+  elements.impactPanel.className = "impact-list";
+  elements.impactPanel.innerHTML = `${cards || `<p class="empty-state">No finished CEMS product statistics were available for deterministic analysis.</p>`}${gaps}<p class="impact-note">${escapeHtml(impacts.deduplication_note)}</p>`;
+}
+
+function renderEvidence(evidence) {
+  if (!evidence) return;
+  elements.evidenceStatus.textContent = friendlyEvidenceStatus(evidence.verification_status);
+  elements.evidenceStatus.className = `badge ${badgeClass(evidence.verification_status)}`;
+  elements.evidencePanel.className = "evidence-content";
+  elements.evidencePanel.innerHTML = `<div class="finding-list">${evidence.findings.map((finding) => `<div class="finding ${escapeHtml(finding.severity)}"><strong>${escapeHtml(friendlyFinding(finding.finding_id))}</strong><p>${escapeHtml(finding.message)}</p></div>`).join("")}</div><div class="source-list"><h4>Saved sources</h4>${evidence.snapshots.map((snapshot) => `<a href="${escapeAttribute(snapshot.source_url)}" target="_blank" rel="noreferrer"><span>${escapeHtml(snapshot.publisher)}</span><small>${escapeHtml(snapshot.kind.replaceAll("_", " "))} - ${escapeHtml(snapshot.content_sha256.slice(0, 12))}...</small></a>`).join("")}</div>`;
+}
+
+async function renderEvents(runId, run) {
+  const response = await fetch(`/v1/runs/${runId}/events?follow=false`);
+  const events = parseSse(await response.text());
+  state.latestEvent = events.at(-1) || null;
+  renderLiveStatus(state.latestEvent, run);
+  elements.eventCount.textContent = `${events.length} step${events.length === 1 ? "" : "s"}`;
+  elements.eventList.innerHTML = events.map((event) => `<li class="event"><span class="event-dot ${event.status}"></span><div><strong>${escapeHtml(friendlyEvent(event.event_type))}</strong><p>${escapeHtml(event.message)}</p><small>${escapeHtml(shortTime(event.created_at))}</small></div></li>`).join("");
+}
+
+function renderLiveStatus(event, run) {
+  const terminal = run?.state === "awaiting_human_review" ? "Automatic checks passed. Draft actions are ready for a qualified human review." : run?.state === "blocked" ? "Stopped safely: no draft can proceed until the displayed failure is resolved." : null;
+  const message = terminal || event?.message || "Waiting for a run to begin.";
+  elements.liveStatus.textContent = message;
+  elements.liveStatus.dataset.status = terminal ? run.state : event?.status || "queued";
+}
+
+function latestReviewsByAction(reviews) {
+  return reviews.reduce((latest, review) => {
+    const previous = latest.get(review.action_id);
+    if (!previous || review.version > previous.version) latest.set(review.action_id, review);
+    return latest;
+  }, new Map());
+}
+
+function humanDecisionLabel(decision) {
+  return ({approve: "Approved for follow-up", edit: "Edited", request_evidence: "Evidence requested", reject: "Rejected"})[decision] || decision;
+}
+
+function incidentDescription(cems, evidence) {
+  if (!cems) return `Verified source package ${evidence.activation_code}.`;
+  return `${cems.name} is listed by Copernicus EMS as ${cems.category}${cems.sub_category ? ` / ${cems.sub_category}` : ""}. The activation is ${cems.closed ? "closed, so the mapped source is historical evidence" : "still open, so new products and statistics may still arrive"}.`;
+}
+
+function friendlyRunState(value) { return ({received: "Waiting for worker", source_check: "Checking official sources", verified: "Sources verified", data_snapshot: "Evidence saved", impact_analysis: "Preparing response", action_drafting: "Drafting recommendations", evidence_verification: "Checking the draft", awaiting_human_review: "Ready for human review", blocked: "Needs attention", rejected: "Rejected", exported: "Exported"})[value] || value; }
+function stateDescription(value) { return ({awaiting_human_review: "Automatic checks passed. A qualified human can now record a decision for each draft.", blocked: "The run stopped safely. Read the feedback and progress panels before starting another run.", action_drafting: "The response supervisor is turning verified facts into draft recommendations.", evidence_verification: "The system is checking every draft against its saved sources and safety rules."})[value] || "The worker is recording each step so the review remains auditable."; }
+function friendlyEvidenceStatus(value) { return ({supported: "Source checked", preliminary: "Useful, but incomplete", conflicting: "Source conflict", unknown: "Unknown"})[value] || value; }
+function badgeClass(value) { return ({supported: "good", preliminary: "warning", conflicting: "danger"})[value] || ""; }
+function friendlyEvent(value) { return ({run_created: "Run started", lease_acquired: "Worker started", source_intake_started: "Source intake working", source_verified: "Source check complete", source_snapshot_pinned: "Evidence saved", source_evidence_ready: "Evidence ready", impact_analysis_started: "Impact analysis working", impact_analysis_completed: "Impact analysis complete", response_supervisor_queued: "Response review started", response_supervisor_started: "Drafting in progress", response_supervisor_response_received: "Structured response received", response_supervisor_completed: "Draft actions created", draft_checks_started: "Draft checks in progress", agent_evaluation_completed: "Draft checks complete", response_supervisor_failed: "Drafting needs attention", human_review_recorded: "Human decision recorded", lease_released: "Worker finished"})[value] || value.replaceAll("_", " "); }
+function friendlyFinding(value) { return ({"cems-source-reachable": "Official source reached", "cems-activation-open": "Event is still evolving", "cems-products-pending": "Map coverage is incomplete", "fixture-integrity-verified": "Practice-case integrity checked", "fixture-preliminary-claims": "Some facts remain preliminary"})[value] || value.replaceAll("-", " "); }
+function friendlyUrgency(value) { return ({immediate: "Immediate review", under_six_hours: "Review within 6 hours", under_twenty_four_hours: "Review within 24 hours", monitor: "Monitor"})[value] || value; }
+function friendlyCase(value) { return ({emsr927: "Nepal flood", emsr756: "South-west Poland flood", emsr851: "Sri Lanka flood", "nepal-emsr927-v1": "Nepal flood practice case"})[value] || value.toUpperCase(); }
+function number(value) { return new Intl.NumberFormat().format(value); }
+function percent(value) { return new Intl.NumberFormat(undefined, {style: "percent", maximumFractionDigits: 1}).format(value); }
+function shortTime(value) { return new Date(value).toLocaleString([], {month: "short", day: "numeric", hour: "2-digit", minute: "2-digit"}); }
+function parseSse(text) { return text.split("\n\n").map((chunk) => chunk.split("\n").find((line) => line.startsWith("data:"))).filter(Boolean).map((line) => JSON.parse(line.slice(5).trim())); }
+function escapeHtml(value) { return String(value).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;"); }
+function escapeAttribute(value) { return escapeHtml(value); }
+function newId() { return crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`; }
+
 boot().catch(showError);

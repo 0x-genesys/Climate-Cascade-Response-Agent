@@ -63,11 +63,11 @@ Earthquake is the first proposed post-MVP adapter. It closely matches the produc
 
 ### Beat 1: The event arrives
 
-Load the pinned `EMSR927` Nepal fixture. Show USGS, CEMS, and International Charter verification. Highlight that the exact trigger is still under investigation.
+Choose the Nepal live CEMS example (`EMSR927`). Show USGS, CEMS, and International Charter verification. Highlight that the exact trigger is still under investigation.
 
 ### Beat 2: The agent works in public
 
-Show the live dashboard run feed moving through source retrieval, source verification, source snapshot, constrained response-supervisor drafting, receipt of the stored structured response, and deterministic draft checks. The dashboard exposes these persisted milestones, not token streaming or private model reasoning. Surface the stored warning that `EMSR927` is open and that Bharatpur is waiting for a product. The dashboard reaches `Ready for human review` only when the draft has cited saved evidence and passed deterministic policy checks. It does not claim deterministic impact analysis, a geographic overlay, lives saved, or human approval.
+Show the live dashboard run feed moving through source retrieval, source verification, source snapshot, constrained response-supervisor drafting, receipt of the stored structured response, and deterministic draft checks. The dashboard exposes these persisted milestones, not token streaming or private model reasoning. Surface the stored warning that `EMSR927` is open and that Bharatpur is waiting for a product. The dashboard reaches `Ready for human review` only when the draft has cited saved evidence and passed deterministic policy checks. A qualified reviewer can persist approve, edit, request-evidence, or reject decisions, and the queue visibly reflects the latest record. Those decisions are audit records only: the product never dispatches or executes an action.
 
 Use the glossary at the bottom of the dashboard if the reviewer needs to distinguish CEMS, USGS, the International Charter, AOIs, evidence snapshots, automatic Run Feedback, human adjudication, or LSAC@5. Each entry explains where it appears in the flow.
 

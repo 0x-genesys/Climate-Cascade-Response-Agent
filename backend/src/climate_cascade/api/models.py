@@ -73,3 +73,11 @@ class ErrorDetail(ApiModel):
 
 class ErrorEnvelope(ApiModel):
     error: ErrorDetail
+
+
+class CreateActionReviewRequest(ApiModel):
+    decision: Literal["approve", "edit", "request_evidence", "reject"]
+    reviewer_id: Identifier
+    reviewer_role: Annotated[str, StringConstraints(strip_whitespace=True, min_length=3, max_length=160)]
+    rationale: Annotated[str, StringConstraints(strip_whitespace=True, min_length=10, max_length=2000)]
+    assumptions: dict[str, float] = Field(default_factory=dict)
