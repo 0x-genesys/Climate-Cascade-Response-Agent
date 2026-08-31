@@ -218,4 +218,5 @@ def _validate_response(
 
 
 def _compact_validation_error(error: ValidationError) -> str:
-    return json.dumps(error.errors(include_url=False), separators=(",", ":"))[:2000]
+    # Pydantic keeps model-validator exceptions in `ctx.error`; serialize them as text for a durable artifact.
+    return json.dumps(error.errors(include_url=False), separators=(",", ":"), default=str)[:2000]

@@ -73,6 +73,25 @@ def test_response_supervisor_fails_closed_on_unknown_evidence_reference() -> Non
     assert "unknown evidence" in (artifact.failure_detail or "")
 
 
+def test_response_supervisor_records_model_validation_errors_with_value_error_context() -> None:
+    response = _response()
+    response["actions"][1]["action_id"] = response["actions"][0]["action_id"]
+
+    artifact = run_response_supervisor(
+        run_id="run-44444444-4444-4444-8444-444444444444",
+        case_id=CASE.manifest.fixture_id,
+        evidence=build_fixture_evidence_package(CASE),
+        config=CONFIG,
+        gateway=StaticGateway(response),
+        case=CASE,
+        now=lambda: FROZEN_NOW,
+    )
+
+    assert artifact.status is ResponseSupervisorRunStatus.FAILED
+    assert artifact.failure_code == "model_schema"
+    assert "unique action_id" in (artifact.failure_detail or "")
+
+
 def test_agent_evaluator_requires_human_coverage_then_scores_it() -> None:
     evidence = build_fixture_evidence_package(CASE)
     artifact = run_response_supervisor(
