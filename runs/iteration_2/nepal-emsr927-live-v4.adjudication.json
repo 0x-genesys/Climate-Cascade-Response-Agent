@@ -1,0 +1,37 @@
+{
+  "schema_version": "1",
+  "case_id": "nepal-emsr927-v1",
+  "run_id": "run-f7fd675d-6370-4470-ac51-cc1356b7f581",
+  "reviewer_id": "project-owner-ai-assisted",
+  "reviewer_role": "Project owner manual rubric review, AI-assisted",
+  "decided_at": "2026-08-31T12:46:00Z",
+  "decisions": [
+    {
+      "schema_version": "1",
+      "gold_action_id": "verify-access-timure",
+      "covered": true,
+      "proposal_action_id": "emsr927-aoi2-access-residential-triage-1",
+      "rationale": "The cited Timure draft explicitly requests immediate human verification of road and bridge access impacts before action, retains human authority, and references the saved CEMS snapshot."
+    },
+    {
+      "schema_version": "1",
+      "gold_action_id": "triage-residential-impact-bidur",
+      "covered": true,
+      "proposal_action_id": "emsr927-aoi3-access-residential-triage-1",
+      "rationale": "The cited Bidur draft explicitly requests immediate, location-specific residential-impact triage using source-reported affected building and population facts."
+    },
+    {
+      "schema_version": "1",
+      "gold_action_id": "check-critical-services-syapru-besi",
+      "covered": false,
+      "rationale": "Syapru Besi is present only in an immediate access and residential-triage proposal. Although its saved impact record reports affected power plant constructions and a school, the run contains no named Syapru Besi critical-services continuity check within six hours."
+    },
+    {
+      "schema_version": "1",
+      "gold_action_id": "preserve-bharatpur-data-gap",
+      "covered": true,
+      "proposal_action_id": "emsr927-aoi4-request-product-evidence-1",
+      "rationale": "The Bharatpur draft remains monitor-only, preserves the waiting-for-data state, and requests the missing product rather than inferring no impact."
+    }
+  ]
+}

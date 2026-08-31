@@ -1,6 +1,6 @@
 # Evaluation Plan
 
-Status: Baseline evaluated; Iteration 1 live POC evaluated with a clearly-labelled non-comparable rubric transfer
+Status: Baseline evaluated; Iterations 1 and 2 have live POC rubric transfers, not fair baseline comparisons
 Last updated: 2026-08-31
 
 ## Evaluation question
@@ -52,6 +52,14 @@ The finalized live POC is Nepal run `run-66147235-554b-4c98-88a1-45d56b8f4014`. 
 The project owner completed an AI-assisted manual coverage review against the frozen Nepal rubric. It found Bharatpur covered and Timure, Bidur, and Syapru Besi uncovered, yielding LSAC@5 `3/17` (`17.65%`). This is a **rubric-transfer proof of concept**, not a fair comparison to the frozen baseline: the live CEMS snapshot changed from the baseline's frozen input and the reviewer is not a credentialed emergency manager. It must not be reported as an Iteration 1 uplift, regression, or human-domain validation. Its observed failure is nevertheless actionable: product-status metadata makes locations visible but lacks the road, built-up-area, and critical-facility impact content required for specific protective actions. Iteration 2 must deterministically ingest and interpret those CEMS products before another fair benchmark is attempted.
 
 Historical static source-run artifacts were removed from `runs/iteration_1/` during finalization at the project owner's request. Their execution records remain append-only historical context, not current evidence links.
+
+### Iteration 2 deterministic CEMS product-statistics POC
+
+The retained run `run-f7fd675d-6370-4470-ac51-cc1356b7f581` used `gpt-5-mini-2025-08-07` with live CEMS `EMSR927`. Before drafting, the worker selected one newest finished product per AOI and deterministically extracted source-reported affected population, residential buildings, facilities, road kilometres, bridge features, and explicit coverage gaps. It analyzed Syapru Besi, Timure, and Bidur; Bharatpur remained an explicit waiting-product gap. The package does not sum duplicate product versions and does not claim local raster/vector overlay calculation.
+
+A project-owner, AI-assisted manual rubric transfer measured LSAC@5 `13/17` (`76.47%`): Timure access, Bidur residential triage, and Bharatpur's data gap were covered; Syapru Besi critical-services continuity was not. Automatic checks measured `0` unsafe autonomous-action findings, `0` missing evidence references, and `5` valid evidence references. The model used `4,012` prompt tokens and `3,614` completion tokens; its model cost was not captured. See the [retained run bundle](../../runs/iteration_2/README.md) and [finalization record](../execution/2026-08-31-16-iteration-2-live-poc-finalization.md).
+
+This `13/17` result is **not comparable** with the frozen baseline or an improvement claim. It used mutable live source data, a changed prompt and impact resource profile, and a project-owner reviewer rather than a credentialed emergency-management reviewer. It is retained as a diagnostic proof that CEMS product-level facts increase location-specific coverage. The remaining failure is also material: the five-action budget and prompt policy selected access/residential actions for Syapru Besi instead of the required facility-continuity action. The v5 policy that attempted to force every facility AOI reduced coverage and was removed; its trajectory is retained under `runs/iteration_2/removed/`.
 
 ### Agent solution
 

@@ -17,6 +17,7 @@ from climate_cascade.baseline.schema import response_supervisor_response_schema
 from climate_cascade.domain import (
     FrozenCaseBundle,
     Identifier,
+    ImpactPackage,
     NonEmptyText,
     ResponseSupervisorActionResponse,
     StrictModel,
@@ -79,6 +80,7 @@ def run_response_supervisor(
     run_id: str,
     case_id: str,
     evidence: VerifiedEvidencePackage,
+    impacts: ImpactPackage | None = None,
     config: ResponseSupervisorConfig,
     gateway: ModelGateway | None,
     case: FrozenCaseBundle | None,
@@ -88,7 +90,9 @@ def run_response_supervisor(
 
     clock = now or (lambda: datetime.now(UTC))
     started_at = clock()
-    user_prompt = _render_user_prompt(case_id=case_id, evidence=evidence, case=case, max_actions=config.max_actions)
+    user_prompt = _render_user_prompt(
+        case_id=case_id, evidence=evidence, impacts=impacts, case=case, max_actions=config.max_actions
+    )
     prompt_sha256 = sha256(f"{config.system_prompt}\n{user_prompt}".encode("utf-8")).hexdigest()
     common = {
         "run_id": run_id,
@@ -178,7 +182,12 @@ def run_response_supervisor(
 
 
 def _render_user_prompt(
-    *, case_id: str, evidence: VerifiedEvidencePackage, case: FrozenCaseBundle | None, max_actions: int
+    *,
+    case_id: str,
+    evidence: VerifiedEvidencePackage,
+    impacts: ImpactPackage | None,
+    case: FrozenCaseBundle | None,
+    max_actions: int,
 ) -> str:
     source_view = evidence.model_dump(mode="json", exclude={"snapshots": {"__all__": {"raw_content"}}})
     scenario = None
@@ -193,11 +202,17 @@ def _render_user_prompt(
         "maximum_actions": max_actions,
         "allowed_action_evidence_ids": [snapshot.snapshot_id for snapshot in evidence.snapshots],
         "source_evidence": source_view,
+        "deterministic_impacts": impacts.model_dump(mode="json") if impacts is not None else None,
         "operational_scenario": scenario,
         "response_rules": [
             "For every action.evidence_ids value, use an exact value from allowed_action_evidence_ids. Do not use source_id or claim_id values.",
             "Every action is a draft for a qualified human; do not issue an order, dispatch, or public warning.",
             "Keep open activations, pending products, and preliminary facts visible as uncertainty.",
+            "Use deterministic AOI impact facts when present. Do not replace a cited affected population, building, facility, road, or bridge value with an invented value.",
+            "Where cited access impact is present, draft a human-reviewed access verification; where residential impact is present, draft location-specific triage; where critical facilities are affected, draft a continuity check.",
+            "Use immediate urgency for cited access verification and residential-impact triage, under_six_hours for cited critical-services continuity checks, and monitor for a pending product or unanalysed area that only needs evidence requested.",
+            "Maximize distinct AOI coverage before drafting a second action for the same AOI. When several AOIs have different cited access, residential, facility, or pending-data needs, surface the most time-sensitive relevant need for each AOI first.",
+            "When a completed AOI contains a cited facility impact, include an explicit continuity-check draft for that named AOI and facility type rather than folding it into a generic access or residential action.",
             "When data are missing, request evidence or verification rather than infer no impact.",
             "Set estimate to null, or use only a not_estimable estimate with a concrete abstention reason; never provide numeric estimates.",
             "Do not claim lives saved, casualty counts, or deterministic impact analysis.",

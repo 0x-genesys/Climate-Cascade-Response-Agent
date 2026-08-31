@@ -8,8 +8,9 @@ from pathlib import Path
 
 from climate_cascade.agents import ResponseSupervisorRunStatus, load_response_supervisor_config, run_response_supervisor
 from climate_cascade.baseline import ModelGateway, run_baseline
-from climate_cascade.domain import EvidenceStatus, RunMode, RunState, VerifiedEvidencePackage, load_frozen_case
+from climate_cascade.domain import EvidenceStatus, ImpactPackage, RunMode, RunState, VerifiedEvidencePackage, load_frozen_case
 from climate_cascade.evaluation import evaluate_agent_run, evaluate_baseline
+from climate_cascade.impacts import build_cems_product_impact_package
 from climate_cascade.persistence import LocalArtifactStore, RunRepository, RunSnapshot
 from climate_cascade.sources import build_evidence_package_for_run
 
@@ -115,22 +116,39 @@ class WorkflowEngine:
                 run.run_id,
                 worker_id=worker_id,
                 to_state=RunState.IMPACT_ANALYSIS,
-                message="Source evidence is pinned. Iteration 1 uses this verified source picture without claiming deterministic impact analysis.",
+                message="Source evidence is pinned. Deterministic CEMS product-statistics impact analysis is starting.",
                 event_type="source_evidence_ready",
             )
         if run.state is RunState.IMPACT_ANALYSIS:
-            return self._repository.transition(
-                run.run_id,
-                worker_id=worker_id,
-                to_state=RunState.ACTION_DRAFTING,
-                message="Response supervisor is preparing human-reviewable draft actions from verified source evidence.",
-                event_type="response_supervisor_queued",
-            )
+            return self._analyze_impacts(run, worker_id=worker_id)
         if run.state is RunState.ACTION_DRAFTING:
             return self._execute_response_supervisor(run, worker_id=worker_id)
         if run.state is RunState.EVIDENCE_VERIFICATION:
             return self._evaluate_response_supervisor(run, worker_id=worker_id)
         raise RuntimeError(f"agent workflow cannot advance from {run.state.value}")
+
+    def _analyze_impacts(self, run: RunSnapshot, *, worker_id: str) -> RunSnapshot:
+        evidence = self._load_evidence_package(run.run_id)
+        self._repository.record_progress(
+            run.run_id,
+            worker_id=worker_id,
+            event_type="impact_analysis_started",
+            message="Analyzing: extracting affected population, assets, roads, bridges, and data gaps from saved CEMS products.",
+        )
+        impacts = build_cems_product_impact_package(run_id=run.run_id, evidence=evidence)
+        stored = self._artifact_store.put_json(impacts.model_dump(mode="json"))
+        self._repository.store_artifact(run.run_id, logical_name="impact_package", artifact=stored)
+        return self._repository.transition(
+            run.run_id,
+            worker_id=worker_id,
+            to_state=RunState.ACTION_DRAFTING,
+            message=(
+                f"Deterministic impact analysis saved {len(impacts.aoi_impacts)} AOI result(s) and "
+                f"{len(impacts.data_gaps)} explicit data gap(s); response drafting can now use cited impact facts."
+            ),
+            evidence_ids=tuple(snapshot.snapshot_id for snapshot in evidence.snapshots),
+            event_type="impact_analysis_completed",
+        )
 
     def _verify_agent_sources(self, run: RunSnapshot, *, worker_id: str) -> RunSnapshot:
         self._repository.record_progress(
@@ -167,6 +185,7 @@ class WorkflowEngine:
 
     def _execute_response_supervisor(self, run: RunSnapshot, *, worker_id: str) -> RunSnapshot:
         evidence = self._load_evidence_package(run.run_id)
+        impacts = self._load_impact_package(run.run_id)
         case = load_frozen_case(self._case_root / run.case_id) if run.fixture_mode else None
         config = load_response_supervisor_config(self._response_supervisor_config_path)
         self._repository.record_progress(
@@ -182,6 +201,7 @@ class WorkflowEngine:
             run_id=run.run_id,
             case_id=run.case_id,
             evidence=evidence,
+            impacts=impacts,
             config=config,
             gateway=self._gateway_factory(run.config),
             case=case,
@@ -254,6 +274,12 @@ class WorkflowEngine:
         if stored is None:
             raise RuntimeError("source evidence package artifact is missing")
         return VerifiedEvidencePackage.model_validate_json(stored.storage_path.read_text(encoding="utf-8"))
+
+    def _load_impact_package(self, run_id: str) -> ImpactPackage:
+        stored = self._repository.get_artifact(run_id, "impact_package")
+        if stored is None:
+            raise RuntimeError("impact package artifact is missing")
+        return ImpactPackage.model_validate_json(stored.storage_path.read_text(encoding="utf-8"))
 
     def _advance_baseline(self, run: RunSnapshot, *, worker_id: str) -> RunSnapshot:
         transitions = {

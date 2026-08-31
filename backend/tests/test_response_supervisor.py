@@ -8,6 +8,7 @@ from climate_cascade.agents import ResponseSupervisorRunStatus, load_response_su
 from climate_cascade.baseline.gateway import ModelCompletion
 from climate_cascade.domain import load_frozen_case
 from climate_cascade.evaluation import AgentEvaluationStatus, CoverageAdjudication, evaluate_agent_run
+from climate_cascade.impacts import build_cems_product_impact_package
 from climate_cascade.sources import build_fixture_evidence_package
 
 
@@ -52,6 +53,31 @@ def test_response_supervisor_stores_draft_actions_against_verified_evidence() ->
     assert len(artifact.response.actions) == 4
     assert gateway.schema_name == "response_supervisor_action_response"
     assert "gold_action" not in artifact.user_prompt
+    assert "raw_content" not in artifact.user_prompt
+
+
+def test_response_supervisor_receives_compact_impact_package_not_raw_source_payload() -> None:
+    evidence = build_fixture_evidence_package(CASE)
+    impacts = build_cems_product_impact_package(
+        run_id="run-10101010-1010-4010-8010-101010101010", evidence=evidence
+    )
+    artifact = run_response_supervisor(
+        run_id="run-10101010-1010-4010-8010-101010101010",
+        case_id=CASE.manifest.fixture_id,
+        evidence=evidence,
+        impacts=impacts,
+        config=CONFIG,
+        gateway=StaticGateway(_response()),
+        case=CASE,
+        now=lambda: FROZEN_NOW,
+    )
+
+    assert artifact.status is ResponseSupervisorRunStatus.COMPLETED
+    assert '"deterministic_impacts"' in artifact.user_prompt
+    assert '"analysis_version":"cems-product-stats-v1"' in artifact.user_prompt
+    assert "Use immediate urgency for cited access verification" in artifact.user_prompt
+    assert "Maximize distinct AOI coverage" in artifact.user_prompt
+    assert "include an explicit continuity-check draft" in artifact.user_prompt
     assert "raw_content" not in artifact.user_prompt
 
 

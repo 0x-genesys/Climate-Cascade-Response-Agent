@@ -157,6 +157,14 @@ def create_app(*, services: ApiServices) -> FastAPI:
                 payload[logical_name] = json.loads(artifact.storage_path.read_text(encoding="utf-8"))
         return payload
 
+    @app.get("/v1/runs/{run_id}/impacts")
+    def get_impact_package(run_id: str) -> dict[str, object]:
+        services.repository.get_run(run_id)
+        artifact = services.repository.get_artifact(run_id, "impact_package")
+        if artifact is None:
+            return {"run_id": run_id, "impact_package": None}
+        return {"run_id": run_id, "impact_package": json.loads(artifact.storage_path.read_text(encoding="utf-8"))}
+
     @app.get("/v1/runs/{run_id}/events")
     async def stream_events(
         run_id: str,
