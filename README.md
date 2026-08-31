@@ -1,5 +1,14 @@
 # Climate Cascade Response Agent
 
+Climate Cascade Response turns a verified post-disaster flood or debris-flow case into a short, evidence-backed queue of actions for an emergency operations analyst. The analyst keeps authority: every action remains a draft for human review, and the product never sends public warnings, dispatches responders, or controls infrastructure.
+
+## The problem
+
+Damage maps and situation reports do not answer the operational questions an emergency manager must resolve next: which community needs attention first, what evidence supports that priority, what is still unknown, and who must approve the action. The MVP organizes that evidence into reviewable action proposals while preserving data gaps and uncertainty.
+
+The pilot case is Nepal `EMSR927`. It is a deliberately difficult, evolving event with a pending AOI and unresolved trigger details. It demonstrates uncertainty handling, not closed-event accuracy. The hackathon MVP is limited to floods and debris flows. Earthquakes, tsunamis, tornadoes, and volcanic eruptions are roadmap hazards that require their own adapters and benchmarks.
+
+
 ## Keep Four Questions In Mind
 
 ### 01. Who Has This Problem?
@@ -18,13 +27,6 @@ Partially, with evidence and clear limits. The prompt-only baseline scored LSAC@
 
 Yes, the engineering path is local and documented. A reviewer can run `uv sync --group dev`, execute `uv run pytest`, initialize SQLite with `uv run climate-cascade-local init`, and start the dashboard and worker with `uv run climate-cascade-local serve`. The prompt-only baseline, frozen Nepal case, adjudication files, retained iteration artifacts, migrations, API contracts, SSE trajectory, and exact execution records are versioned in this repository. A live CEMS run additionally needs an `OPENAI_API_KEY` in a local ignored `.env`; its external source snapshot may differ from the retained evidence.
 
-Climate Cascade Response turns a verified post-disaster flood or debris-flow case into a short, evidence-backed queue of actions for an emergency operations analyst. The analyst keeps authority: every action remains a draft for human review, and the product never sends public warnings, dispatches responders, or controls infrastructure.
-
-## The problem
-
-Damage maps and situation reports do not answer the operational questions an emergency manager must resolve next: which community needs attention first, what evidence supports that priority, what is still unknown, and who must approve the action. The MVP organizes that evidence into reviewable action proposals while preserving data gaps and uncertainty.
-
-The pilot case is Nepal `EMSR927`. It is a deliberately difficult, evolving event with a pending AOI and unresolved trigger details. It demonstrates uncertainty handling, not closed-event accuracy. The hackathon MVP is limited to floods and debris flows. Earthquakes, tsunamis, tornadoes, and volcanic eruptions are roadmap hazards that require their own adapters and benchmarks.
 
 ## Quick start
 
@@ -211,3 +213,4 @@ var/artifacts/            Local content-addressed artifacts, excluded from versi
 var/climate-cascade.db    Local SQLite workflow database, excluded from version control
 var/                      Local generated run artifacts, excluded from version control
 ```
+
