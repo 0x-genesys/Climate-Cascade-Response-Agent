@@ -1,0 +1,35 @@
+{
+  "schema_version": "1",
+  "case_id": "nepal-emsr927-v1",
+  "run_id": "run-85e678e3-4505-4e57-9ce3-dd4d5c5f46b3",
+  "reviewer_id": "project-owner-ai-assisted",
+  "reviewer_role": "Project owner manual rubric review, AI-assisted",
+  "decided_at": "2026-08-31T15:14:00Z",
+  "decisions": [
+    {
+      "schema_version": "1",
+      "gold_action_id": "verify-access-timure",
+      "covered": false,
+      "rationale": "Timure appears only in a dam-continuity draft. The run contains no Timure road or bridge access-verification action."
+    },
+    {
+      "schema_version": "1",
+      "gold_action_id": "triage-residential-impact-bidur",
+      "covered": false,
+      "rationale": "Bidur appears in access verification and power-plant continuity drafts, but not in a location-specific residential-impact triage action."
+    },
+    {
+      "schema_version": "1",
+      "gold_action_id": "check-critical-services-syapru-besi",
+      "covered": true,
+      "proposal_action_id": "emsr927-aoi1-facility-continuity-powerplant-001",
+      "rationale": "The cited Syapru Besi action requests a power-plant continuity check within six hours and remains a human-reviewable draft."
+    },
+    {
+      "schema_version": "1",
+      "gold_action_id": "preserve-bharatpur-data-gap",
+      "covered": false,
+      "rationale": "The limitations preserve Bharatpur as waiting for data, but no proposed action requests the missing product. The evaluation contract requires a concrete proposal action for coverage."
+    }
+  ]
+}

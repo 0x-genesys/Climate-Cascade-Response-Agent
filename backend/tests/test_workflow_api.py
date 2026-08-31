@@ -230,11 +230,13 @@ def test_worker_runs_agent_source_intake_to_impact_block(tmp_path: Path) -> None
     assert "response_supervisor_started" in event_types
     assert "response_supervisor_response_received" in event_types
     assert "response_supervisor_completed" in event_types
+    assert "evidence_safety_review_completed" in event_types
     assert "draft_checks_started" in event_types
     assert "agent_evaluation_completed" in event_types
     assert repository.get_artifact(run.run_id, "response_supervisor_run") is not None
     assert repository.get_artifact(run.run_id, "agent_evaluation") is not None
     assert repository.get_artifact(run.run_id, "impact_package") is not None
+    assert repository.get_artifact(run.run_id, "evidence_safety_review") is not None
 
 
 def test_api_agent_run_allows_live_activation_and_exposes_evidence(tmp_path: Path) -> None:
@@ -310,6 +312,8 @@ def test_api_exposes_saved_impact_package(tmp_path: Path) -> None:
     assert payload.status_code == 200
     assert payload.json()["impact_package"]["status"] == "incomplete"
     assert "No raw CEMS activation snapshot" in payload.json()["impact_package"]["data_gaps"][0]
+    agent = client.get(f"/v1/runs/{created.json()['run_id']}/agent")
+    assert agent.json()["evidence_safety_review"]["verdict"] == "pass"
 
 
 def test_api_serves_dashboard_static_files(tmp_path: Path) -> None:

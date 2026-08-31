@@ -81,6 +81,22 @@ def test_response_supervisor_receives_compact_impact_package_not_raw_source_payl
     assert "raw_content" not in artifact.user_prompt
 
 
+def test_response_supervisor_receives_independent_verifier_feedback_on_revision() -> None:
+    artifact = run_response_supervisor(
+        run_id="run-19191919-1919-4191-8191-191919191919",
+        case_id=CASE.manifest.fixture_id,
+        evidence=build_fixture_evidence_package(CASE),
+        config=CONFIG,
+        gateway=StaticGateway(_response()),
+        case=CASE,
+        revision_feedback=["The explicit impact-analysis data gap for Bharatpur is absent."],
+        now=lambda: FROZEN_NOW,
+    )
+
+    assert artifact.status is ResponseSupervisorRunStatus.COMPLETED
+    assert '"verifier_feedback":["The explicit impact-analysis data gap for Bharatpur is absent."]' in artifact.user_prompt
+
+
 def test_response_supervisor_accepts_not_estimable_abstentions_but_not_numeric_estimates() -> None:
     abstaining_response = _response()
     abstaining_response["actions"][0]["estimate"] = {

@@ -151,7 +151,7 @@ def create_app(*, services: ApiServices) -> FastAPI:
     def get_agent_artifacts(run_id: str) -> dict[str, object]:
         services.repository.get_run(run_id)
         payload: dict[str, object] = {"run_id": run_id}
-        for logical_name in ("response_supervisor_run", "agent_evaluation"):
+        for logical_name in ("response_supervisor_run", "evidence_safety_review", "agent_evaluation"):
             artifact = services.repository.get_artifact(run_id, logical_name)
             if artifact is not None:
                 payload[logical_name] = json.loads(artifact.storage_path.read_text(encoding="utf-8"))

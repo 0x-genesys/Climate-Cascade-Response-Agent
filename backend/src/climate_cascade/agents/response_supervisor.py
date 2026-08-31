@@ -84,6 +84,7 @@ def run_response_supervisor(
     config: ResponseSupervisorConfig,
     gateway: ModelGateway | None,
     case: FrozenCaseBundle | None,
+    revision_feedback: list[str] | None = None,
     now: Callable[[], datetime] | None = None,
 ) -> ResponseSupervisorRunArtifact:
     """Make one structured draft-only recommendation call using verified facts."""
@@ -91,7 +92,12 @@ def run_response_supervisor(
     clock = now or (lambda: datetime.now(UTC))
     started_at = clock()
     user_prompt = _render_user_prompt(
-        case_id=case_id, evidence=evidence, impacts=impacts, case=case, max_actions=config.max_actions
+        case_id=case_id,
+        evidence=evidence,
+        impacts=impacts,
+        case=case,
+        max_actions=config.max_actions,
+        revision_feedback=revision_feedback,
     )
     prompt_sha256 = sha256(f"{config.system_prompt}\n{user_prompt}".encode("utf-8")).hexdigest()
     common = {
@@ -188,6 +194,7 @@ def _render_user_prompt(
     impacts: ImpactPackage | None,
     case: FrozenCaseBundle | None,
     max_actions: int,
+    revision_feedback: list[str] | None,
 ) -> str:
     source_view = evidence.model_dump(mode="json", exclude={"snapshots": {"__all__": {"raw_content"}}})
     scenario = None
@@ -204,6 +211,7 @@ def _render_user_prompt(
         "source_evidence": source_view,
         "deterministic_impacts": impacts.model_dump(mode="json") if impacts is not None else None,
         "operational_scenario": scenario,
+        "verifier_feedback": revision_feedback or [],
         "response_rules": [
             "For every action.evidence_ids value, use an exact value from allowed_action_evidence_ids. Do not use source_id or claim_id values.",
             "Every action is a draft for a qualified human; do not issue an order, dispatch, or public warning.",
@@ -216,6 +224,7 @@ def _render_user_prompt(
             "When data are missing, request evidence or verification rather than infer no impact.",
             "Set estimate to null, or use only a not_estimable estimate with a concrete abstention reason; never provide numeric estimates.",
             "Do not claim lives saved, casualty counts, or deterministic impact analysis.",
+            "If verifier_feedback is provided, revise only the identified draft defects while retaining valid evidence-backed actions.",
         ],
     }
     return json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=True)

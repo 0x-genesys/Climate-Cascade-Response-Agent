@@ -6,9 +6,25 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
-from climate_cascade.agents import ResponseSupervisorRunStatus, load_response_supervisor_config, run_response_supervisor
+from climate_cascade.agents import (
+    EvidenceSafetyVerdict,
+    ResponseSupervisorConfig,
+    ResponseSupervisorRunArtifact,
+    ResponseSupervisorRunStatus,
+    load_response_supervisor_config,
+    review_response_draft,
+    run_response_supervisor,
+)
 from climate_cascade.baseline import ModelGateway, run_baseline
-from climate_cascade.domain import EvidenceStatus, ImpactPackage, RunMode, RunState, VerifiedEvidencePackage, load_frozen_case
+from climate_cascade.domain import (
+    EvidenceStatus,
+    FrozenCaseBundle,
+    ImpactPackage,
+    RunMode,
+    RunState,
+    VerifiedEvidencePackage,
+    load_frozen_case,
+)
 from climate_cascade.evaluation import evaluate_agent_run, evaluate_baseline
 from climate_cascade.impacts import build_cems_product_impact_package
 from climate_cascade.persistence import LocalArtifactStore, RunRepository, RunSnapshot
@@ -197,15 +213,17 @@ class WorkflowEngine:
                 "Private model reasoning is not displayed."
             ),
         )
-        artifact = run_response_supervisor(
-            run_id=run.run_id,
-            case_id=run.case_id,
-            evidence=evidence,
-            impacts=impacts,
-            config=config,
-            gateway=self._gateway_factory(run.config),
-            case=case,
+        artifact = self._draft_and_verify_response(
+            run=run, worker_id=worker_id, evidence=evidence, impacts=impacts, config=config, case=case
         )
+        if artifact is None:
+            return self._repository.transition(
+                run.run_id,
+                worker_id=worker_id,
+                to_state=RunState.BLOCKED,
+                message="Response draft did not pass independent verification within its two allowed revisions; inspect verifier findings.",
+                event_type="response_revision_exhausted",
+            )
         stored = self._artifact_store.put_json(artifact.model_dump(mode="json"))
         self._repository.store_artifact(run.run_id, logical_name="response_supervisor_run", artifact=stored)
         self._repository.record_progress(
@@ -239,6 +257,65 @@ class WorkflowEngine:
             ),
             event_type="response_supervisor_completed",
         )
+
+    def _draft_and_verify_response(
+        self,
+        *,
+        run: RunSnapshot,
+        worker_id: str,
+        evidence: VerifiedEvidencePackage,
+        impacts: ImpactPackage,
+        config: ResponseSupervisorConfig,
+        case: FrozenCaseBundle | None,
+    ) -> ResponseSupervisorRunArtifact | None:
+        """Run at most one initial draft plus two bounded model revisions."""
+
+        revision_feedback: list[str] | None = None
+        for attempt in range(3):
+            artifact = run_response_supervisor(
+                run_id=run.run_id,
+                case_id=run.case_id,
+                evidence=evidence,
+                impacts=impacts,
+                config=config,
+                gateway=self._gateway_factory(run.config),
+                case=case,
+                revision_feedback=revision_feedback,
+            )
+            stored = self._artifact_store.put_json(artifact.model_dump(mode="json"))
+            logical_name = "response_supervisor_run" if attempt == 0 else f"response_supervisor_revision_{attempt}"
+            self._repository.store_artifact(run.run_id, logical_name=logical_name, artifact=stored)
+            if artifact.status is not ResponseSupervisorRunStatus.COMPLETED or artifact.response is None:
+                return artifact
+
+            review = review_response_draft(run_id=run.run_id, response=artifact.response, evidence=evidence, impacts=impacts)
+            review_stored = self._artifact_store.put_json(review.model_dump(mode="json"))
+            self._repository.store_artifact(run.run_id, logical_name="evidence_safety_review", artifact=review_stored)
+            self._repository.record_progress(
+                run.run_id,
+                worker_id=worker_id,
+                event_type="evidence_safety_review_completed",
+                message=(
+                    f"Independent evidence and safety review returned {review.verdict.value} "
+                    f"with {len(review.findings)} finding(s)."
+                ),
+            )
+            if review.verdict is EvidenceSafetyVerdict.PASS:
+                if attempt:
+                    self._repository.store_artifact(run.run_id, logical_name="response_supervisor_run", artifact=stored)
+                return artifact
+            if review.verdict is EvidenceSafetyVerdict.REJECT:
+                return None
+            if attempt == 2:
+                return None
+            revision_feedback = [finding.message for finding in review.findings]
+            self._repository.record_progress(
+                run.run_id,
+                worker_id=worker_id,
+                event_type="response_revision_requested",
+                message=f"Verifier requested a bounded revision ({attempt + 1} of 2).",
+            )
+        return None
 
     def _evaluate_response_supervisor(self, run: RunSnapshot, *, worker_id: str) -> RunSnapshot:
         from climate_cascade.agents import ResponseSupervisorRunArtifact
